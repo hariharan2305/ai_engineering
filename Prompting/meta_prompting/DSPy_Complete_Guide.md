@@ -397,7 +397,7 @@ Imagine building **"MarketPulse"** — an app that generates reports for *any* j
 
 ### By Data Size
 
-![Optimizer Selection by Data Size](/meta_prompting/images/Screenshot%202026-02-05%20at%2011.24.04%E2%80%AFPM.png)
+![Optimizer Selection by Data Size](./images/DSPy_Optimizers.png)
 
 **Rule of Thumb:**
 - **10-50 examples:** Use `BootstrapFewShot`

@@ -138,7 +138,7 @@ You would feed DSPy 20 examples of different roles and good reports. DSPy would 
 
 
 ---
-![alt text](</meta_prompting/images/Screenshot 2026-02-05 at 11.24.04 PM.png>)
+![alt text](<./images/DSPy_Optimizers.png>)
 
 ### Rule of Thumb:
 
