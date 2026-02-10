@@ -1,0 +1,17 @@
+[project]
+name = "meta-prompting"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "dspy>=2.5.0",
+    "dspy-ai>=3.1.2",
+    "ipykernel>=7.1.0",
+    "mlflow>=3.9.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.1.0",
+]
