@@ -1,3 +1,16 @@
+"""
+This is a mini project to demonstrate the concepts of FastAPI by creating a simple GenAI backend API without any actual LLM integration. The API will have endpoints for health checks, listing available models, getting model details, and creating chat completions based on user input. The responses will be dummy data for demonstration purposes.
+
+Concepts covered in this mini project:
+1. Using FastAPI to create a simple API with multiple endpoints
+2. Using Pydantic data models for request validation and response modeling
+3. Using Enums for better validation and documentation of query parameters
+4. Implementing basic error handling with HTTP exceptions
+5. Using status codes to indicate the result of API operations
+6. Organizing endpoints logically (health/info endpoints, chat endpoints, admin endpoints)
+
+"""
+
 from fastapi import FastAPI, Query
 from fastapi import status, HTTPException
 from enum import Enum
@@ -139,4 +152,3 @@ def delete_model(model_id: str):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Model {model_id} not found")
     
     del MODELS[model_id]
-    

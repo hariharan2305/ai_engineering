@@ -1,3 +1,19 @@
+"""
+A simple FastAPI application demonstrating the use of request body parameters and Pydantic models.
+
+This application includes:
+1. An endpoint to create a chat completion based on the provided request body with validation. (use of Pydantic models to validate the structure and types of the incoming data in the request body. If we don't have any response validation, we can return any response object, even if it doesn't conform to the expected schema. However, if we specify a response_model in the endpoint decorator, FastAPI will validate the response against that model and raise an error if it doesn't conform.)
+2. An endpoint to create a chat completion with both request body and response validation.
+
+NOTE: Request body parameters are used to send complex data to the server, typically in JSON format. In FastAPI, you can define request body parameters using Pydantic models, which allow you to validate the structure and types of the incoming data. By using Pydantic models, you can ensure that the data sent by clients conforms to the expected schema, and you can also provide detailed error messages when validation fails.
+
+LEARNINGS:
+- If a parameter is declared in the path string (URL route), it's a path parameter
+- If a parameter is NOT in the path and has a simple type (int, str, float, bool, etc.), it's a query parameter
+- If a parameter is NOT in the path and is a Pydantic model (or complex type), it's a request body parameter
+
+"""
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
@@ -48,8 +64,3 @@ def create_validated_chat_completion(request: ChatRequest):
     response = "This will cause a validation error because the response does not conform to the ChatResponse model schema. Comment this line to see a proper response object returned!"
     return response
 
-
-# LEARNINGS:
-# If a parameter is declared in the path string (URL route), it's a path parameter
-# If a parameter is NOT in the path and has a simple type (int, str, float, bool, etc.), it's a query parameter
-# If a parameter is NOT in the path and is a Pydantic model (or complex type), it's a request body parameter

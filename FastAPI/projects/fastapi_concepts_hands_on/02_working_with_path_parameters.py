@@ -1,3 +1,15 @@
+"""
+A simple FastAPI application demonstrating the use of path parameters.
+
+This application includes:
+1. An endpoint to get model details using a path parameter with simple type validation.
+2. An endpoint to get supported models using an enum-validated path parameter.
+3. An endpoint to get user conversation details using multiple path parameters (NOTE: The position of the path parameters in the URL matters and should be captured in the same order).
+
+NOTE: Path parameters are variables that are part of the URL path and are used to capture dynamic values from the URL. In FastAPI, path parameters are defined in the route string using curly braces (e.g., /items/{item_id}) and are passed as arguments to the endpoint function. Path parameters are required by default, meaning that clients must provide a value for them when making a request to the endpoint.
+
+"""
+
 from fastapi import FastAPI
 from enum import Enum
 

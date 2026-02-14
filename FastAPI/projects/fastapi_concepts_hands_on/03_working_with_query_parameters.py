@@ -1,3 +1,15 @@
+"""
+A simple FastAPI application demonstrating the use of query parameters.
+
+This application includes:
+1. An endpoint to list models with optional pagination and filtering by provider. (use of simple OPTIONAL query parameters with default values)
+2. An endpoint to get models for a specific provider with an optional limit. (use of both Path parameters and OPTIONAL query parameters with default values)
+3. An endpoint to get detailed models for a specific provider and model type with a required limit. (use of Path parameters and REQUIRED query parameters without default values)
+
+NOTE: Query parameters are key-value pairs that are appended to the URL after a question mark (?). They are used to send additional data to the server and are typically used for filtering, sorting, pagination, and other optional parameters that modify the behavior of the endpoint. In FastAPI, query parameters can be defined in the function signature and can have default values, making them optional for clients to provide when making requests.
+
+"""
+
 from fastapi import FastAPI
 from typing import Optional
 from enum import Enum

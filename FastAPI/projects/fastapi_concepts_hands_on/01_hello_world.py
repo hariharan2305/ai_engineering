@@ -1,3 +1,11 @@
+"""
+A simple FastAPI application demonstrating a "Hello World" example.
+
+This application includes:
+1. A root endpoint that returns a welcome message.
+2. A health check endpoint to verify that the API is running.
+
+"""
 from fastapi import FastAPI
 
 # Create an instance of the FastAPI class
