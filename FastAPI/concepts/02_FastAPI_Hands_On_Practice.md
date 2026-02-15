@@ -664,6 +664,727 @@ Explore:
 
 ---
 
+## Exercise 7: Simple Dependency - API Key Validation (15 minutes)
+
+### Goal
+
+Create your first dependency function and understand how FastAPI executes it before your endpoint.
+
+### Steps
+
+1. Create a dependency function that validates an API key from headers
+2. Use it in multiple endpoints
+3. Test with valid/invalid keys
+4. Add print statements to see execution order
+
+### Code
+
+```python
+from fastapi import FastAPI, Depends, Header, HTTPException
+
+app = FastAPI()
+
+# ===== Dependency =====
+
+def verify_api_key(x_api_key: str = Header(...)) -> str:
+    """Validate API key from header"""
+    print(f"🔑 Dependency: Validating API key: {x_api_key}")
+
+    valid_keys = ["dev-key-123", "prod-key-456"]
+
+    if x_api_key not in valid_keys:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid API key"
+        )
+
+    print("✅ Dependency: API key valid")
+    return x_api_key
+
+# ===== Protected Endpoints =====
+
+@app.get("/models")
+def list_models(api_key: str = Depends(verify_api_key)):
+    print("📋 Endpoint: Listing models")
+    return {"models": ["gpt-4", "claude-sonnet"]}
+
+@app.post("/chat")
+def chat(message: str, api_key: str = Depends(verify_api_key)):
+    print("💬 Endpoint: Chat endpoint")
+    return {"message": message, "key": api_key}
+
+@app.get("/settings")
+def get_settings(api_key: str = Depends(verify_api_key)):
+    print("⚙️  Endpoint: Settings")
+    return {"settings": "user preferences"}
+```
+
+### Test It
+
+```bash
+# ✅ Valid key - dependency succeeds, endpoint runs
+curl http://localhost:8000/models -H "X-API-Key: dev-key-123"
+
+# ❌ Invalid key - dependency fails, endpoint never runs
+curl http://localhost:8000/models -H "X-API-Key: wrong-key"
+
+# ❌ Missing key - dependency fails
+curl http://localhost:8000/models
+
+# Test another endpoint with same dependency
+curl http://localhost:8000/chat?message=Hello -H "X-API-Key: prod-key-456"
+```
+
+### Expected Console Output
+
+```
+Request: curl http://localhost:8000/models -H "X-API-Key: dev-key-123"
+
+🔑 Dependency: Validating API key: dev-key-123
+✅ Dependency: API key valid
+📋 Endpoint: Listing models
+```
+
+### Key Takeaway
+
+The **dependency runs BEFORE the endpoint**. If it raises an exception, the endpoint never executes. This is how FastAPI enforces validation at the framework level—not inside your endpoint logic.
+
+---
+
+## Exercise 8: Database Session Dependency (20 minutes)
+
+### Goal
+
+Create a realistic database session dependency with automatic cleanup using async SQLAlchemy.
+
+### Steps
+
+1. Set up an async SQLAlchemy session
+2. Create a dependency that provides the session with cleanup
+3. Use it in CRUD endpoints
+4. Verify cleanup happens automatically
+
+### Code
+
+```python
+from fastapi import FastAPI, Depends
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from typing import AsyncGenerator
+
+app = FastAPI()
+
+# ===== Database Setup =====
+
+# Use SQLite for simplicity (production would use PostgreSQL)
+DATABASE_URL = "sqlite+aiosqlite:///./test.db"
+engine = create_async_engine(DATABASE_URL, echo=True)
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False
+)
+
+# ===== Dependency =====
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    """Provide database session with automatic cleanup"""
+    print("🗄️  Opening database session")
+    async with AsyncSessionLocal() as session:
+        try:
+            yield session  # Endpoint receives this
+        finally:
+            print("🗄️  Closing database session")
+            # Cleanup happens automatically
+
+# ===== Endpoints Using DB Session =====
+
+@app.get("/conversations")
+async def list_conversations(db: AsyncSession = Depends(get_db)):
+    print("📂 Endpoint: Fetching conversations")
+    # In reality: result = await db.execute(select(Conversation))
+    # For demo, just show that we got the session
+    return {"conversations": ["conv1", "conv2"], "session": str(db)}
+
+@app.post("/conversations")
+async def create_conversation(
+    name: str,
+    db: AsyncSession = Depends(get_db)
+):
+    print(f"➕ Endpoint: Creating conversation: {name}")
+    # In reality:
+    # conversation = Conversation(name=name)
+    # db.add(conversation)
+    # await db.commit()
+    return {"id": 1, "name": name}
+
+@app.get("/messages")
+async def get_messages(db: AsyncSession = Depends(get_db)):
+    print("💬 Endpoint: Fetching messages")
+    return {"messages": ["msg1", "msg2"]}
+```
+
+### Test It
+
+```bash
+# Start the server
+uvicorn app:app --reload
+
+# In another terminal:
+# Open /docs and try endpoints, or use curl:
+
+curl http://localhost:8000/conversations
+curl -X POST "http://localhost:8000/conversations?name=My%20Chat"
+curl http://localhost:8000/messages
+```
+
+### Expected Console Output
+
+```
+🗄️  Opening database session
+📂 Endpoint: Fetching conversations
+🗄️  Closing database session
+```
+
+Notice: Session opens, endpoint runs, then closes. Even if your endpoint crashes, the cleanup code always runs.
+
+### Key Takeaway
+
+The `yield` pattern guarantees cleanup. FastAPI waits for the code after `yield` to execute, ensuring your database connection always closes properly—even if an error occurs.
+
+---
+
+## Exercise 9: Authentication Dependency Chain (20 minutes)
+
+### Goal
+
+Build a multi-level dependency chain where each level builds on the previous one.
+
+### Steps
+
+1. Create dependency 1: Validate API key
+2. Create dependency 2: Get user from validated key
+3. Create dependency 3: Check user quota
+4. Use the final dependency in endpoints
+
+### Code
+
+```python
+from fastapi import FastAPI, Depends, Header, HTTPException
+from pydantic import BaseModel
+
+app = FastAPI()
+
+# ===== Models =====
+
+class User(BaseModel):
+    id: int
+    email: str
+    tokens_used: int
+    token_limit: int
+
+# ===== Mock Database =====
+
+USERS = {
+    "key-123": User(id=1, email="free@example.com", tokens_used=800, token_limit=1000),
+    "key-456": User(id=2, email="pro@example.com", tokens_used=5000, token_limit=100000),
+}
+
+# ===== Dependency Chain =====
+
+# Level 1: Validate API key
+def verify_api_key(x_api_key: str = Header(...)) -> str:
+    print(f"🔑 Step 1: Validating key")
+    if x_api_key not in USERS:
+        raise HTTPException(401, "Invalid API key")
+    print(f"✅ Step 1: Key valid")
+    return x_api_key
+
+# Level 2: Get user (depends on Level 1)
+def get_current_user(api_key: str = Depends(verify_api_key)) -> User:
+    print(f"👤 Step 2: Fetching user")
+    user = USERS[api_key]
+    print(f"✅ Step 2: User {user.email}")
+    return user
+
+# Level 3: Check quota (depends on Level 2)
+def check_quota(user: User = Depends(get_current_user)) -> User:
+    print(f"📊 Step 3: Checking quota")
+    remaining = user.token_limit - user.tokens_used
+    print(f"✅ Step 3: {remaining} tokens remaining")
+
+    if user.tokens_used >= user.token_limit:
+        raise HTTPException(429, "Token quota exceeded")
+
+    return user
+
+# ===== Endpoint =====
+
+@app.post("/chat")
+def chat(
+    prompt: str,
+    user: User = Depends(check_quota)  # All 3 levels run automatically
+):
+    print(f"💬 Step 4: Chat endpoint executing")
+    remaining = user.token_limit - user.tokens_used
+    return {
+        "user": user.email,
+        "prompt": prompt,
+        "response": f"Response to: {prompt}",
+        "tokens_remaining": remaining
+    }
+
+# Another endpoint using chain
+@app.get("/profile")
+def get_profile(user: User = Depends(check_quota)):
+    print(f"📋 Step 4: Profile endpoint")
+    return {
+        "email": user.email,
+        "tokens_used": user.tokens_used,
+        "tokens_limit": user.token_limit
+    }
+```
+
+### Test It
+
+```bash
+# Free user with quota
+curl -X POST "http://localhost:8000/chat?prompt=Hello" \
+  -H "X-API-Key: key-123"
+
+# Pro user with plenty of quota
+curl -X POST "http://localhost:8000/chat?prompt=Hello" \
+  -H "X-API-Key: key-456"
+
+# Invalid key (fails at Step 1)
+curl -X POST "http://localhost:8000/chat?prompt=Hello" \
+  -H "X-API-Key: invalid"
+
+# Profile endpoint also uses same chain
+curl http://localhost:8000/profile -H "X-API-Key: key-123"
+```
+
+### Expected Console Output
+
+```
+🔑 Step 1: Validating key
+✅ Step 1: Key valid
+👤 Step 2: Fetching user
+✅ Step 2: User free@example.com
+📊 Step 3: Checking quota
+✅ Step 3: 200 tokens remaining
+💬 Step 4: Chat endpoint executing
+```
+
+### Key Takeaway
+
+Dependencies execute in order (deepest first → shallowest → endpoint). If any step fails, later steps don't run. This creates a powerful pipeline: validate → fetch user → check limits → business logic.
+
+---
+
+## Exercise 10: Configuration Dependency with Caching (15 minutes)
+
+### Goal
+
+Understand how FastAPI's request-scoped caching prevents duplicate work.
+
+### Steps
+
+1. Create a settings dependency with expensive operations
+2. Use it in multiple places in a single endpoint
+3. Add print statements to see it only executes once per request
+
+### Code
+
+```python
+from fastapi import FastAPI, Depends
+from pydantic_settings import BaseSettings
+
+app = FastAPI()
+
+# ===== Settings =====
+
+class Settings(BaseSettings):
+    app_name: str = "GenAI API"
+    openai_api_key: str = "sk-test-key"
+    anthropic_api_key: str = "ant-test-key"
+    default_model: str = "gpt-4"
+    max_tokens: int = 4096
+
+# ===== Dependency =====
+
+def get_settings() -> Settings:
+    print("⚙️  Loading settings (expensive operation)")
+    # In reality: loading from DB or cloud config
+    return Settings()
+
+# ===== Helper Functions Using Settings =====
+
+def get_api_key_for_model(
+    model: str,
+    settings: Settings = Depends(get_settings)
+) -> str:
+    """Get API key for a model"""
+    print(f"🔧 Step 1: Getting API key for {model}")
+    if "gpt" in model:
+        return settings.openai_api_key
+    else:
+        return settings.anthropic_api_key
+
+def validate_max_tokens(
+    requested_tokens: int,
+    settings: Settings = Depends(get_settings)
+) -> int:
+    """Validate token request"""
+    print(f"🔧 Step 2: Validating tokens")
+    if requested_tokens > settings.max_tokens:
+        raise HTTPException(400, f"Max: {settings.max_tokens}")
+    return requested_tokens
+
+# ===== Endpoint Using Settings Multiple Ways =====
+
+@app.post("/chat")
+def chat(
+    model: str,
+    max_tokens: int = 1000,
+    settings: Settings = Depends(get_settings),  # Direct use
+    api_key: str = Depends(get_api_key_for_model),  # Via helper
+    tokens_validated: int = Depends(validate_max_tokens)  # Via another helper
+):
+    print(f"💬 Endpoint: Starting chat")
+
+    return {
+        "app": settings.app_name,
+        "model": model,
+        "api_key_prefix": api_key[:10] + "...",
+        "max_tokens": tokens_validated,
+        "default_model": settings.default_model
+    }
+```
+
+### Test It
+
+```bash
+curl -X POST "http://localhost:8000/chat?model=gpt-4&max_tokens=500"
+```
+
+### Expected Console Output
+
+```
+⚙️  Loading settings (expensive operation)
+🔧 Step 1: Getting API key for gpt-4
+🔧 Step 2: Validating tokens
+💬 Endpoint: Starting chat
+```
+
+**Key observation**: `⚙️ Loading settings` only prints **ONCE**, even though `get_settings()` is used in three places!
+
+### Why This Matters
+
+- Without caching, database queries execute multiple times per request
+- Request-scoped caching makes dependencies safe and efficient
+- Perfect for expensive operations like loading configs or querying databases
+
+### Key Takeaway
+
+FastAPI caches dependency results within a single request. Call the same dependency 10 times in different places, and it only executes once. This is like Spark's lazy evaluation—computed once, reused everywhere.
+
+---
+
+## Exercise 11: Refactor Complete Example with Dependencies (30 minutes)
+
+### Goal
+
+Take Exercise 6's mini API and refactor it to use dependencies instead of repeated validation.
+
+### Steps
+
+1. Add authentication dependency
+2. Add settings dependency
+3. Refactor endpoints to use dependencies
+4. Remove validation code from endpoints (now in dependencies)
+5. Compare before/after code quality
+
+### Code
+
+```python
+from fastapi import FastAPI, status, HTTPException, Depends, Query
+from pydantic import BaseModel, Field
+from enum import Enum
+from typing import Optional
+
+# ===== App Setup =====
+
+app = FastAPI(
+    title="Mini GenAI API with DI",
+    description="Refactored with Dependency Injection",
+    version="1.0.0"
+)
+
+# ===== Models =====
+
+class Provider(str, Enum):
+    OPENAI = "openai"
+    ANTHROPIC = "anthropic"
+    LITELLM = "litellm"
+
+class Settings:
+    DEFAULT_MODEL = "gpt-4"
+    MAX_TOKENS = 4096
+    RATE_LIMIT = 100
+
+class User(BaseModel):
+    id: int
+    email: str
+    tier: str
+
+class Message(BaseModel):
+    role: str = Field(..., pattern="^(user|assistant|system)$")
+    content: str
+
+class ChatRequest(BaseModel):
+    model: str
+    messages: list[Message] = Field(..., min_items=1)
+    temperature: float = Field(default=0.7, ge=0.0, le=2.0)
+    max_tokens: int = Field(default=1000, ge=1, le=4096)
+
+class ChatResponse(BaseModel):
+    id: str
+    model: str
+    content: str
+    tokens: dict = {"input": 0, "output": 0}
+
+class ModelInfo(BaseModel):
+    id: str
+    name: str
+    provider: Provider
+    max_tokens: int
+
+# ===== Database Mock =====
+
+MODELS = {
+    "gpt-4": ModelInfo(id="gpt-4", name="GPT-4", provider=Provider.OPENAI, max_tokens=8192),
+    "claude-sonnet": ModelInfo(id="claude-sonnet", name="Claude Sonnet", provider=Provider.ANTHROPIC, max_tokens=200000),
+    "llama-3": ModelInfo(id="llama-3", name="Llama 3", provider=Provider.LITELLM, max_tokens=8192),
+}
+
+USERS = {
+    "key-123": User(id=1, email="user@example.com", tier="free"),
+    "key-456": User(id=2, email="pro@example.com", tier="pro"),
+}
+
+# ===== DEPENDENCIES =====
+
+def authenticate(api_key: str = Header(..., alias="X-API-Key")) -> User:
+    """Dependency: Authenticate user"""
+    if api_key not in USERS:
+        raise HTTPException(401, "Invalid API key")
+    return USERS[api_key]
+
+def get_settings() -> Settings:
+    """Dependency: Load settings"""
+    return Settings()
+
+def validate_model(model_id: str) -> ModelInfo:
+    """Dependency: Validate model exists"""
+    if model_id not in MODELS:
+        raise HTTPException(404, f"Model {model_id} not found")
+    return MODELS[model_id]
+
+# ===== ENDPOINTS =====
+
+@app.get("/health")
+def health_check():
+    """Server health status"""
+    return {"status": "healthy"}
+
+@app.get("/models", response_model=list[ModelInfo])
+def list_models(
+    provider: Optional[Provider] = Query(None),
+    limit: int = Query(10, ge=1, le=100),
+    user: User = Depends(authenticate)  # Auth via dependency
+):
+    """List available models"""
+    models = list(MODELS.values())
+
+    if provider:
+        models = [m for m in models if m.provider == provider]
+
+    return models[:limit]
+
+@app.get("/models/{model_id}", response_model=ModelInfo)
+def get_model(
+    model_id: str,
+    user: User = Depends(authenticate),  # Auth via dependency
+    model: ModelInfo = Depends(validate_model)  # Validation via dependency
+):
+    """Get model details"""
+    return model
+
+@app.post("/chat/completions", response_model=ChatResponse, status_code=status.HTTP_201_CREATED)
+def create_chat_completion(
+    request: ChatRequest,
+    user: User = Depends(authenticate),  # Auth via dependency
+    settings: Settings = Depends(get_settings),  # Settings via dependency
+):
+    """Create a chat completion"""
+
+    # Validate model exists (using dependency)
+    if request.model not in MODELS:
+        raise HTTPException(404, f"Model {request.model} not found")
+
+    # Tier-based validation (now easy with user object from dependency)
+    if user.tier == "free" and request.max_tokens > 1000:
+        raise HTTPException(403, "Free tier limited to 1000 tokens")
+
+    # Focus on business logic (validation already done)
+    last_message = request.messages[-1].content
+    response = ChatResponse(
+        id="msg_123",
+        model=request.model,
+        content=f"Response from {request.model}: {last_message[:50]}",
+        tokens={"input": len(request.messages) * 10, "output": 50}
+    )
+
+    return response
+
+@app.post("/providers/{provider_id}/chat")
+def chat_with_provider(
+    provider_id: Provider,
+    request: ChatRequest,
+    user: User = Depends(authenticate)  # Auth via dependency
+):
+    """Chat with a specific provider"""
+
+    # Validate model belongs to provider
+    model = MODELS.get(request.model)
+    if not model or model.provider != provider_id:
+        raise HTTPException(
+            400,
+            f"Model {request.model} not available for provider {provider_id}"
+        )
+
+    return {
+        "provider": provider_id,
+        "model": request.model,
+        "user": user.email,  # Easy access to user from dependency
+        "response": f"Handled by {provider_id}"
+    }
+
+@app.post("/models", response_model=ModelInfo, status_code=status.HTTP_201_CREATED)
+def register_model(
+    model: ModelInfo,
+    user: User = Depends(authenticate)  # Auth via dependency
+):
+    """Register a new model (admin only)"""
+
+    if model.id in MODELS:
+        raise HTTPException(400, f"Model {model.id} already exists")
+
+    MODELS[model.id] = model
+    return model
+
+@app.delete("/models/{model_id}", status_code=status.HTTP_204_NO_CONTENT)
+def unregister_model(
+    model_id: str,
+    user: User = Depends(authenticate)  # Auth via dependency
+):
+    """Unregister a model"""
+
+    if model_id not in MODELS:
+        raise HTTPException(404, f"Model {model_id} not found")
+
+    del MODELS[model_id]
+```
+
+### Test It
+
+```bash
+# ===== Auth is now required on all endpoints =====
+
+# ❌ Without API key
+curl http://localhost:8000/models
+# → 401 Unauthorized
+
+# ✅ With API key
+curl http://localhost:8000/models -H "X-API-Key: key-123"
+
+# ===== Chat with auth =====
+curl -X POST http://localhost:8000/chat/completions \
+  -H "X-API-Key: key-123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hello"}]
+  }'
+
+# ===== Tier validation (free tier limited to 1000 tokens) =====
+curl -X POST http://localhost:8000/chat/completions \
+  -H "X-API-Key: key-123" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hi"}],
+    "max_tokens": 2000
+  }'
+# → 403 Forbidden (free tier limit)
+
+# ===== Pro user with higher limit =====
+curl -X POST http://localhost:8000/chat/completions \
+  -H "X-API-Key: key-456" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "Hi"}],
+    "max_tokens": 2000
+  }'
+# → 200 OK (pro tier supports higher limits)
+
+# ===== Docs now show auth requirement =====
+# Visit http://localhost:8000/docs and try endpoints
+# Notice: All endpoints now have a lock icon (requires API key)
+```
+
+### Comparison: Before vs After
+
+**Before (Exercise 6):**
+```python
+@app.post("/chat/completions")
+def create_chat_completion(request: ChatRequest):
+    # Validation code inside endpoint
+    if request.model not in MODELS:
+        raise HTTPException(404, "Model not found")
+
+    # Actual logic mixed with validation
+    response = ChatResponse(...)
+    return response
+```
+
+**After (This exercise):**
+```python
+@app.post("/chat/completions")
+def create_chat_completion(
+    request: ChatRequest,
+    user: User = Depends(authenticate),  # Auth extracted
+    settings: Settings = Depends(get_settings)  # Settings extracted
+):
+    # Endpoint focuses ONLY on business logic
+    # Validation already done by dependencies
+    response = ChatResponse(...)
+    return response
+```
+
+### Key Takeaway
+
+Dependencies make endpoints cleaner by:
+- Moving validation logic out of endpoints
+- Providing pre-validated data to your functions
+- Enabling code reuse across multiple endpoints
+- Making the dependency graph explicit (readable)
+
+Your endpoint functions now focus **only on business logic**, not infrastructure concerns.
+
+---
+
 ## Testing Best Practices
 
 ### Use a `.http` File for Better Testing
@@ -782,7 +1503,7 @@ class Message(BaseModel):
 
 ## Next Steps
 
-1. **Complete all 6 exercises** - They take ~1.5 hours total
+1. **Complete all 11 exercises** - They take ~2.5-3 hours total
 2. **Modify examples** - Change model names, providers, add fields
 3. **Break things** - Try invalid inputs, see how FastAPI responds
 4. **Check docs** - Visit `/docs` after each change
@@ -793,6 +1514,10 @@ After these exercises, you'll understand:
 - ✅ How Pydantic models structure data
 - ✅ How to use proper HTTP status codes
 - ✅ How to combine path/query/body parameters
+- ✅ How dependency injection prevents code duplication
+- ✅ How to build authentication and database layers with DI
+- ✅ How request-scoped caching works
+- ✅ How to chain dependencies for powerful validation pipelines
 
-Then you're ready for error handling, middleware, and async operations.
+Then you're ready for error handling, middleware, async operations, and building production GenAI backends.
 

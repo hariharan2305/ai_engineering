@@ -13,8 +13,11 @@
 5. [Query Parameters](#query-parameters)
 6. [Request Bodies](#request-bodies)
 7. [Response Handling](#response-handling)
-8. [Complete Working Example](#complete-working-example)
-9. [Common Patterns for GenAI](#common-patterns-for-genai-applications)
+8. [Dependency Injection](#dependency-injection)
+9. [Complete Working Example](#complete-working-example)
+10. [Common Patterns for GenAI](#common-patterns-for-genai-applications)
+11. [Key Insights for Your Learning](#key-insights-for-your-learning)
+12. [Next Steps](#next-steps)
 
 ---
 
@@ -791,6 +794,415 @@ def list_models(response: Response):
 
 ---
 
+## Dependency Injection
+
+### What is Dependency Injection?
+
+**The Problem**: Repeating validation logic across multiple endpoints.
+
+```python
+# ❌ Without DI: Code duplication
+@app.get("/chat")
+def chat(api_key: str = Header(...)):
+    if api_key != "secret":
+        raise HTTPException(401)
+    # actual logic...
+
+@app.get("/models")
+def models(api_key: str = Header(...)):
+    if api_key != "secret":
+        raise HTTPException(401)
+    # actual logic...
+
+@app.post("/completions")
+def completions(api_key: str = Header(...)):
+    if api_key != "secret":
+        raise HTTPException(401)
+    # actual logic...
+```
+
+**The Solution**: Extract to a dependency function.
+
+```python
+# ✅ With DI: Reusable validation
+def verify_api_key(api_key: str = Header(...)):
+    if api_key != "secret":
+        raise HTTPException(401, "Invalid key")
+    return api_key
+
+@app.get("/chat")
+def chat(key: str = Depends(verify_api_key)):
+    # key is already validated
+
+@app.get("/models")
+def models(key: str = Depends(verify_api_key)):
+    # key is already validated
+
+@app.post("/completions")
+def completions(key: str = Depends(verify_api_key)):
+    # key is already validated
+```
+
+**What FastAPI Does:**
+1. Sees `Depends(verify_api_key)` in your endpoint signature
+2. Executes `verify_api_key()` BEFORE your endpoint runs
+3. Passes the return value into your endpoint function
+4. If the dependency raises an exception, your endpoint never runs
+
+**Mental Model**: "A dependency is a function that runs before your endpoint and provides its result."
+
+---
+
+### Basic Function Dependencies
+
+A dependency function:
+- Takes parameters from the request (headers, query, path, body)
+- Performs validation or setup
+- Returns a value that gets passed to your endpoint
+- Can raise exceptions to reject the request
+
+```python
+from fastapi import Depends, Header, HTTPException
+
+# Dependency function
+def get_api_key(x_api_key: str = Header(...)):
+    """Validate API key from header"""
+    if x_api_key != "secret-key":
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    return x_api_key
+
+# Using the dependency
+@app.get("/protected")
+def protected_route(api_key: str = Depends(get_api_key)):
+    return {"message": "Access granted", "key": api_key}
+
+# Using the same dependency in another endpoint
+@app.post("/create-model")
+def create_model(name: str, api_key: str = Depends(get_api_key)):
+    return {"model": name, "created_by": api_key}
+```
+
+**Test commands:**
+```bash
+# ✅ Valid key
+curl http://localhost:8000/protected -H "X-API-Key: secret-key"
+# → {"message": "Access granted", "key": "secret-key"}
+
+# ❌ Invalid key
+curl http://localhost:8000/protected -H "X-API-Key: wrong"
+# → 401 Unauthorized
+```
+
+---
+
+### Common Patterns for GenAI Applications
+
+#### Pattern 1: Database Session Dependency
+
+**Why this matters**: Every GenAI app stores conversations, messages, and embeddings. DB session management is repetitive without DI.
+
+```python
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+
+# Setup (usually in separate config file)
+DATABASE_URL = "postgresql+asyncpg://localhost/genai"
+engine = create_async_engine(DATABASE_URL)
+SessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+
+# Dependency: Provides database session with automatic cleanup
+async def get_db() -> AsyncSession:
+    """Provide database session, auto-cleanup after request"""
+    async with SessionLocal() as session:
+        yield session  # FastAPI handles cleanup
+
+# Usage: Every endpoint that needs DB gets it automatically
+@app.get("/conversations")
+async def list_conversations(db: AsyncSession = Depends(get_db)):
+    result = await db.execute("SELECT * FROM conversations")
+    return result.scalars().all()
+
+@app.post("/conversations/{id}/messages")
+async def add_message(
+    id: int,
+    message: str,
+    db: AsyncSession = Depends(get_db)
+):
+    # db session automatically provided and cleaned up
+    await db.execute("INSERT INTO messages ...")
+    await db.commit()
+    return {"message_id": 1}
+
+@app.get("/users/{user_id}/conversation-history")
+async def get_user_history(
+    user_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    # Same dependency, multiple endpoints
+    result = await db.execute("SELECT * FROM messages WHERE user_id = ?", [user_id])
+    return result.scalars().all()
+```
+
+**Why `yield`?** FastAPI recognizes the `yield` pattern and guarantees cleanup even if your endpoint crashes. The session always closes properly.
+
+**GenAI relevance**: Topic 6 (Database Integration) and future phases rely heavily on this pattern for conversation storage.
+
+---
+
+#### Pattern 2: Authentication Dependency
+
+**Why this matters**: Protected endpoints need user context. DI makes auth checks reusable and provides user info to all endpoints.
+
+```python
+from pydantic import BaseModel
+
+class User(BaseModel):
+    id: int
+    email: str
+    tier: str  # "free", "pro", "enterprise"
+
+# Dependency
+async def get_current_user(
+    api_key: str = Header(..., alias="X-API-Key")
+) -> User:
+    """Validate API key and return user object"""
+
+    # In production: query database
+    users = {
+        "key-123": User(id=1, email="user@example.com", tier="free"),
+        "key-456": User(id=2, email="pro@example.com", tier="pro"),
+    }
+
+    if api_key not in users:
+        raise HTTPException(401, "Invalid API key")
+
+    return users[api_key]
+
+# Usage: Endpoints automatically get user context
+@app.post("/chat/completions")
+async def chat(
+    request: ChatRequest,
+    user: User = Depends(get_current_user)
+):
+    # user is already validated and loaded
+    if user.tier == "free" and request.max_tokens > 1000:
+        raise HTTPException(403, "Free tier limited to 1000 tokens")
+
+    return {"user": user.email, "response": "..."}
+
+# Another endpoint using same dependency
+@app.get("/profile")
+async def get_profile(user: User = Depends(get_current_user)):
+    return {
+        "email": user.email,
+        "tier": user.tier,
+        "subscription_active": True
+    }
+```
+
+**GenAI relevance**: Topic 9 (Authentication) and Topic 10 (Rate Limiting) build on this exact pattern.
+
+---
+
+#### Pattern 3: Configuration Dependency
+
+**Why this matters**: Model settings, provider credentials, and feature flags need to be available in every endpoint.
+
+```python
+from pydantic_settings import BaseSettings
+
+class Settings(BaseSettings):
+    openai_api_key: str
+    anthropic_api_key: str
+    default_model: str = "gpt-4"
+    max_tokens_limit: int = 4096
+    rate_limit_per_minute: int = 60
+
+    class Config:
+        env_file = ".env"
+
+# Dependency
+def get_settings() -> Settings:
+    """Load configuration (FastAPI caches this per request)"""
+    return Settings()
+
+# Usage
+@app.post("/chat")
+def chat(
+    request: ChatRequest,
+    settings: Settings = Depends(get_settings)
+):
+    # Use settings throughout endpoint
+    model = request.model or settings.default_model
+
+    if request.max_tokens > settings.max_tokens_limit:
+        raise HTTPException(
+            400,
+            f"Max tokens: {settings.max_tokens_limit}"
+        )
+
+    # Use API keys from settings
+    api_key = (
+        settings.openai_api_key if "gpt" in model
+        else settings.anthropic_api_key
+    )
+
+    return call_llm(model, api_key, request)
+
+# Another endpoint with settings
+@app.get("/rate-limit-info")
+def get_rate_limit(settings: Settings = Depends(get_settings)):
+    return {
+        "limit_per_minute": settings.rate_limit_per_minute,
+        "default_model": settings.default_model
+    }
+```
+
+---
+
+### Dependency Chaining
+
+**Concept**: One dependency can call another dependency. FastAPI executes them in order (deepest first → shallow → endpoint).
+
+```python
+# Level 1: Validate API key
+def verify_api_key(x_api_key: str = Header(...)) -> str:
+    print("🔑 Step 1: Validating API key")
+    if x_api_key != "valid-key":
+        raise HTTPException(401, "Invalid key")
+    return x_api_key
+
+# Level 2: Get user (depends on Level 1)
+def get_current_user(api_key: str = Depends(verify_api_key)) -> User:
+    print("👤 Step 2: Fetching user")
+    # api_key is already validated
+    return User(id=1, email="user@example.com", tokens_used=500, token_limit=1000)
+
+# Level 3: Check quota (depends on Level 2)
+def check_user_quota(user: User = Depends(get_current_user)) -> User:
+    print("📊 Step 3: Checking quota")
+    if user.tokens_used >= user.token_limit:
+        raise HTTPException(429, "Token quota exceeded")
+    return user
+
+# Endpoint uses final dependency
+@app.post("/chat")
+def chat(
+    request: ChatRequest,
+    user: User = Depends(check_user_quota)  # All 3 checks run automatically
+):
+    print("💬 Step 4: Endpoint executing")
+    remaining = user.token_limit - user.tokens_used
+    return {
+        "message": "Chat accepted",
+        "remaining_tokens": remaining
+    }
+```
+
+**Execution flow for a single request:**
+```
+Request arrives
+    ↓
+1. verify_api_key() runs (validates header)
+    ↓
+2. get_current_user() runs (uses validated key)
+    ↓
+3. check_user_quota() runs (uses user from step 2)
+    ↓
+4. chat() runs (receives user from step 3)
+    ↓
+Response sent
+```
+
+**In console you'd see:**
+```
+🔑 Step 1: Validating API key
+👤 Step 2: Fetching user
+📊 Step 3: Checking quota
+💬 Step 4: Endpoint executing
+```
+
+---
+
+### Request-Scoped Caching
+
+**Key insight**: FastAPI caches dependency results per request. If multiple endpoints/dependencies use the same dependency, it only executes ONCE per request.
+
+```python
+def get_current_user(api_key: str = Header(...)) -> User:
+    print(f"🔍 Looking up user for key: {api_key}")
+    # Expensive: database query
+    user = db.query(User).filter_by(api_key=api_key).first()
+    return user
+
+@app.get("/profile")
+def profile(user: User = Depends(get_current_user)):
+    print("📋 Profile endpoint")
+    return user
+
+@app.get("/settings")
+def settings(user: User = Depends(get_current_user)):
+    print("⚙️  Settings endpoint")
+    return user.settings
+
+# If you call both /profile and /settings in separate requests:
+# Request 1: GET /profile
+#   → "🔍 Looking up user..." (executes once)
+#   → "📋 Profile endpoint"
+#
+# Request 2: GET /settings
+#   → "🔍 Looking up user..." (executes once)
+#   → "⚙️  Settings endpoint"
+
+# But WITHIN a single request, if you use get_current_user twice:
+def compound_endpoint(
+    user1: User = Depends(get_current_user),
+    user2: User = Depends(get_current_user)
+):
+    print("Compound endpoint")
+    # "🔍 Looking up user..." only prints ONCE
+    # user1 and user2 point to the SAME object
+
+# This is why dependencies are ideal for expensive operations like DB queries.
+```
+
+**Why this matters**: Prevents unnecessary database queries and API calls. Your get_current_user dependency executes ONCE per HTTP request, even if used in 5 different places.
+
+---
+
+### Key Insights for Your Learning
+
+```
+★ Insight ─────────────────────────────────────
+
+1. **Dependencies are pre-processing functions**: Think of them like Spark
+   transformations that run before your action (endpoint). They validate,
+   fetch data, and pass results forward—just like .filter() and .map()
+   prepare data before .collect().
+
+2. **DI prevents "pyramid of doom"**: Without dependencies, your endpoint
+   functions become nested validation hell. Dependencies flatten this into
+   a clean pipeline: validate → fetch user → check quota → business logic.
+
+3. **Request-scoped caching is automatic**: FastAPI caches dependency results
+   per request. Call get_current_user() in 5 places? Database query happens
+   once. This is like caching a Spark DataFrame—computed once, reused
+   everywhere in that job.
+
+4. **Essential for GenAI apps**: Every production LLM backend needs:
+   - Database session management (conversations, messages, embeddings)
+   - Authentication (API keys, user context, tier limits)
+   - Rate limiting (quota checks before expensive LLM calls)
+   All three are built with dependency injection.
+
+5. **Chaining creates powerful pipelines**: Multiple dependencies work
+   together like a data pipeline: API key validation → User lookup →
+   Quota check → Endpoint. Each step happens automatically.
+
+─────────────────────────────────────────────────
+```
+
+---
+
 ## Complete Working Example
 
 Here's a minimal but complete GenAI backend that uses all concepts:
@@ -1065,11 +1477,13 @@ Your learning path:
 
 1. ✅ HTTP & REST API Basics (completed)
 2. ✅ FastAPI Core Concepts (current)
-3. **Next**: Error Handling & Custom Responses
-4. **Then**: Middleware & Request Lifecycle
-5. **Then**: Async FastAPI for Concurrent LLM Calls
-6. **Then**: Authentication & API Keys
-7. **Then**: Integrating Real LLM Providers
+3. **Next**: Hands-On Practice with Dependency Injection
+4. **Then**: Error Handling & Custom Responses
+5. **Then**: Middleware & Request Lifecycle
+6. **Then**: Async FastAPI for Concurrent LLM Calls
+7. **Then**: Authentication & API Keys (builds on DI patterns)
+8. **Then**: Database Integration (uses session dependencies)
+9. **Then**: Integrating Real LLM Providers
 
-Ready to practice, or dive deeper into any concept?
+You now understand the foundation of building scalable GenAI backends. Dependency Injection is the key pattern that enables clean, reusable code for the advanced topics ahead.
 
