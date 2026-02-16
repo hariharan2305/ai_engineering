@@ -135,8 +135,6 @@ Phase 6: Ship It (Week 6)
 - `concepts/02_FastAPI_Core_Concepts.md` ✅
 - `concepts/02_FastAPI_Hands_On_Practice.md` ✅ (6 exercises completed)
 
-> **Note:** Dependency injection is covered at a basic level. For advanced patterns (chaining, request-scoped dependencies, sub-dependencies), see the Master Roadmap's advanced extensions.
-
 **Learning Objectives:**
 
 **Part 1: Application Setup**
