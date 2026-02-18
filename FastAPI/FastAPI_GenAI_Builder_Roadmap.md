@@ -65,14 +65,14 @@ Phase 6: Ship It (Week 6)
 
 | Phase | Topics | Status |
 |-------|--------|--------|
-| Phase 1 | Topics 1-3 | Topic 1 ✅, Topic 2 ✅, Topic 3 🔧 Next |
-| Phase 2 | Topics 4-6 | 📋 Pending |
+| Phase 1 | Topics 1-3 | Topic 1 ✅, Topic 2 ✅, Topic 3 ✅ |
+| Phase 2 | Topics 4-6 | Topic 4 🔧 Next, Topics 5-6 📋 Pending |
 | Phase 3 | Topics 7-8 + Mini-Project 1 | 📋 Pending |
 | Phase 4 | Topics 9-10 + Mini-Project 2 | 📋 Pending |
 | Phase 5 | Topics 11-13 + Mini-Project 3 | 📋 Pending |
 | Phase 6 | Topics 14-15 + Final Project | 📋 Pending |
 
-**Next Action:** Complete Topic 3 (Error Handling) to finish Phase 1
+**Next Action:** Complete Topic 4 (Middleware & Request Lifecycle) to start Phase 2
 
 ---
 
@@ -193,11 +193,11 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 🔧 Topic 3: Error Handling Basics — NEXT
+### ✅ Topic 3: Error Handling Basics — COMPLETED
 
 **Target Files:**
-- `concepts/03_Error_Handling.md` (to be created)
-- `concepts/03_Error_Handling_Practice.md` (to be created)
+- `concepts/03_Error_Handling.md` ✅
+- `concepts/03_Error_Handling_Practice.md` ✅ (5 exercises completed)
 
 **Learning Objectives:**
 
@@ -252,7 +252,7 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 📋 Topic 4: Middleware & Request Lifecycle
+### 🔧 Topic 4: Middleware & Request Lifecycle — NEXT
 
 **Target Files:**
 - `concepts/04_Middleware.md`
