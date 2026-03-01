@@ -81,6 +81,7 @@ ENV/
 .env
 .env.local
 .env.*
+!.env.example
 *.pem
 *.key
 secrets.json

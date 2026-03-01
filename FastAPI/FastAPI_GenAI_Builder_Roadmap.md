@@ -66,13 +66,13 @@ Phase 6: Ship It (Week 6)
 | Phase | Topics | Status |
 |-------|--------|--------|
 | Phase 1 | Topics 1-3 | Topic 1 ✅, Topic 2 ✅, Topic 3 ✅ |
-| Phase 2 | Topics 4-6 | Topic 4 🔧 Next, Topics 5-6 📋 Pending |
+| Phase 2 | Topics 4-6 | Topic 4 ✅, Topic 5 🔧 Next, Topic 6 📋 Pending |
 | Phase 3 | Topics 7-8 + Mini-Project 1 | 📋 Pending |
 | Phase 4 | Topics 9-10 + Mini-Project 2 | 📋 Pending |
 | Phase 5 | Topics 11-13 + Mini-Project 3 | 📋 Pending |
 | Phase 6 | Topics 14-15 + Final Project | 📋 Pending |
 
-**Next Action:** Complete Topic 4 (Middleware & Request Lifecycle) to start Phase 2
+**Next Action:** Complete Topic 5 (Async FastAPI) — critical for LLM-powered backends
 
 ---
 
@@ -252,11 +252,11 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 🔧 Topic 4: Middleware & Request Lifecycle — NEXT
+### ✅ Topic 4: Middleware & Request Lifecycle — COMPLETED
 
 **Target Files:**
-- `concepts/04_Middleware.md`
-- `concepts/04_Middleware_Practice.md`
+- `concepts/04_Middleware.md` ✅
+- `concepts/04_Middleware_Practice.md` ✅
 
 **Learning Objectives:**
 
@@ -304,7 +304,7 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 📋 Topic 5: Async FastAPI (Critical for LLMs)
+### 🔧 Topic 5: Async FastAPI (Critical for LLMs) — NEXT
 
 **Target Files:**
 - `concepts/05_Async_FastAPI.md`
