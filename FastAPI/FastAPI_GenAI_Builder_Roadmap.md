@@ -66,13 +66,13 @@ Phase 6: Ship It (Week 6)
 | Phase | Topics | Status |
 |-------|--------|--------|
 | Phase 1 | Topics 1-3 | Topic 1 ✅, Topic 2 ✅, Topic 3 ✅ |
-| Phase 2 | Topics 4-6 | Topic 4 ✅, Topic 5 🔧 Next, Topic 6 📋 Pending |
+| Phase 2 | Topics 4-6 | Topic 4 ✅, Topic 5 ✅, Topic 6 📋 Pending |
 | Phase 3 | Topics 7-8 + Mini-Project 1 | 📋 Pending |
 | Phase 4 | Topics 9-10 + Mini-Project 2 | 📋 Pending |
 | Phase 5 | Topics 11-13 + Mini-Project 3 | 📋 Pending |
 | Phase 6 | Topics 14-15 + Final Project | 📋 Pending |
 
-**Next Action:** Complete Topic 5 (Async FastAPI) — critical for LLM-powered backends
+**Next Action:** Complete Topic 6 (Database Integration) — the data layer all GenAI features depend on
 
 ---
 
@@ -304,7 +304,7 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 🔧 Topic 5: Async FastAPI (Critical for LLMs) — NEXT
+### ✅ Topic 5: Async FastAPI (Critical for LLMs) — COMPLETED
 
 **Target Files:**
 - `concepts/05_Async_FastAPI.md`
@@ -360,7 +360,7 @@ Phase 6: Ship It (Week 6)
 
 ---
 
-### 📋 Topic 6: Database Integration
+### 📋 Topic 6: Database Integration (Expanded)
 
 **Target Files:**
 - `concepts/06_Database_Integration.md`
@@ -368,53 +368,73 @@ Phase 6: Ship It (Week 6)
 
 **Learning Objectives:**
 
-**Part 1: PostgreSQL with Async SQLAlchemy**
-- Why PostgreSQL for GenAI apps (structured data, JSON support, reliability)
-- Async SQLAlchemy setup with asyncpg driver
-- Database session management with dependencies
-- Connection pooling basics
+**Part 1: Async SQLAlchemy + PostgreSQL**
+- Why async DB for GenAI: concurrent LLM calls + DB writes without blocking
+- `asyncpg` driver setup with `create_async_engine()`
+- FastAPI async session dependency pattern (async generator with `try/finally`)
+- Connection pool sizing for GenAI workloads (LLM calls are long; larger pools needed)
 
 **Part 2: GenAI Data Models**
-- User model (authentication, preferences, token limits)
-- Conversation model (metadata, system prompts, model selection)
-- Message model (role, content, token counts, latency tracking)
-- Relationships and foreign keys
+- `User`: id (UUID), email, token_limit, tokens_used, created_at
+- `Conversation`: id, user_id (FK), title, system_prompt, model, created_at
+- `Message`: id, conversation_id (FK), role, content, tokens, latency_ms, provider_metadata (JSON), created_at
+- Why track `latency_ms` and `tokens` per message: analytics + cost attribution
 
-**Part 3: CRUD Operations**
-- Creating records (async session.add, commit, refresh)
-- Reading with filters and pagination
-- Updating existing records
-- Soft deletes vs hard deletes
+**Part 3: CRUD + Pagination**
+- Async session patterns: `session.add()`, `await session.commit()`, `await session.refresh()`
+- Cursor-based pagination (vs OFFSET) — critical for long chat histories
+- Soft deletes: `deleted_at` timestamp vs hard delete
 
-**Part 4: Redis for GenAI**
-- Redis setup with redis-py async
-- Caching LLM responses (when appropriate)
-- Session/conversation context storage
-- Rate limiting data (covered more in Topic 10)
+**Part 4: Supabase**
+- Managed PostgreSQL + PostgREST + Auth + RLS + pgvector in one service
+- `acreate_client()` async FastAPI dependency pattern
+- Row Level Security (RLS) — multi-tenant enforcement at DB level
+- supabase-py vs SQLAlchemy decision matrix
+- pgvector preview: enabling extension, embedding column, cosine similarity search
+
+**Part 5: Redis Deep Dive**
+- Redis data structures for GenAI: STRING, HASH, SORTED SET, LIST
+- LLM response caching strategy: cache key design, TTL tiers, what to cache vs not
+- Sliding window rate limiter with sorted sets
+- Conversation context hot cache (avoid PostgreSQL on every LLM call)
+- Token budget tracking with `INCR` + `EXPIRE`
+- Upstash vs local Redis: stateless HTTP vs persistent TCP, `REDIS_URL` migration pattern
 
 **What You'll Be Able to Build:**
-- Persistent conversation storage
-- User management with token tracking
-- Message history with pagination
-- Response caching layer
+- Persistent conversation storage with Supabase (managed PostgreSQL)
+- Multi-tenant RLS-enforced data access
+- LLM response caching with TTL strategies
+- Sliding window rate limiter
+- Conversation context hot cache
+- pgvector-ready schema for Phase 5 RAG
 
 **Key Questions You Should Be Able to Answer:**
 1. Why use async SQLAlchemy instead of sync for GenAI apps?
-2. What data should you track per message for analytics?
+2. What is RLS and why is it the killer feature for multi-tenant GenAI apps?
 3. When should you cache LLM responses, and when shouldn't you?
-4. How do you paginate conversation history efficiently?
+4. How does cursor-based pagination differ from OFFSET, and why does it matter?
+5. What Redis data structure do you use for a sliding window rate limiter?
+6. How do you migrate from local Redis to Upstash with minimal code changes?
 
-**Hands-On Exercises:**
-- Exercise 1: Set up async SQLAlchemy with PostgreSQL
-- Exercise 2: Create User, Conversation, and Message models
-- Exercise 3: Build CRUD operations for conversations
-- Exercise 4: Add pagination to message retrieval
-- Exercise 5: Implement Redis caching for recent conversations
-- Exercise 6: Track token usage per user
+**Hands-On Exercises (files 10_1_* through 10_8_*):**
+- Exercise 1: Async SQLAlchemy setup — connect to PostgreSQL (Supabase connection string)
+- Exercise 2: GenAI data models — User, Conversation, Message with relationships
+- Exercise 3: Async CRUD — create conversation, add messages, cursor-based pagination
+- Exercise 4: Token usage tracking — per message, aggregate per user, enforce via dependency
+- Exercise 5: Supabase async client — `acreate_client()` as dependency, RLS demonstration
+- Exercise 6: pgvector preview — enable extension, add embedding column, cosine similarity search
+- Exercise 7: Redis LLM response caching — cache-aside pattern, TTL strategy, cache hit/miss logging
+- Exercise 8: Redis rate limiting + context cache + Upstash migration
 
-**GenAI Application:** Every production chat app needs to store conversations, track token usage, and cache expensive operations. This topic builds the data layer that all GenAI features depend on.
+**GenAI Application:** Every production GenAI app needs to store conversations, enforce per-user access controls, track token costs, and cache expensive LLM calls. This topic builds the complete data layer.
 
-**Estimated Time:** 4 hours concepts + 4 hours hands-on
+**Estimated Time:** 5 hours concepts + 5 hours hands-on
+
+**Dependencies Added:**
+- `asyncpg` — async PostgreSQL driver for SQLAlchemy
+- `supabase` — supabase-py client with `acreate_client()` async support
+- `redis` — redis-py with asyncio support (aioredis merged in)
+- `upstash-redis` — HTTP-based Redis for Upstash section
 
 ---
 
