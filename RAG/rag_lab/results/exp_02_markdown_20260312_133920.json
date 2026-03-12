@@ -1,0 +1,66 @@
+{
+  "experiment": "exp_02_markdown",
+  "timestamp": "20260312_133920",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab_exp02_markdown",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "variable_changed": "chunking_strategy: fixed \u2192 markdown_headers",
+  "corpus": "rag_advanced_techniques.md",
+  "scores": {
+    "faithfulness": 0.9199999999999999,
+    "answer_relevancy": 0.8541824049636766,
+    "answer_similarity": 0.8993257005173216
+  },
+  "samples": [
+    {
+      "question": "What is HyDE and how does it improve retrieval over using the raw query?",
+      "answer": "HyDE (Hypothetical Document Embeddings) is a query transformation technique where the LLM generates a hypothetical answer to the query, and this hypothetical answer is used as the retrieval query instead of the original question. It improves retrieval by acknowledging that a hypothetical answer is likely to be closer to the actual answer documents in embedding space than a short question. This is because questions and answers often use different vocabulary and phrasing. By generating a document-like answer first, the query vector aligns better with stored chunk vectors. However, it adds one LLM call per query at retrieval time, resulting in increased latency and cost, and it performs best on factual, knowledge-dense corpora with a large vocabulary gap between questions and documents.",
+      "num_contexts": 5,
+      "ground_truth": "HyDE (Hypothetical Document Embeddings) generates a hypothetical answer to the query using an LLM, then uses that hypothetical answer as the retrieval query instead of the original question. It improves retrieval because a hypothetical answer lives closer to actual answer documents in embedding space than a short question does, bridging the vocabulary gap between questions and documents."
+    },
+    {
+      "question": "What is the main difference between multi-query retrieval and query expansion?",
+      "answer": "The main difference between multi-query retrieval and query expansion is that multi-query retrieval generates multiple reformulations of the original query and runs each as a separate retrieval, whereas query expansion modifies the original query in place by adding related terms and synonyms without generating separate queries. Multi-query retrieval results in multiple retrieval calls and is more effective at capturing different phrasings, while query expansion is less powerful but cheaper as it results in a single retrieval call.",
+      "num_contexts": 5,
+      "ground_truth": "Multi-query retrieval generates multiple reformulations of the original query and runs each as a separate retrieval call, then merges and deduplicates results. Query expansion modifies the original query in place by adding related terms and still results in a single retrieval call. Multi-query is more powerful but more expensive; query expansion is cheaper but less effective."
+    },
+    {
+      "question": "Why can cross-encoder rerankers not be used for first-stage retrieval over large corpora?",
+      "answer": "Cross-encoder rerankers cannot be used for first-stage retrieval over large corpora because they process query and document jointly, which means that every query-document pair must be scored at query time. This makes them too slow for handling large datasets, whereas bi-encoders, which encode query and document independently and can pre-compute document embeddings, are faster and more suitable for first-stage retrieval.",
+      "num_contexts": 5,
+      "ground_truth": "Cross-encoders cannot pre-compute document embeddings because they encode the query and document jointly as a single input. Every query-document pair must be scored at query time, making them too slow for first-stage retrieval over large corpora. They are suitable only for reranking a small candidate set of 20 to 50 documents."
+    },
+    {
+      "question": "What problem does context compression solve in a RAG pipeline?",
+      "answer": "Context compression solves the problem of inflated context windows, increased costs, and the introduction of noise that can confuse the LLM by extracting only the relevant portions of retrieved text and removing irrelevant content.",
+      "num_contexts": 5,
+      "ground_truth": "Context compression reduces the amount of retrieved text passed to the LLM by removing irrelevant content from chunks before generation. Retrieved chunks often contain only a few relevant sentences surrounded by unrelated content. Passing full chunks inflates the context window, increases cost, and introduces noise that can confuse the LLM. Compression extracts only the relevant portions."
+    },
+    {
+      "question": "How does LLMLingua compress retrieved context and what compression ratio can it achieve?",
+      "answer": "LLMLingua compresses retrieved context by using a small language model to score the importance of each token in the retrieved context. It drops low-importance tokens, which reduces context length by up to 20x while preserving key information.",
+      "num_contexts": 5,
+      "ground_truth": "LLMLingua uses a small language model to score the importance of each token in the retrieved context. Low-importance tokens are dropped, reducing context length by up to 20x while preserving the key information. It is particularly useful when retrieved chunks are long and only partially relevant to the query."
+    }
+  ]
+}

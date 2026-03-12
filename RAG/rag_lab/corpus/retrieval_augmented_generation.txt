@@ -1,0 +1,35 @@
+Retrieval Augmented Generation (RAG)
+
+Retrieval Augmented Generation (RAG) is an AI technique that improves the accuracy and reliability of large language models by grounding their responses in external, retrieved knowledge. Instead of relying solely on information baked into model weights during training, RAG systems dynamically fetch relevant documents at query time and pass them to the LLM as context.
+
+Why RAG Exists
+
+Large language models have two fundamental limitations that RAG addresses. First, they have a knowledge cutoff — they cannot know about events or documents published after their training data was collected. Second, they hallucinate — they sometimes generate plausible-sounding but factually incorrect information with high confidence. RAG mitigates both problems by providing the model with retrieved facts it must ground its answer in.
+
+The Basic RAG Pipeline
+
+A RAG system operates in two phases: indexing and querying.
+
+During indexing, source documents are loaded and parsed into plain text. The text is then split into smaller segments called chunks. Each chunk is converted into a dense vector embedding using an embedding model. These embeddings are stored in a vector database alongside the original text and metadata.
+
+During querying, the user's question is embedded using the same embedding model. The query embedding is compared against stored chunk embeddings using cosine similarity or another distance metric. The most similar chunks (top-k) are retrieved and injected into the LLM prompt as context. The LLM then generates an answer grounded in that context.
+
+Chunking Strategy
+
+Chunking is one of the most impactful decisions in a RAG system. Fixed-size chunking splits text into equal-length segments with optional overlap. Overlap between adjacent chunks reduces the risk of cutting a sentence or concept in half. Semantic chunking uses sentence boundaries or topic shifts to create more meaningful segments. Hierarchical chunking creates parent and child chunks, allowing coarse retrieval with fine-grained context delivery.
+
+The optimal chunk size depends on the use case. Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. Larger chunks (512-1024 tokens) provide more context but can introduce noise that confuses the LLM.
+
+Limitations of Naive RAG
+
+Naive RAG — simple dense retrieval with no refinements — fails in several predictable ways. Keyword mismatch occurs when the query uses different terminology than the documents. Low-quality embeddings produce poor similarity rankings. The lost-in-the-middle problem causes LLMs to ignore information positioned in the middle of a long context. Context window overflow happens when too many large chunks are retrieved.
+
+Advanced RAG Techniques
+
+Hybrid retrieval combines dense vector search with sparse keyword search (BM25) to handle both semantic and exact-match queries. Reranking adds a second-pass model that re-scores retrieved chunks with higher precision than the initial retrieval. Hypothetical Document Embeddings (HyDE) generates a hypothetical answer to the query and retrieves documents similar to that answer rather than the raw query. Multi-query retrieval generates several rephrasings of the original question and merges the results.
+
+Agentic RAG extends the pattern further by allowing the system to iteratively refine its retrieval — querying multiple times, using tool calls, and reasoning over intermediate results before generating a final answer.
+
+Production Considerations
+
+Production RAG systems require careful attention to evaluation. Without measurement, you cannot know whether a change to any component improved or degraded overall quality. The RAGAS framework provides standardized metrics for faithfulness, answer relevancy, context precision, and context recall. Regular evaluation on a held-out test set is the discipline that separates production-grade RAG from prototype RAG.

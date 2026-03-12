@@ -1,0 +1,22 @@
+[
+  {
+    "question": "How does LLMClient handle API failures and what is the retry strategy used?",
+    "ground_truth": "LLMClient handles API failures using exponential backoff with full jitter. On each failure it calls exponential_backoff(attempt) to compute the wait time, logs a warning with the retry count and error, then sleeps before retrying. The maximum number of retry attempts is set by the max_retries parameter, which defaults to 3. After all retries are exhausted, the last exception is re-raised."
+  },
+  {
+    "question": "What hashing algorithm does EmbeddingCache use for cache keys and why is the model name included?",
+    "ground_truth": "EmbeddingCache uses SHA-256 to generate cache keys. The key is computed by hashing the string '{model_name}:{text}'. The model name is included to prevent cross-model cache collisions — the same text embedded by different models produces different vectors, so they must be stored under different keys to avoid stale or incorrect cache hits."
+  },
+  {
+    "question": "What fields does RAGResponse contain and what is the purpose of the latency_ms field?",
+    "ground_truth": "RAGResponse contains: answer (the generated text), sources (list of raw chunk texts used as citations), tokens_used (cumulative token count for cost tracking), latency_ms (end-to-end wall-clock latency in milliseconds for performance monitoring), and an optional metadata dict for experiment-specific tags."
+  },
+  {
+    "question": "How does RAGPipeline._build_prompt() ensure the prompt fits within the LLM context window?",
+    "ground_truth": "RAGPipeline._build_prompt() joins the retrieved contexts as a numbered list, then calls truncate_to_token_limit() on the combined context block using max_context_tokens (default 3000). Truncation is tail-first, preserving the highest-ranked chunks at the top. The question is appended after the truncated context block."
+  },
+  {
+    "question": "What is the maximum wait cap in exponential_backoff and why is full jitter used instead of a fixed delay?",
+    "ground_truth": "The maximum wait is capped at max_delay=60.0 seconds. Full jitter randomizes the wait across the entire range [0, delay] rather than adding noise on top of a fixed value. This prevents the thundering herd problem, where many clients retrying after the same service failure would otherwise all wake up at the same time and overwhelm the service again."
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is HyDE and how does it improve retrieval over using the raw query?",
+    "ground_truth": "HyDE (Hypothetical Document Embeddings) generates a hypothetical answer to the query using an LLM, then uses that hypothetical answer as the retrieval query instead of the original question. It improves retrieval because a hypothetical answer lives closer to actual answer documents in embedding space than a short question does, bridging the vocabulary gap between questions and documents."
+  },
+  {
+    "question": "What is the main difference between multi-query retrieval and query expansion?",
+    "ground_truth": "Multi-query retrieval generates multiple reformulations of the original query and runs each as a separate retrieval call, then merges and deduplicates results. Query expansion modifies the original query in place by adding related terms and still results in a single retrieval call. Multi-query is more powerful but more expensive; query expansion is cheaper but less effective."
+  },
+  {
+    "question": "Why can cross-encoder rerankers not be used for first-stage retrieval over large corpora?",
+    "ground_truth": "Cross-encoders cannot pre-compute document embeddings because they encode the query and document jointly as a single input. Every query-document pair must be scored at query time, making them too slow for first-stage retrieval over large corpora. They are suitable only for reranking a small candidate set of 20 to 50 documents."
+  },
+  {
+    "question": "What problem does context compression solve in a RAG pipeline?",
+    "ground_truth": "Context compression reduces the amount of retrieved text passed to the LLM by removing irrelevant content from chunks before generation. Retrieved chunks often contain only a few relevant sentences surrounded by unrelated content. Passing full chunks inflates the context window, increases cost, and introduces noise that can confuse the LLM. Compression extracts only the relevant portions."
+  },
+  {
+    "question": "How does LLMLingua compress retrieved context and what compression ratio can it achieve?",
+    "ground_truth": "LLMLingua uses a small language model to score the importance of each token in the retrieved context. Low-importance tokens are dropped, reducing context length by up to 20x while preserving the key information. It is particularly useful when retrieved chunks are long and only partially relevant to the query."
+  }
+]

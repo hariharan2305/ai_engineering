@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Embedding Models for Semantic Search</title>
+</head>
+<body>
+
+<h1>Embedding Models for Semantic Search</h1>
+<p>Embedding models convert text into dense numerical vectors that capture semantic meaning. These vectors power similarity search in RAG systems, enabling retrieval based on meaning rather than keyword overlap.</p>
+
+<h2>What Are Embeddings</h2>
+<p>An embedding is a fixed-length vector representation of text. Two pieces of text with similar meaning will have vectors that are geometrically close — high cosine similarity. Two pieces of text with different meanings will have vectors that are far apart. Embedding models are trained on large corpora to encode this semantic structure into vector space.</p>
+<p>In a RAG system, documents are embedded at ingestion time and stored in a vector database. At query time, the query is embedded using the same model, and nearest-neighbor search finds the most semantically similar document chunks.</p>
+
+<h2>Types of Embedding Models</h2>
+<p>There are two primary architectures used in production RAG systems: bi-encoders and cross-encoders. Each serves a different role in the retrieval pipeline.</p>
+
+<h3>Bi-Encoder Models</h3>
+<p>Bi-encoders encode the query and each document independently using the same encoder network. Because documents are encoded independently of the query, their embeddings can be pre-computed and stored. This makes bi-encoders extremely fast at query time — retrieval is just a nearest-neighbor lookup. The limitation is that the query and document never interact during encoding, so subtle relevance signals can be missed. Bi-encoders are used for first-stage retrieval where speed over a large corpus is required.</p>
+<p>Popular bi-encoder models include the sentence-transformers family: all-MiniLM-L6-v2, all-mpnet-base-v2, and OpenAI's text-embedding-3-small and text-embedding-3-large.</p>
+
+<h3>Cross-Encoder Models</h3>
+<p>Cross-encoders take the query and document concatenated as a single input and output a relevance score. Because query and document are processed jointly, the model captures fine-grained interactions between them. Cross-encoders are significantly more accurate than bi-encoders at scoring relevance. However, document embeddings cannot be pre-computed because the encoding depends on the specific query. This means every candidate document must be scored at query time, making cross-encoders impractical for first-stage retrieval over large corpora. They are used as rerankers over a small candidate set retrieved by a bi-encoder.</p>
+
+<h2>Choosing the Right Embedding Model</h2>
+<p>Model selection affects retrieval quality, latency, and cost. The right choice depends on the corpus characteristics and the deployment environment.</p>
+
+<h3>Performance vs Cost Trade-offs</h3>
+<p>Larger embedding models generally produce higher quality embeddings but require more compute at ingestion and query time. OpenAI's text-embedding-3-large produces 3072-dimensional vectors and achieves state-of-the-art performance on benchmarks, but costs more per token than text-embedding-3-small. Local models like all-MiniLM-L6-v2 (384 dimensions) are free to run but lower quality. For most production RAG systems, text-embedding-3-small or a mid-size sentence-transformers model offers the best cost-quality trade-off.</p>
+
+<h3>Domain-Specific Models</h3>
+<p>General-purpose embedding models are trained on broad web corpora. For specialized domains — legal, medical, financial, or code — domain-specific models trained on relevant corpora often outperform general models even when the general model is larger. For example, BioBERT-based embedding models outperform general models on medical literature retrieval. Always evaluate on a held-out set of domain-specific queries before choosing between a general and a domain-specific model.</p>
+
+<h2>Optimization Techniques</h2>
+<p>Several techniques can improve embedding quality or reduce computational cost without changing the base model.</p>
+
+<h3>Matryoshka Representation Learning</h3>
+<p>Matryoshka Representation Learning (MRL) trains embedding models to encode information in a nested structure, where the first N dimensions of a larger embedding are themselves a valid, meaningful embedding. This allows you to truncate embeddings to a smaller dimension at retrieval time without retraining. For example, a 1536-dimensional MRL embedding can be truncated to 512 or 256 dimensions with only modest quality loss, significantly reducing storage and similarity computation costs. OpenAI's text-embedding-3 models use MRL, which is why they support the dimensions parameter.</p>
+
+<h3>Embedding Quantization</h3>
+<p>Quantization reduces the precision of stored embeddings from 32-bit floats to 8-bit integers or binary representations. This reduces storage by 4x to 32x with a small quality penalty. Binary quantization is the most aggressive, converting each embedding dimension to a single bit. It enables fast Hamming distance computation and is used in systems requiring extreme-scale retrieval over billions of documents.</p>
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {
+    "question": "What is the key property of bi-encoder models that makes them suitable for first-stage retrieval?",
+    "ground_truth": "Bi-encoders encode the query and each document independently, which means document embeddings can be pre-computed and stored before any query arrives. At query time, retrieval is just a nearest-neighbor lookup against pre-computed vectors, making bi-encoders extremely fast and suitable for searching large corpora."
+  },
+  {
+    "question": "Why are cross-encoder models more accurate than bi-encoders but impractical for large-scale retrieval?",
+    "ground_truth": "Cross-encoders take the query and document concatenated as a single input, allowing the model to capture fine-grained interactions between them, which produces more accurate relevance scores. However, document embeddings cannot be pre-computed because the encoding depends on the specific query. Every candidate document must be scored at query time, making cross-encoders too slow for first-stage retrieval over large corpora."
+  },
+  {
+    "question": "What are Matryoshka embeddings and what practical benefit do they provide?",
+    "ground_truth": "Matryoshka Representation Learning (MRL) trains embedding models so that the first N dimensions of a larger embedding are themselves a valid meaningful embedding. This allows truncating embeddings to a smaller dimension at retrieval time without retraining. For example, a 1536-dimensional MRL embedding can be truncated to 512 or 256 dimensions with modest quality loss, significantly reducing storage and similarity computation costs."
+  },
+  {
+    "question": "When should you consider using a domain-specific embedding model instead of a general-purpose model?",
+    "ground_truth": "For specialized domains such as legal, medical, financial, or code, domain-specific models trained on relevant corpora often outperform general models even when the general model is larger. You should evaluate on a held-out set of domain-specific queries before choosing. For example, BioBERT-based embedding models outperform general models on medical literature retrieval."
+  },
+  {
+    "question": "What is embedding quantization and what is the trade-off when using binary quantization?",
+    "ground_truth": "Embedding quantization reduces the precision of stored embeddings from 32-bit floats to lower-precision representations such as 8-bit integers or binary. Binary quantization converts each embedding dimension to a single bit, reducing storage by up to 32x and enabling fast Hamming distance computation. The trade-off is a small but meaningful quality penalty compared to full-precision embeddings."
+  }
+]

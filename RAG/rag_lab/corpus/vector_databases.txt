@@ -1,0 +1,35 @@
+Vector Databases
+
+A vector database is a data store purpose-built for storing, indexing, and querying high-dimensional vector embeddings. Unlike traditional databases that match records by exact values or SQL predicates, vector databases retrieve records by semantic similarity — finding vectors that are geometrically close to a query vector in high-dimensional space.
+
+How Similarity Search Works
+
+Vector embeddings are dense numerical arrays, typically 384 to 1536 dimensions, that encode semantic meaning. Two pieces of text with similar meaning will have embeddings that are close together in vector space. Similarity is usually measured by cosine similarity (angle between vectors) or Euclidean distance (L2 norm).
+
+Searching across millions of vectors by brute force is computationally expensive. Vector databases use Approximate Nearest Neighbor (ANN) algorithms to trade a small amount of accuracy for dramatically faster search. The most widely used ANN algorithm is HNSW (Hierarchical Navigable Small World), which builds a multi-layered graph structure allowing logarithmic search complexity. IVF (Inverted File Index) with PQ (Product Quantization) is another approach that compresses vectors for memory efficiency at the cost of some recall.
+
+Key Vector Database Options
+
+ChromaDB is an open-source, embedded vector database designed for simplicity. It runs entirely in-process with no server required, making it ideal for prototyping and local development. ChromaDB supports both persistent and in-memory modes.
+
+Qdrant is an open-source vector database written in Rust, offering high performance and a rich filtering API. It supports payload-based filtering alongside vector search, allowing queries like "find the most similar document AND where the document is from source X."
+
+Weaviate is an open-source vector database with built-in support for hybrid search, combining vector similarity with BM25 keyword search in a single query. It also supports multi-tenancy for SaaS applications.
+
+Pinecone is a fully managed, cloud-native vector database. It abstracts away all infrastructure concerns but introduces vendor lock-in and higher cost at scale.
+
+pgvector is a PostgreSQL extension that adds vector storage and ANN search to a standard relational database. It is the pragmatic choice when a team already operates PostgreSQL and wants to avoid introducing a new system.
+
+Hybrid Search
+
+Pure vector search performs poorly on queries with rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Hybrid search solves this by combining a dense vector score with a sparse BM25 keyword score. The scores are fused using Reciprocal Rank Fusion (RRF) or a weighted linear combination.
+
+Most production RAG systems use hybrid search because it handles both semantic queries ("what is the capital of France") and lexical queries ("error code NX-4012") effectively.
+
+Metadata Filtering
+
+Vector databases allow attaching metadata to each stored vector. This enables filtered retrieval: "find the top-5 most similar chunks AND where the document was published after 2023." Metadata filtering prevents irrelevant documents from appearing in results even if they are semantically similar, which is critical for access control and multi-tenant applications.
+
+Scaling Considerations
+
+For small corpora under one million vectors, any vector database will perform adequately. As scale grows, the key concerns are indexing throughput, query latency at percentile (p99), and memory footprint. HNSW indexes are memory-intensive because the graph structure is held in RAM. IVF-PQ reduces memory usage significantly by quantizing vectors, at the cost of recall. Distributed vector databases like Qdrant and Pinecone handle horizontal scaling through sharding.

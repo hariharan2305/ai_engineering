@@ -1,0 +1,66 @@
+{
+  "experiment": "exp_02_html",
+  "timestamp": "20260312_133754",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab_exp02_html",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "variable_changed": "chunking_strategy: fixed \u2192 html_headers",
+  "corpus": "embedding_models_guide.html",
+  "scores": {
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.8844171320588237,
+    "answer_similarity": 0.9116398396151262
+  },
+  "samples": [
+    {
+      "question": "What is the key property of bi-encoder models that makes them suitable for first-stage retrieval?",
+      "answer": "The key property of bi-encoder models that makes them suitable for first-stage retrieval is that they encode documents independently of the query, allowing their embeddings to be pre-computed and stored, which makes retrieval extremely fast at query time \u2014 essentially just a nearest-neighbor lookup.",
+      "num_contexts": 5,
+      "ground_truth": "Bi-encoders encode the query and each document independently, which means document embeddings can be pre-computed and stored before any query arrives. At query time, retrieval is just a nearest-neighbor lookup against pre-computed vectors, making bi-encoders extremely fast and suitable for searching large corpora."
+    },
+    {
+      "question": "Why are cross-encoder models more accurate than bi-encoders but impractical for large-scale retrieval?",
+      "answer": "Cross-encoder models are more accurate than bi-encoders because they take the query and document concatenated as a single input, allowing the model to capture fine-grained interactions between them. However, they are impractical for large-scale retrieval because document embeddings cannot be pre-computed\u2014they depend on the specific query. This necessitates scoring every candidate document at query time, which makes cross-encoders less suitable for first-stage retrieval over large corpora.",
+      "num_contexts": 5,
+      "ground_truth": "Cross-encoders take the query and document concatenated as a single input, allowing the model to capture fine-grained interactions between them, which produces more accurate relevance scores. However, document embeddings cannot be pre-computed because the encoding depends on the specific query. Every candidate document must be scored at query time, making cross-encoders too slow for first-stage retrieval over large corpora."
+    },
+    {
+      "question": "What are Matryoshka embeddings and what practical benefit do they provide?",
+      "answer": "Matryoshka embeddings are based on Matryoshka Representation Learning (MRL), which trains embedding models to encode information in a nested structure. The practical benefit of Matryoshka embeddings is that they allow for truncating embeddings to a smaller dimension at retrieval time without needing to retrain the model, which can significantly reduce storage and similarity computation costs while resulting in only modest quality loss. For example, a 1536-dimensional MRL embedding can be truncated to 512 or 256 dimensions.",
+      "num_contexts": 5,
+      "ground_truth": "Matryoshka Representation Learning (MRL) trains embedding models so that the first N dimensions of a larger embedding are themselves a valid meaningful embedding. This allows truncating embeddings to a smaller dimension at retrieval time without retraining. For example, a 1536-dimensional MRL embedding can be truncated to 512 or 256 dimensions with modest quality loss, significantly reducing storage and similarity computation costs."
+    },
+    {
+      "question": "When should you consider using a domain-specific embedding model instead of a general-purpose model?",
+      "answer": "You should consider using a domain-specific embedding model instead of a general-purpose model when you are working in specialized domains such as legal, medical, financial, or code. Domain-specific models, trained on relevant corpora, often outperform general models in these areas, even if the general model is larger. It is also advised to evaluate on a held-out set of domain-specific queries before making a choice.",
+      "num_contexts": 5,
+      "ground_truth": "For specialized domains such as legal, medical, financial, or code, domain-specific models trained on relevant corpora often outperform general models even when the general model is larger. You should evaluate on a held-out set of domain-specific queries before choosing. For example, BioBERT-based embedding models outperform general models on medical literature retrieval."
+    },
+    {
+      "question": "What is embedding quantization and what is the trade-off when using binary quantization?",
+      "answer": "Embedding quantization is the process of reducing the precision of stored embeddings from 32-bit floats to 8-bit integers or binary representations. The trade-off when using binary quantization is that it reduces storage by 4x to 32x, but incurs a small quality penalty. Binary quantization specifically converts each embedding dimension to a single bit, allowing for fast Hamming distance computation and is useful in systems that require extreme-scale retrieval over billions of documents.",
+      "num_contexts": 5,
+      "ground_truth": "Embedding quantization reduces the precision of stored embeddings from 32-bit floats to lower-precision representations such as 8-bit integers or binary. Binary quantization converts each embedding dimension to a single bit, reducing storage by up to 32x and enabling fast Hamming distance computation. The trade-off is a small but meaningful quality penalty compared to full-precision embeddings."
+    }
+  ]
+}

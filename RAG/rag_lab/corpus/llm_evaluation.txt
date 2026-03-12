@@ -1,0 +1,45 @@
+Evaluating RAG Systems
+
+Evaluation is the discipline that separates production RAG from prototype RAG. Without a measurement framework, every change to a pipeline component is a guess. With evaluation, changes become controlled experiments with observable outcomes.
+
+Why LLM Evaluation Is Hard
+
+Traditional software testing verifies exact outputs against expected values. LLM outputs are natural language — they are never exactly identical across runs, and a semantically correct answer can be phrased in infinitely many ways. This makes rule-based testing insufficient. Evaluation of LLM systems requires either human annotation or the use of another LLM as a judge.
+
+The RAGAS Framework
+
+RAGAS (Retrieval Augmented Generation Assessment) is an open-source framework specifically designed for evaluating RAG pipelines. It decomposes RAG quality into four core metrics.
+
+Faithfulness measures whether the generated answer is factually consistent with the retrieved context. A faithful answer only states claims that are supported by the context. An unfaithful answer introduces information from the model's parametric knowledge that was not present in the retrieved chunks. Faithfulness is computed by asking a judge LLM to verify each factual claim in the answer against the context.
+
+Answer Relevancy measures whether the generated answer actually addresses the user's question. A high-relevancy answer directly responds to the question. A low-relevancy answer may be factually correct but tangential. Answer relevancy is computed by generating candidate questions from the answer and measuring how similar they are to the original question.
+
+Context Precision measures whether the retrieved chunks are relevant to the question. High precision means most of the retrieved context is actually needed to answer the question. Low precision indicates noisy retrieval — chunks that were retrieved but not useful.
+
+Context Recall measures whether all the information needed to answer the question was present in the retrieved context. High recall requires ground truth answers and checks whether each piece of the ground truth is derivable from the retrieved context.
+
+The RAG Triad
+
+TruLens, another evaluation framework, defines the RAG triad: context relevance, groundedness, and answer relevance. These correspond closely to RAGAS metrics. Context relevance maps to context precision. Groundedness maps to faithfulness. Answer relevance maps to answer relevancy.
+
+The triad is a useful mental model: was the right context retrieved, is the answer grounded in that context, and does the answer address the question?
+
+Offline vs Online Evaluation
+
+Offline evaluation runs on a fixed, curated test set with known ground truth answers. It is reproducible, cheap to run repeatedly, and essential for regression testing when changing pipeline components. The main limitation is dataset drift — a test set curated six months ago may not represent current user queries.
+
+Online evaluation uses real production queries, either with human annotation or LLM-as-judge scoring on live traffic. It captures distribution shift but is more expensive and introduces latency if scoring happens in the request path.
+
+Most mature RAG systems use both: offline evaluation for component changes and A/B experiments, online evaluation for monitoring production quality over time.
+
+Common Failure Modes
+
+Hallucination occurs when the LLM generates information not present in the retrieved context. This is detected by the faithfulness metric.
+
+Context stuffing occurs when too many retrieved chunks are passed to the LLM. The model may ignore relevant information in the middle of a long context — a phenomenon called the lost-in-the-middle problem. Research has shown that LLMs perform better when relevant information appears at the beginning or end of the context window.
+
+Retrieval failure occurs when the correct document is in the corpus but not retrieved — either because of embedding quality, chunking artifacts, or a vocabulary mismatch between the query and the document. This is detected by low context recall scores.
+
+Evaluation Cadence
+
+Running RAGAS evaluation after every component change provides the feedback loop needed to make RAG development feel more like engineering and less like guessing. A baseline score measured on the naive pipeline becomes the benchmark. Every subsequent experiment is measured as a delta from that baseline.

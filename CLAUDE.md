@@ -74,3 +74,90 @@ Exercises include time estimates and are progressive in complexity. All code use
 FastAPI stack defined in `FastAPI/projects/fastapi_concepts_hands_on/pyproject.toml`:
 - FastAPI, Uvicorn, Pydantic v2+, pydantic-settings, SQLAlchemy 2.0+, aiosqlite
 - Python 3.12+, managed with `uv`
+
+---
+
+## RAG Track
+
+A third learning track focused on mastering RAG system building from beginner to advanced.
+
+### Goal
+
+Understand every RAG component deeply by building a lab bench where components are swapped one at a time and quality is measured via RAGAS. FastAPI is the final capstone only — not used during the learning phase.
+
+### Lab Bench Location
+
+`RAG/rag_lab/` — run all experiments from this directory with `uv run python experiments/<exp_file>.py`
+
+### Key Files
+
+- `RAG/rag_lab/components/` — reusable component modules (ingestion, chunking, embeddings, vectordb, retrieval, reranking, generation, evaluation)
+- `RAG/rag_lab/configs/rag_config.py` — `BASELINE_CONFIG` and `RAGConfig` pydantic model; all experiments reference this
+- `RAG/rag_lab/corpus/` — 3 `.txt` knowledge documents + `test_questions.json` (8 QA pairs with `ground_truth`)
+- `RAG/rag_lab/experiments/` — one file per experiment (`exp_01_baseline.py`, `exp_02_chunking.py`, etc.)
+- `RAG/rag_lab/results/` — JSON output per experiment run; compare against baseline JSON to measure delta
+
+### Experiment Pattern (NEVER deviate from this)
+
+- `exp_01_baseline.py` is the **zero point** — never modify it
+- Each new experiment swaps **exactly one component**, everything else stays at baseline
+- Always compare RAGAS scores against the baseline JSON in `results/`
+- The delta tells you what that component actually contributed
+
+### Curriculum Order (component-by-component)
+
+1. **Chunking** — fixed → semantic → recursive splitting (`exp_02_*`)
+2. **Embeddings** — MiniLM → larger/domain-specific models (`exp_03_*`)
+3. **Retrieval** — dense-only → hybrid BM25+dense (`exp_04_*`)
+4. **Reranking** — identity → cross-encoder reranker (`exp_05_*`)
+5. **Generation** — prompt engineering, context window management (`exp_06_*`)
+6. **Advanced retrieval** — HyDE, multi-query, query expansion (`exp_07_*`)
+7. **FastAPI capstone** — wrap the best pipeline as a production API
+
+### Evaluation Stack
+
+- `faithfulness` — RAGAS LLM-judge: is the answer grounded in context?
+- `answer_relevancy` — RAGAS LLM-judge: does the answer address the question?
+- `answer_similarity` — **deterministic cosine sim** (sentence-transformers, no LLM); most trusted signal — if this moves, the improvement is real
+
+### Models in Use
+
+- Generator: `gpt-4o-mini` (OpenAI)
+- RAGAS judge LLM: `gpt-4o-mini` (via LangchainLLMWrapper)
+- RAGAS embeddings: `text-embedding-3-small` (via LangchainEmbeddingsWrapper)
+- Local embedder: `all-MiniLM-L6-v2` (sentence-transformers, no API cost)
+
+### RAG Component Stack Guide
+
+`RAG/` contains deep-research cheat sheets for each component. These are the curriculum reference — read the relevant cheat sheet before building each experiment.
+
+### Architecture Reference
+
+`RAG/rag_lab/ARCHITECTURE.md` — explains the design rationale, full data flow diagram, and the role of every file and directory. Read this to understand why the lab is structured the way it is.
+
+### Tech Stack Philosophy
+
+Use well-tested library implementations where they exist — this builds hands-on familiarity with industry-standard tools. Add comments in experiment files explaining what the library does under the hood so the learning is preserved.
+
+Preferred libraries per component:
+
+| Component | Library |
+|---|---|
+| Chunking (recursive) | `langchain_text_splitters.RecursiveCharacterTextSplitter` |
+| Chunking (semantic) | `langchain_text_splitters.SemanticChunker` |
+| Embeddings | `sentence-transformers` |
+| Vector DB | `chromadb` directly |
+| BM25 (hybrid retrieval) | `rank_bm25` |
+| Cross-encoder reranking | `sentence-transformers` CrossEncoder |
+| Generation | `openai` SDK directly |
+| Evaluation | `ragas` |
+
+All components must still conform to the `base.py` data types (`Document`, `Chunk`, etc.) — the pipeline interface does not change, only the internal implementation of each component.
+
+### Import Verification Rule (MANDATORY)
+
+Before writing any import statement for a third-party library, use Context7 MCP to verify the exact module path:
+1. `resolve-library-id` — find the library
+2. `query-docs` — confirm the exact class/function location
+
+Never assume import paths. Example of a past mistake: `SemanticChunker` is in `langchain_experimental.text_splitter`, not `langchain_text_splitters`.

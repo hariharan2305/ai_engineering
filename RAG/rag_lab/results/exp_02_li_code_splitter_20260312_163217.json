@@ -1,0 +1,66 @@
+{
+  "experiment": "exp_02_li_code_splitter",
+  "timestamp": "20260312_163217",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab_exp02_li_code",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "variable_changed": "chunking_strategy: fixed_char \u2192 AST-aware (tree-sitter python)",
+  "corpus": "llm_pipeline_code.py",
+  "scores": {
+    "faithfulness": 0.9416666666666667,
+    "answer_relevancy": 0.8951799467647934,
+    "answer_similarity": 0.8920742147418986
+  },
+  "samples": [
+    {
+      "question": "How does LLMClient handle API failures and what is the retry strategy used?",
+      "answer": "LLMClient handles API failures by implementing retry logic for transient issues such as rate limit errors (429), server errors (5xx), and network timeouts. The retry strategy involves exponential backoff with full jitter. If an error occurs, it waits for an increasing amount of time before retrying the request based on the attempt number, up to a maximum number of retries specified by `max_retries`. If all retry attempts fail, it re-raises the last exception so the caller can handle it accordingly.",
+      "num_contexts": 5,
+      "ground_truth": "LLMClient handles API failures using exponential backoff with full jitter. On each failure it calls exponential_backoff(attempt) to compute the wait time, logs a warning with the retry count and error, then sleeps before retrying. The maximum number of retry attempts is set by the max_retries parameter, which defaults to 3. After all retries are exhausted, the last exception is re-raised."
+    },
+    {
+      "question": "What hashing algorithm does EmbeddingCache use for cache keys and why is the model name included?",
+      "answer": "The EmbeddingCache uses the SHA-256 hashing algorithm for cache keys. The model name is included in the hash to prevent cross-model collisions, ensuring that the same text embedded by different models produces different vectors and must be stored separately.",
+      "num_contexts": 5,
+      "ground_truth": "EmbeddingCache uses SHA-256 to generate cache keys. The key is computed by hashing the string '{model_name}:{text}'. The model name is included to prevent cross-model cache collisions \u2014 the same text embedded by different models produces different vectors, so they must be stored under different keys to avoid stale or incorrect cache hits."
+    },
+    {
+      "question": "What fields does RAGResponse contain and what is the purpose of the latency_ms field?",
+      "answer": "The `RAGResponse` class contains the following fields:\n\n1. `answer`: The generated text from the LLM.\n2. `sources`: Raw chunk texts used as context \u2014 displayed as citations.\n3. `tokens_used`: Cumulative token count for this call, used for cost tracking.\n4. `latency_ms`: End-to-end wall-clock latency in milliseconds, from query embedding through generation, for performance monitoring.\n5. `metadata`: Optional dict for experiment-specific tags (e.g. chunker name, reranker used, collection name).\n\nThe purpose of the `latency_ms` field is to provide performance monitoring by measuring the end-to-end wall-clock latency of the process from the beginning of query embedding through to the generation of the answer.",
+      "num_contexts": 5,
+      "ground_truth": "RAGResponse contains: answer (the generated text), sources (list of raw chunk texts used as citations), tokens_used (cumulative token count for cost tracking), latency_ms (end-to-end wall-clock latency in milliseconds for performance monitoring), and an optional metadata dict for experiment-specific tags."
+    },
+    {
+      "question": "How does RAGPipeline._build_prompt() ensure the prompt fits within the LLM context window?",
+      "answer": "RAGPipeline._build_prompt() ensures the prompt fits within the LLM context window by calling truncate_to_token_limit() on the assembled context block before appending the question. This truncation is done in a tail-first manner, preserving the highest-ranked chunks at the top of the list, and the combined context block is kept within the specified max_context_tokens limit.",
+      "num_contexts": 5,
+      "ground_truth": "RAGPipeline._build_prompt() joins the retrieved contexts as a numbered list, then calls truncate_to_token_limit() on the combined context block using max_context_tokens (default 3000). Truncation is tail-first, preserving the highest-ranked chunks at the top. The question is appended after the truncated context block."
+    },
+    {
+      "question": "What is the maximum wait cap in exponential_backoff and why is full jitter used instead of a fixed delay?",
+      "answer": "The maximum wait cap in exponential_backoff is 60.0 seconds. Full jitter is used instead of a fixed delay to prevent the thundering herd problem, where many retrying clients would otherwise all wake up at the same time after a service blip. Full jitter randomizes the wait time across the entire range, which helps to spread out the retry attempts.",
+      "num_contexts": 5,
+      "ground_truth": "The maximum wait is capped at max_delay=60.0 seconds. Full jitter randomizes the wait across the entire range [0, delay] rather than adding noise on top of a fixed value. This prevents the thundering herd problem, where many clients retrying after the same service failure would otherwise all wake up at the same time and overwhelm the service again."
+    }
+  ]
+}
