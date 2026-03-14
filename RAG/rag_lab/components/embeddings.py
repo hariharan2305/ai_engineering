@@ -17,7 +17,7 @@ class SentenceTransformerEmbedder:
 
     def __init__(self, model_name: str = "all-MiniLM-L6-v2"):
         self.model_name = model_name
-        self.model = SentenceTransformer(model_name)
+        self.model = SentenceTransformer(model_name, trust_remote_code=True)
 
     def embed(self, texts: list[str]) -> list[list[float]]:
         embeddings = self.model.encode(texts, show_progress_bar=False)

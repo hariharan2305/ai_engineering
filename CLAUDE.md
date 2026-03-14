@@ -93,7 +93,13 @@ Understand every RAG component deeply by building a lab bench where components a
 
 - `RAG/rag_lab/components/` — reusable component modules (ingestion, chunking, embeddings, vectordb, retrieval, reranking, generation, evaluation)
 - `RAG/rag_lab/configs/rag_config.py` — `BASELINE_CONFIG` and `RAGConfig` pydantic model; all experiments reference this
-- `RAG/rag_lab/corpus/` — 3 `.txt` knowledge documents + `test_questions.json` (8 QA pairs with `ground_truth`)
+- `RAG/rag_lab/corpus/` — knowledge documents and test question sets:
+  - `*.txt` — 3 prose documents (RAG theory, vector DBs, LLM evaluation)
+  - `rag_advanced_techniques.md` — markdown-structured corpus for markdown chunking experiments
+  - `embedding_models_guide.html` — HTML-structured corpus for HTML chunking experiments
+  - `llm_pipeline_code.py` — production Python code corpus (LLMClient, EmbeddingCache, RAGPipeline) for code chunking experiments
+  - `test_questions.json` — 8 QA pairs for prose corpus experiments
+  - `test_questions_markdown.json`, `test_questions_html.json`, `test_questions_code.json` — domain-matched test sets for structured/code corpus experiments
 - `RAG/rag_lab/experiments/` — one file per experiment (`exp_01_baseline.py`, `exp_02_chunking.py`, etc.)
 - `RAG/rag_lab/results/` — JSON output per experiment run; compare against baseline JSON to measure delta
 
@@ -106,7 +112,7 @@ Understand every RAG component deeply by building a lab bench where components a
 
 ### Curriculum Order (component-by-component)
 
-1. **Chunking** — fixed → semantic → recursive splitting (`exp_02_*`)
+1. **Chunking** — `exp_02_*` (complete): recursive, semantic, markdown, HTML (LangChain); SentenceSplitter, SemanticSplitter, TokenTextSplitter, CodeSplitter (LlamaIndex); contextual enrichment; late chunking concept file
 2. **Embeddings** — MiniLM → larger/domain-specific models (`exp_03_*`)
 3. **Retrieval** — dense-only → hybrid BM25+dense (`exp_04_*`)
 4. **Reranking** — identity → cross-encoder reranker (`exp_05_*`)
@@ -144,7 +150,13 @@ Preferred libraries per component:
 | Component | Library |
 |---|---|
 | Chunking (recursive) | `langchain_text_splitters.RecursiveCharacterTextSplitter` |
-| Chunking (semantic) | `langchain_text_splitters.SemanticChunker` |
+| Chunking (semantic, LC) | `langchain_experimental.text_splitter.SemanticChunker` |
+| Chunking (markdown) | `langchain_text_splitters.MarkdownHeaderTextSplitter` |
+| Chunking (HTML) | `langchain_text_splitters.HTMLHeaderTextSplitter` |
+| Chunking (LI sentence) | `llama_index.core.node_parser.SentenceSplitter` |
+| Chunking (LI semantic) | `llama_index.core.node_parser.SemanticSplitterNodeParser` |
+| Chunking (LI token) | `llama_index.core.node_parser.TokenTextSplitter` |
+| Chunking (LI code/AST) | `llama_index.core.node_parser.CodeSplitter` (needs `tree-sitter-language-pack`) |
 | Embeddings | `sentence-transformers` |
 | Vector DB | `chromadb` directly |
 | BM25 (hybrid retrieval) | `rank_bm25` |

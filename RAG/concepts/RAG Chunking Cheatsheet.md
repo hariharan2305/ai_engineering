@@ -285,6 +285,77 @@ A decision guide for choosing the right chunking strategy. Based on hands-on exp
 
 ***
 
+## Chunk Size Rubric — How to Set `chunk_size` Based on Your Embedding Model
+
+This is one of the most common RAG configuration mistakes: `chunk_size` in chunking libraries is in **characters**, but embedding model context limits are in **tokens**. They are different units.
+
+### The Unit Mismatch
+
+| What you set | Unit | Where |
+|---|---|---|
+| `chunk_size=1000` | **Characters** | `RecursiveCharacterTextSplitter`, `SentenceSplitter`, etc. |
+| Context window `512` | **Tokens** | Embedding model spec |
+
+**1 token ≈ 4 characters** (English prose average)
+**1 token ≈ 3 characters** (code, technical text with symbols)
+
+### The Conversion Rule
+
+```
+chunk_size (chars) = model_context_tokens × 3
+```
+
+Use **3, not 4** as the multiplier. The 4:1 ratio is an average — individual chunks can skew lower (denser text, symbols, non-English words). The 25% buffer ensures you never silently truncate, even on harder text.
+
+### The Rubric
+
+```
+1. Take the model's context window in tokens
+2. Multiply by 3  →  this is your CEILING (max safe chunk_size in chars)
+3. Use 70–80% of that ceiling  →  this is your TARGET chunk_size
+4. Set overlap to 10–15% of your chunk_size
+```
+
+The 70–80% target gives headroom for metadata/prefix text some models prepend, non-English content that tokenizes at higher rates, and chunk boundaries that don't land cleanly.
+
+### Applied to Real Models
+
+| Model | Context (tokens) | Ceiling (×3) | Target chunk_size | Overlap |
+|---|---|---|---|---|
+| `all-MiniLM-L6-v2` | 256 | 768 chars | **512** | 50 |
+| `bge-small-en-v1.5` | 512 | 1536 chars | **1024** | 100 |
+| `bge-large-en-v1.5` | 512 | 1536 chars | **1024** | 100 |
+| `all-mpnet-base-v2` | 514 | 1542 chars | **1024** | 100 |
+| `jina-embeddings-v3` | 8192 | 24576 chars | **16000** | 1600 |
+| `text-embedding-3-small` | 8191 | 24573 chars | **16000** | 1600 |
+| `pplx-embed-v1` | 32768 | ~98000 chars | No practical constraint — chunk by semantics | — |
+
+### The Mental Model
+
+> **Pick your embedding model first. Your chunk_size is then constrained — not the other way around.**
+
+If you pick `all-MiniLM-L6-v2` and set `chunk_size=2000`, you silently lose ~75% of every chunk. No error. No warning. The embedding simply encodes the first 256 tokens and discards the rest.
+
+### The Overlap Gotcha
+
+Most people forget that `chunk_size + chunk_overlap` is the actual length of a boundary chunk passed to the embedder. So the real constraint is:
+
+```
+chunk_size + chunk_overlap  ≤  context_tokens × 3
+```
+
+Example — safe:
+- `chunk_size=1024`, `overlap=200` → boundary chunk = 1224 chars ≈ 408 tokens → within a 512-token model ✓
+
+Example — risky:
+- `chunk_size=1024`, `overlap=512` → boundary chunk = 1536 chars ≈ 512 tokens → right at the limit, zero safety margin ✗
+
+### What Happens When You Exceed the Context Window
+
+Exceeding the embedding model's context window does **not** raise an error. The text is silently truncated at the token limit. The embedding only represents the truncated portion. There is no indication that content was lost. This is the most common silent quality killer in RAG pipelines.
+
+***
+
 ## 3. Amazon Bedrock Knowledge Bases (Managed Chunking & Indexing)
 
 Amazon Bedrock Knowledge Bases (KBs) handle **embedding, chunking, vector store setup, and retrieval** for you. You create a KB, connect data sources, and Bedrock manages ingestion (including chunking configuration in the console).[^12][^1]
