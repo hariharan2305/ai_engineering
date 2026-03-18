@@ -736,6 +736,60 @@ print("Scores:", scores)
 
 ---
 
+## Contextual Retrieval (Anthropic)
+
+A technique for improving embedding quality by enriching each chunk with LLM-generated context before embedding it.
+
+### The Problem
+
+Raw chunks lose document context when split. A chunk like *"The margin was 12% higher than the previous quarter"* embeds poorly — the embedding has no signal about which company, product, or time period this refers to. Standard chunking discards that context.
+
+### The Fix
+
+Before embedding, prepend a short LLM-generated summary of where this chunk sits in the source document:
+
+```python
+CONTEXTUAL_PROMPT = """
+Here is the full document:
+<document>{full_document}</document>
+
+Here is a chunk from that document:
+<chunk>{chunk_text}</chunk>
+
+Write a short 1-2 sentence description of what this chunk is about
+in the context of the full document. Reply with only the description.
+"""
+
+# For each chunk:
+context = llm.generate(CONTEXTUAL_PROMPT.format(
+    full_document=source_doc,
+    chunk_text=chunk.text,
+))
+enriched_text = f"{context}\n\n{chunk.text}"
+embedding = embedder.embed(enriched_text)   # embed the enriched version
+```
+
+The enriched text is embedded and stored. The original chunk text is still returned to the LLM at generation time.
+
+### Relation to Multi-Vector
+
+Both solve the same problem — a raw chunk embedding doesn't always carry enough signal for retrieval — via different mechanisms:
+
+| | Contextual Retrieval | Multi-Vector |
+|---|---|---|
+| Vectors per chunk | One (enriched) | Multiple (e.g. content + summary) |
+| Approach | Merge context into the chunk before embedding | Store separate embeddings per aspect |
+| LLM at index time | Always — one call per chunk | Only if generating a summary vector |
+| Retrieval | Standard single-vector search | Route queries to the best-suited vector |
+
+Contextual Retrieval is the simpler path — one enriched vector, same retrieval logic, strong empirical results on Anthropic's benchmarks. Multi-vector gives more flexibility but requires more infrastructure (named vector config, query routing).
+
+### Cost Consideration
+
+LLM is called **once per chunk at index time**. For a 10,000-chunk corpus at ~500 tokens per call, that's ~5M input tokens — a real cost that needs justification from measured recall improvement. Use a cheap, fast model (e.g. `claude-haiku-4-5`) to minimise this.
+
+---
+
 ## References
 
 1. [Vector embeddings | OpenAI API](https://developers.openai.com/api/docs/guides/embeddings/)

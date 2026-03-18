@@ -1,5 +1,187 @@
 # Vector Databases & Search Backends – Code Cheat‑Sheet (2026)
 
+---
+
+## Core Concepts
+
+### Why Vector DBs Exist
+Regular databases match exact values. Vector DBs match **semantic meaning**. Text is converted to vectors (lists of numbers) by an embedding model — semantically similar text lands close together in that space. A vector DB finds the closest vectors to a query, fast.
+
+### Vectors as Coordinates
+An embedding model converts text into a point in high-dimensional space (e.g., 768 dimensions). Sentences with similar meaning land near each other. A vector DB is a spatial index for these coordinates.
+
+### Distance Metrics
+How "closeness" is measured between two vectors:
+- **Cosine** — measures the angle between vectors, ignoring magnitude. Most common for text.
+- **L2 / Euclidean** — straight-line distance. Sensitive to magnitude. Common for images.
+- **Dot product** — combines direction and magnitude. Equivalent to cosine when vectors are normalised (length = 1).
+
+Check your embedding model's docs — use whatever metric it was trained with. Default to cosine.
+
+### ANN vs Exact Search
+Brute-force search (compare query against every vector) is too slow at scale. **Approximate Nearest Neighbor (ANN)** algorithms build a smart data structure at index time to skip most comparisons at query time. Tiny accuracy tradeoff (~1–2%), massive speed gain. HNSW and IVFFlat are the two dominant ANN algorithms.
+
+### HNSW
+A multi-layer graph where each vector is a node and edges connect nearby vectors.
+- **Top layers** — few nodes, long-range connections (fast coarse navigation)
+- **Bottom layer (0)** — all nodes, short-range connections (precise local search)
+
+**Index construction:** vectors are inserted one at a time. Each vector is randomly assigned to a set of layers. At each layer, it connects to its `M` nearest neighbours (edges drawn bidirectionally). Higher layers get fewer vectors by design, creating natural long-range shortcuts.
+
+**Search:** enter at the top layer, greedily move toward the query, descend layer by layer, do a thorough search at layer 0 using a candidate list of size `ef_search`.
+
+Key parameters: `M` (edges per node), `ef_construction` (build quality), `ef_search` (query recall vs. speed).
+
+### IVFFlat
+Cluster all vectors into `N` buckets (k-means) at build time. At query time, find the nearest `probes` centroids, then search only within those buckets. Faster to build and uses less memory than HNSW, but lower recall at the same speed. `lists` = number of clusters; `probes` = how many clusters to search.
+
+### Collections, Indices, and Tables
+The top-level container for your vectors. Naming varies by system:
+
+| System | Container name | Notes |
+|---|---|---|
+| Qdrant | Collection | HNSW is baked in; no separate index step |
+| Weaviate | Collection | Same — index is part of the collection |
+| Pinecone | Index | Same |
+| pgvector | Table + index | Table stores raw rows; HNSW/IVFFlat index added separately on the vector column |
+
+In purpose-built vector DBs, the ANN structure IS the collection. In pgvector, the table and the index are two separate constructs — the index is a query accelerator bolted on top.
+
+### What a Record Looks Like
+Every stored item has three components:
+```
+id            →  unique identifier (int or UUID)
+vector        →  the dense embedding (list of floats) — semantic fingerprint
+payload       →  structured metadata: { text, source, date, ... }
+```
+The **actual chunk text lives in the payload**, not in the vector. The vector is used to find the right record; the payload is what gets returned and passed to the LLM.
+
+### Upsert
+Insert if the ID is new, overwrite if it already exists. All four systems use upsert as the primary write operation. Safe to re-index without creating duplicates.
+
+### Namespaces
+Logical partitions within a single index (Pinecone term; other systems use collections-per-tenant or multi-tenancy). Searches within one namespace never surface results from another. Used for multi-tenant RAG, versioning, or language partitions.
+
+### Metadata Filtering
+Combine vector similarity with hard constraints (e.g., `category = "invoices" AND date > 2024-01-01`). Two strategies:
+- **Pre-filter:** narrow candidates before ANN search. Fast when the filtered set is still large. Breaks down when the filter is highly selective (<1% of data remains) — HNSW's graph was built for the full dataset and its shortcuts become useless over a sparse valid set.
+- **Post-filter:** run ANN first, then filter. Can miss results if all top-k get filtered away.
+
+Qdrant detects filter selectivity automatically and switches strategy accordingly.
+
+### Inverted Index (BM25)
+BM25 is a classical keyword-scoring algorithm (not a neural model). Its underlying data structure is an **inverted index**: maps each token → list of documents containing it. Opposite direction to a forward index (document → tokens).
+
+Query `"HNSW search"` → look up both tokens in the inverted index → retrieve their document lists → score each document using TF (term frequency) × IDF (inverse document frequency) × length normalisation. Common words ("is", "the") get near-zero IDF weight and are ignored.
+
+### Hybrid Search (Dense + BM25)
+Run both searches in parallel, normalise scores, then combine:
+```
+final_score = alpha × dense_score + (1 − alpha) × bm25_score
+```
+- `alpha = 1.0` → pure semantic (dense only)
+- `alpha = 0.0` → pure keyword (BM25 only)
+
+Dense wins for paraphrases and conceptual similarity. BM25 wins for exact product names, version strings, and rare proper nouns. Hybrid covers both failure modes. Two separate indices are maintained internally (HNSW for dense, inverted index for sparse); both point to the same record IDs and payload store.
+
+### Sparse Vectors: BM25 vs SPLADE
+
+Both produce sparse vectors (mostly-zero, only matching terms non-zero) but differ fundamentally:
+
+| | BM25 | SPLADE |
+|---|---|---|
+| Type | Statistical formula (TF × IDF) | Trained neural model (masked LM) |
+| Synonym awareness | No — exact token match only | Yes — learned term relationships |
+| Computation cost | Zero — pure lookup at query time | Neural inference at index + query time |
+| Model required | None | ~110M param MLM (e.g. `naver/splade-v3`) |
+| When to use | Default hybrid search | Domain-heavy jargon (medical, legal, patents) |
+
+**Practical default:** Dense + BM25 covers ~90% of production RAG needs. Reach for SPLADE only when synonym expansion is a measurable bottleneck.
+
+**How vector DBs expose sparse support:**
+- **Weaviate** — builds BM25 inverted index automatically from TEXT properties. Zero configuration.
+- **Qdrant** — infrastructure only. You compute sparse vectors yourself (BM25 or SPLADE), declare a `SparseVectorParams` config at collection creation, then store via `SparseVector(indices, values)` in `PointStruct`.
+- **pgvector** — native `sparsevec(N)` column type; you compute and store sparse vectors manually.
+
+---
+
+### Multi-Vector per Document
+
+Store multiple named embeddings on the same object — each representing a different aspect of the same content.
+
+**What "document" means in this context:**
+- In RAG, the unit is the **chunk** (e.g. a 512-token segment), not the source file.
+- Multi-vector is applied at the chunk level: one chunk → multiple vectors, all on the same DB object.
+
+**Example — a chunk from `rag_theory.txt`:**
+```
+chunk text: "RAG combines a retrieval system with a language model. The retrieval
+             component searches a vector database for relevant documents..."
+
+content_vector: embed(full chunk text)          ← detailed meaning
+summary_vector: embed("RAG: retrieval + LLM generation")  ← compressed topic
+```
+
+Both vectors share the same object ID and payload. Searching either vector returns the same chunk text.
+
+**How vectors are stored — named, not extra rows:**
+```
+10 chunks × 2 named vectors = 20 searchable entry points, 10 objects in the DB
+```
+Not 20 rows — 10 objects each with 2 vectors. When either vector matches a query, you get back the same object (same payload, same chunk text).
+
+**Why this improves recall:**
+Different query formulations route to different vectors on the same chunk:
+- "what is RAG?" → matches `summary_vector` → returns chunk
+- "retrieval augmented generation grounding without retraining" → matches `content_vector` → returns same chunk
+
+Without multi-vector, one of these queries might rank the chunk lower or miss it entirely.
+
+**Cost consideration for summary vectors:**
+- `content_vector`: chunk text → embedder → vector. No LLM needed.
+- `summary_vector`: chunk text → LLM (summarise) → text → embedder → vector. LLM tokens consumed at index time for every chunk.
+
+**Alternatives that avoid LLM cost for the second vector:**
+- First sentence of the chunk (natural topic sentence)
+- Keyword extraction via TF-IDF
+- Named entity list
+
+Use an LLM-generated summary only when you have evidence that compressed representations meaningfully improve recall — and accept the token cost as deliberate.
+
+**Systems that support multi-vector:**
+- Weaviate: named vectors via `Configure.Vectors` — multiple vectors per collection object
+- Qdrant: named vectors via `vectors_config` dict in `create_collection`
+
+---
+
+### Enterprise Vector DB Selection Matrix
+
+When the algorithm and distance metric are held constant, all vector DBs deliver equivalent retrieval quality. The decision comes down to operational and feature requirements.
+
+**Decision factors:**
+
+| Factor | What to evaluate |
+|---|---|
+| Retrieval capabilities | Hybrid search (dense + BM25), sparse vectors (SPLADE), multi-vector per document |
+| Operational model | Self-hosted vs managed cloud; fits existing infra vs new service to operate |
+| Scale | pgvector struggles past ~50M vectors; purpose-built DBs handle billions |
+| Multi-tenancy | Namespace/tenant isolation — Pinecone namespaces, Weaviate multi-tenancy, Qdrant collections-per-tenant |
+| Metadata filtering | Pre-filter quality at high selectivity — Qdrant's dynamic strategy is best-in-class |
+| Data consistency | ACID transactions only in pgvector (it's Postgres); others are eventually consistent |
+| Compliance | SOC2, HIPAA, data residency — Pinecone/Weaviate Cloud have certifications; self-hosted gives full control |
+
+**Practical shortcut:**
+
+| Situation | Pick |
+|---|---|
+| Already on Postgres, moderate scale (<50M vectors) | pgvector |
+| Need hybrid search, prefer self-hosted | Weaviate or Qdrant |
+| Want zero ops, fully managed cloud | Pinecone |
+| Need ACID transactions across vector and relational data | pgvector |
+| Need best-in-class filtered ANN at scale | Qdrant |
+
+---
+
 This cheat‑sheet shows **how to connect, upsert, and query** the main vector/search backends from the RAG Component Guide:
 
 - Qdrant (self‑hosted / cloud)
