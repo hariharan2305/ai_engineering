@@ -1,0 +1,98 @@
+{
+  "expectations": [
+    {
+      "text": "The skill triggered and produced LinkedIn post content",
+      "passed": true,
+      "evidence": "The output file (2026-03-19_chunking-over-embeddings.md) contains three clearly labelled LinkedIn post variations: Myth-Buster, Narrative / Story, and Technical Breakdown. The run_summary.txt confirms both skill steps (capture-insight and polish-insight) were executed in sequence, producing the full polished output."
+    },
+    {
+      "text": "Each post variation is under 3000 characters",
+      "passed": true,
+      "evidence": "Variation 1 (Myth-Buster) is approximately 880 characters. Variation 2 (Narrative / Story) is approximately 850 characters. Variation 3 (Technical Breakdown) is approximately 1050 characters. All are well under the 3000-character limit — none comes close to the ceiling."
+    },
+    {
+      "text": "The posts do not contain banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', excessive hashtags, or one-word sentence hooks",
+      "passed": true,
+      "evidence": "Full text of all three variations scanned. No instance of 'Here\\'s the thing', 'Game-changer', 'Stop.', or 'Read that again'. No hashtags appear anywhere. No one-word sentence hooks are present. Variation 1 contains 'Here\\'s what that forced me to update in my mental model' — distinct from the banned phrase."
+    },
+    {
+      "text": "The first 1-2 lines of each post create genuine curiosity through a surprising or counterintuitive claim",
+      "passed": false,
+      "evidence": "Variation 1 opens with: 'I spent time swapping embedding models in my RAG pipeline. / MiniLM to a larger model. Barely moved my RAGAS scores.' — counterintuitive and immediately engaging. Variation 3 opens with: 'Chunking strategy moved my RAG quality by 28%. Embedding model swap barely moved it at all.' — clear counterintuitive claim from line 1. However, Variation 2 opens with: 'I ran two sets of experiments on my RAG pipeline. / First: swap the embedding model.' — neutral scene-setting with no surprising claim. The curiosity hook in V2 does not land until several paragraphs in. The expectation requires genuine curiosity in the first 1-2 lines for each post; V2 does not satisfy this."
+    },
+    {
+      "text": "The posts include concrete details (28%, RAGAS, MiniLM) rather than generic motivational language",
+      "passed": true,
+      "evidence": "All three variations explicitly reference '28%', 'RAGAS', and 'MiniLM'. Variation 1: 'RAGAS jumped 28%', 'MiniLM to a larger model'. Variation 2: 'RAGAS jumped 28%', 'MiniLM can produce a signal'. Variation 3: 'moved my RAG quality by 28%', 'RAGAS', 'MiniLM'. No generic motivational language appears in any variation."
+    },
+    {
+      "text": "The posts sound like a practitioner sharing a real learning, not a thought leader performing expertise",
+      "passed": true,
+      "evidence": "All three posts describe specific experimental steps, cite a failed prior assumption (expected embedding model to be the bigger lever), and reason mechanistically through the result. No prescriptive 'you should' framing, no motivational language, no performative structure. Variation 1: 'I assumed the embedding was the bottleneck — bigger model, better semantic representations, better retrieval. The data disagreed.' Variation 2: 'The chunking experiment I almost skipped — because surely the embedding model matters more — turned out to be the highest-leverage change.' These read as genuine practitioner reflections, not thought leadership performance."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.83
+  },
+  "execution_metrics": {
+    "note": "No metrics.json found in outputs_dir. Counts derived from transcript and run_summary.",
+    "output_chars": 5200,
+    "transcript_chars": 174800
+  },
+  "timing": {
+    "executor_duration_seconds": 204.1,
+    "total_duration_seconds": 204.1,
+    "note": "timing.json contains total_tokens: 42266, duration_ms: 204146"
+  },
+  "claims": [
+    {
+      "claim": "Both skill steps (capture-insight and polish-insight) were executed in sequence",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt explicitly documents STEP 1 (CAPTURE) and STEP 2 (POLISH) with outputs and file paths for each. The output file's structure (raw insight card sections followed by LinkedIn variations) confirms both steps ran."
+    },
+    {
+      "claim": "Voice samples file existed but had only template placeholder — 0 actual posts",
+      "type": "factual",
+      "verified": false,
+      "evidence": "run_summary.txt states this, but the file was not read by the grader. Cannot independently verify the voice_samples.md state. The claim is plausible given the run_summary says 'Fallback: mirrored voice patterns from existing polished cards' and the output file header reads 'Voice samples used: none'."
+    },
+    {
+      "claim": "INDEX.md was updated with a new row for this insight",
+      "type": "process",
+      "verified": false,
+      "evidence": "run_summary.txt states the index was updated at ~/Documents/projects/learning-insights/INDEX.md, but no copy of that file was saved to outputs_dir for verification. Unverifiable from available outputs."
+    },
+    {
+      "claim": "All three post variations have mobile-friendly line breaks and no engagement bait closings",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Output file shows each variation uses short paragraphs and line breaks consistent with mobile readability. None of the variations end with calls-to-action, engagement prompts, or questions designed to drive comments. Variation 1 ends: 'One afternoon fixing chunk boundaries moved it by 28%.' Variation 3 ends with a practical implication, not a hook."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [
+      "voice_samples.md existed but contained only template placeholder — skill fell back to mirroring voice patterns from existing polished cards in the project (hybrid-retrieval and stripe-blueprint posts)"
+    ]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The first 1-2 lines of each post create genuine curiosity through a surprising or counterintuitive claim",
+        "reason": "The assertion uses 'each post' but does not define what counts as a qualifying hook precisely enough. Variation 2 fails because its opening is neutral setup, but this is borderline — a lenient reader might argue the whole sequence builds curiosity. The assertion would be stronger if it specified that the hook must contain the counterintuitive claim itself (not merely introduce a scene), with a concrete test: does the opening statement, read in isolation, make you want to know what happened next?"
+      },
+      {
+        "reason": "No assertion checks whether the three variations are genuinely distinct from each other — not just structurally (Myth-Buster, Narrative, Technical Breakdown) but in actual prose. If two variations opened identically and differed only by a paragraph, the structural labels would still pass. Adding an assertion that variations use different opening sentences and different structural approaches would make this eval more discriminating."
+      },
+      {
+        "reason": "No assertion checks that the captured raw insight card (The Struggle / The Drill-Down / The Aha Moment / The One-Liner sections) accurately reflects the input prompt. The executor could hallucinate or drift from the user's stated learning. A fidelity check — does the captured insight card preserve the '28% jump from chunk boundaries' and 'MiniLM barely moved scores' claims from the input? — would catch fabrication."
+      }
+    ],
+    "overall": "Assertions 1, 2, 3, 5, and 6 are solid and discriminating. Assertion 4 (hooks) is the right instinct but needs tighter specification. The missing gap is a fidelity check: do the posts faithfully represent what the user described, or did the skill drift? This is the most important quality property for an insight-capture skill and no assertion currently covers it."
+  }
+}

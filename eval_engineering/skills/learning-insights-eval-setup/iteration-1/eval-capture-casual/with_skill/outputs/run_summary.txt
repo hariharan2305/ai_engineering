@@ -1,0 +1,41 @@
+RUN SUMMARY — capture-insight (with_skill)
+==========================================
+
+DATE: 2026-03-19
+PROJECT DETECTED: ai_engineering (from git repo root folder name at cwd /Users/hariharansampathkumar/Documents/projects/ai_engineering)
+
+FILES CREATED
+-------------
+1. /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings-domain-corpora.md
+   - Raw insight card capturing the user's learning about chunking strategy vs embedding models
+   - Sections: The Struggle, The Drill-Down, The Aha Moment, The One-Liner
+   - Status: raw
+
+2. /Users/hariharansampathkumar/Documents/projects/learning-insights/INDEX.md (updated, not created)
+   - Prepended new row for the captured insight at the top (newest-first order)
+
+CONTENT WRITTEN
+---------------
+Insight topic: "Chunking Strategy Matters More Than Embedding Model for Domain-Specific Corpora"
+
+The Struggle: User spent two days swapping embedding models with minimal RAGAS score movement.
+The Drill-Down: Methodically worked through RAG component stack; switched to fixing chunk boundaries to respect paragraph structure; RAGAS scores jumped 28%.
+The Aha Moment: Bad chunk boundaries feed broken context to the embedding model — no embedding model can recover meaning from a fragment that lost its beginning or end. Fixing boundaries is prerequisite to meaningful embedding.
+The One-Liner: "Two days on embeddings, barely moved the needle. Fixed my chunk boundaries, RAGAS jumped 28%. Chunking is the foundation — don't skip it."
+
+VOICE PRESERVATION NOTES
+-------------------------
+- Kept user's exact phrasing: "barely moved the needle", "jumped 28%", "don't skip it"
+- Matched their direct, short-sentence style
+- Did not fabricate confusion or embellish — extracted only what was in the user's message
+
+ERRORS
+------
+None. All files written successfully.
+
+INDEX UPDATE
+------------
+New row inserted at top of INDEX.md:
+| 2026-03-19 | ai_engineering | Chunking Strategy Matters More Than Embedding Model for Domain-Specific Corpora | raw | [2026-03-19_chunking-beats-embeddings-domain-corpora.md](ai_engineering/2026-03-19_chunking-beats-embeddings-domain-corpora.md) |
+
+NOTE: INDEX.md had been updated by a concurrent process between the initial read and first write attempt (a new entry for 2026-03-19_hnsw-approximate-search-semantic.md was added). Re-read was done before writing to preserve that entry. Final INDEX.md contains all entries correctly.

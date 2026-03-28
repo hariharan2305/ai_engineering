@@ -1,0 +1,103 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created in the sandbox path — skill triggered from casual phrasing without a slash command",
+      "passed": true,
+      "evidence": "File created at iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_chunk-quality-over-embedding-model.md. Trigger phrase was 'This is a really good insight — save it as a learning insight.' — no slash command used. Confirmed by transcript Write tool call and successful file creation."
+    },
+    {
+      "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+      "passed": true,
+      "evidence": "All four sections present and non-empty in the output file. Lines 10, 14, 18, 22 contain '## The Struggle', '## The Drill-Down', '## The Aha Moment', '## The One-Liner' respectively."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": true,
+      "evidence": "Line 5 of the output file: '**Status:** raw'"
+    },
+    {
+      "text": "The file preserves '28%' from the conversation",
+      "passed": true,
+      "evidence": "The One-Liner section reads: '> I spent two days swapping embedding models and barely moved the needle — switched to paragraph chunking in two hours and got a 28% jump.' The figure comes from the conversation Turn 7 ('RAGAS jumped from 0.55 to 0.71 — a 28% improvement')."
+    },
+    {
+      "text": "The Drill-Down uses the user's phrasing — 'barely saw any change' or 'two days' appears",
+      "passed": true,
+      "evidence": "'barely saw any change' appears in The Struggle section ('barely saw any change'). 'two days' appears in both The Struggle ('I spent two days swapping models') and The Aha Moment ('Two hours vs two days'). The Drill-Down itself uses the user's exact question from the transcript: 'so the embedding model is not the lever here?'"
+    },
+    {
+      "text": "The Aha Moment correctly identifies chunk boundaries as the root cause",
+      "passed": true,
+      "evidence": "The Aha Moment opens: 'Fixed-size chunking cuts at character boundaries regardless of sentence or concept breaks. A better embedding model can't fix broken chunks.' This directly names chunk boundaries as the structural failure and as the root cause of the stalled scores."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 2,
+      "Bash": 3,
+      "Write": 3
+    },
+    "total_tool_calls": 8,
+    "total_steps": 8,
+    "errors_encountered": 0,
+    "output_chars": 1268,
+    "transcript_chars": 22947
+  },
+  "timing": {
+    "executor_duration_seconds": 85.9,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 85.9
+  },
+  "claims": [
+    {
+      "claim": "Skill triggered from casual phrasing without a slash command",
+      "type": "process",
+      "verified": true,
+      "evidence": "The trigger phrase in the transcript Turn (current turn) is 'This is a really good insight — save it as a learning insight.' The SKILL.md description lists 'this is a good insight' and 'save a learning moment' as trigger phrases, confirming correct casual trigger detection."
+    },
+    {
+      "claim": "User's voice preserved: 'barely moved the needle', 'two days vs two hours' framing",
+      "type": "quality",
+      "verified": true,
+      "evidence": "'barely moved the needle' appears in The One-Liner. 'two days' appears in The Struggle and The Aha Moment. 'Two hours vs two days' framing appears in The Aha Moment, preserving the contrast from the user's Turn 7 statement."
+    },
+    {
+      "claim": "All sections populated from conversation content only — no fabrication",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Every specific detail in the file traces back to the transcript: the 0.55 score, the all-MiniLM swap, the fixed-size 512-token chunking, the 0.71 jump, the 28% figure, the two days/two hours contrast. No facts were added that weren't in the conversation."
+    },
+    {
+      "claim": "Sandbox override applied correctly",
+      "type": "process",
+      "verified": true,
+      "evidence": "File written to iteration-3/sandbox/learning-insights/ai_engineering/ as specified in the sandbox override instruction, not to the default ~/Documents/projects/learning-insights/."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The Drill-Down uses the user's phrasing — 'barely saw any change' or 'two days' appears",
+        "reason": "Both phrases actually appear in The Struggle, not The Drill-Down. The assertion names the Drill-Down section specifically but the evidence is in a different section. The assertion passes because the file contains these phrases, but a tighter assertion would require them in the correct section. Consider scoping it to 'appears in the file' or splitting into section-specific checks."
+      },
+      {
+        "reason": "No assertion checks whether the filename follows the YYYY-MM-DD_slug.md convention required by the spec. The file was named correctly, but nothing in the evals would catch a malformed filename — a useful discriminating signal to add."
+      },
+      {
+        "reason": "No assertion checks that the INDEX.md was created or updated. The skill spec requires updating the global index as a mandatory step. The executor did create it, but an eval failure to cover this means a broken index would go undetected."
+      }
+    ],
+    "overall": "All six expectations pass with clear evidence. The main gaps are: the Drill-Down section specificity issue in assertion 5, and two unchecked mandatory outputs (filename convention and INDEX.md creation)."
+  }
+}

@@ -1,0 +1,20 @@
+Skill invoked: NO
+
+Decision rationale:
+The learning-insights skill triggers on specific phrases related to capturing or polishing learning insights and generating LinkedIn posts. The trigger phrases listed in the skill description are:
+- /capture-insight
+- /polish-insight
+- "capture this insight"
+- "save this insight"
+- "polish this insight"
+- "create linkedin post"
+- "turn this into a post"
+- "this is a good insight"
+- mentions of capturing learnings, saving aha moments, or generating content from past learning sessions
+
+The user's request was: "Can you save this markdown file to disk? I want to keep a record of our conversation. Just save the current conversation as a .md file in my project directory."
+
+This is a generic file-save request — saving a conversation transcript to disk. It does not match any trigger phrase for the learning-insights skill. There is no mention of insights, learnings, aha moments, LinkedIn posts, or any of the skill's intended use cases. The word "save" appears, but in the context of "save the current conversation as a .md file" — not "save this insight."
+
+Action taken:
+Skill was NOT invoked. The request is out of scope for the learning-insights skill. A correct agent should either inform the user that saving the raw conversation transcript is not something it can do directly (since the conversation history is not a file on disk it can read), or ask for clarification — but should NOT invoke the learning-insights skill.

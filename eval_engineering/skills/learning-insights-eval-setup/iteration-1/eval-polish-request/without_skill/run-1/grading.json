@@ -1,0 +1,103 @@
+{
+  "expectations": [
+    {
+      "text": "The skill triggered and produced LinkedIn post content",
+      "passed": false,
+      "evidence": "The task was explicitly run WITHOUT the learning-insights skill (prompt says 'Execute this task WITHOUT any learning-insights skill'). No skill was invoked — the executor produced a linkedin_post.md directly via Write tool calls. Content was produced but the skill did not trigger. The assertion conflates two things: skill invocation and content production. In this without_skill run, skill invocation is expected to be absent, making the assertion fail on its literal text."
+    },
+    {
+      "text": "Each post variation is under 3000 characters",
+      "passed": true,
+      "evidence": "The single post in linkedin_post.md is approximately 870 characters total (verified by reading the file). Well within the 3000 character limit."
+    },
+    {
+      "text": "The posts do not contain banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', excessive hashtags, or one-word sentence hooks",
+      "passed": true,
+      "evidence": "Full post reviewed. None of the banned phrases are present. Hashtag count is 5 (#RAG #LLM #GenAI #MachineLearning #NLP) — a moderate number, not excessive. No one-word sentence hooks found. The post avoids all listed banned patterns."
+    },
+    {
+      "text": "The first 1-2 lines of each post create genuine curiosity through a surprising or counterintuitive claim",
+      "passed": false,
+      "evidence": "Opening line: 'Everyone talks about which embedding model to use for RAG.' This is a scene-setting framing statement, not a surprising or counterintuitive claim. It does not challenge an assumption or assert something unexpected — it merely identifies a common topic. Genuine curiosity through a counterintuitive hook would look like: 'Swapping to a better embedding model did nothing for my RAG pipeline. Fixing my chunks gave me 28%.' The actual opening is a generic setup that does not satisfy the criterion."
+    },
+    {
+      "text": "The posts include concrete details (28%, RAGAS, MiniLM) rather than generic motivational language",
+      "passed": true,
+      "evidence": "The post explicitly mentions: MiniLM ('swapping MiniLM for larger, more capable models'), RAGAS scores ('my RAGAS scores barely moved'), 28% ('28% jump across faithfulness, answer relevancy, and answer similarity'). All three named details are present and used in context. The post avoids generic motivational language and stays grounded in specific experimental outcomes."
+    },
+    {
+      "text": "The posts sound like a practitioner sharing a real learning, not a thought leader performing expertise",
+      "passed": true,
+      "evidence": "The post uses first-person grounded language ('I spent weeks running controlled experiments'), references specific experiment methodology (controlled variable swap — same embedding model, retrieval logic, LLM), and closes with a concrete actionable recommendation ('audit your chunk boundaries before touching your embedding model'). Tone is direct and dry, not performative. No motivational posturing or vague calls to 'shift your mindset.' Reads like a practitioner debriefing an experiment."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 2,
+    "total": 6,
+    "pass_rate": 0.67
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 870,
+    "transcript_chars": 9841
+  },
+  "timing": {
+    "executor_duration_seconds": 23.5,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 23.5
+  },
+  "claims": [
+    {
+      "claim": "The post opens by challenging the common assumption about embedding models",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The run_summary.txt says the post 'Opens with the common assumption people make.' The actual opening ('Everyone talks about which embedding model to use for RAG') identifies the assumption but does not challenge it in the opening line. The challenge only arrives in line 2. The executor's own framing is slightly overstated."
+    },
+    {
+      "claim": "The post led with the concrete result: 28% improvement",
+      "type": "quality",
+      "verified": false,
+      "evidence": "Run summary claims the post 'Led with the concrete result: 28% improvement.' In the actual post, '28% jump' appears at line 7 (after three setup lines). It is not led with — it is buried mid-post after the narrative setup. This is a factually incorrect claim in the run_summary."
+    },
+    {
+      "claim": "The post kept tone direct and grounded in real experimental data",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Confirmed. The post references specific metrics, named models, and a concrete percentage delta. No generic advice or motivational padding."
+    },
+    {
+      "claim": "Only one post variation was produced",
+      "type": "factual",
+      "verified": true,
+      "evidence": "linkedin_post.md contains a single post. The task prompt said 'Create a LinkedIn post' (singular), so this is appropriate. No multi-variation output was expected or delivered."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The skill triggered and produced LinkedIn post content",
+        "reason": "This assertion is broken for without_skill runs by design. A without_skill baseline should assert 'LinkedIn post content was produced' separately from 'the skill triggered.' Conflating them means the assertion always fails for the baseline run even when the output quality is high — creating noise rather than signal. Split into two separate assertions: one for content production (applicable to both runs) and one for skill invocation (applicable only to with_skill runs)."
+      },
+      {
+        "assertion": "The first 1-2 lines of each post create genuine curiosity through a surprising or counterintuitive claim",
+        "reason": "This assertion is doing real work but is hard to grade consistently because 'genuine curiosity' and 'counterintuitive' are subjective. Consider making it more concrete: 'The opening line makes a falsifiable or unexpected claim (not a scene-setting observation).' A clear test: would the first line cause someone scrolling LinkedIn to pause? 'Everyone talks about which embedding model to use for RAG' would not. A version like 'Better embedding models moved my RAGAS scores by almost nothing' would. The criterion is directionally correct but could be sharpened for consistent grading."
+      },
+      {
+        "reason": "No assertion checks whether the output is a single variation or multiple variations. The task prompt said 'Create a LinkedIn post' (singular), and a skill aiming for quality would ideally produce multiple framings so the user can choose. No assertion catches whether the executor produced one or many variations — an important quality signal that differentiates a skill from a plain Claude response."
+      }
+    ],
+    "overall": "Two of the six assertions carry real discriminating power (banned patterns, first-line curiosity). The concrete-details and practitioner-tone assertions are good. The skill-triggered assertion is structurally broken for baseline runs. The eval would benefit from a variation-count assertion to differentiate skill quality from raw Claude output."
+  }
+}

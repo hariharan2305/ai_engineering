@@ -1,0 +1,80 @@
+{
+  "expectations": [
+    {
+      "text": "No file was created in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "The transcript shows two Write tool calls, both targeting the outputs directory at .../without_skill/outputs/. Neither write operation touched ~/Documents/projects/learning-insights/. The directory exists as a pre-existing repo, but no new files were created there during execution."
+    },
+    {
+      "text": "~/Documents/projects/learning-insights/INDEX.md was not modified",
+      "passed": true,
+      "evidence": "No tool call in the transcript reads or writes ~/Documents/projects/learning-insights/INDEX.md. The only writes were to outputs/conversation.md and outputs/run_summary.txt. INDEX.md was not touched."
+    },
+    {
+      "text": "The agent handled the request as a plain file-save without routing it through the learning-insights capture workflow",
+      "passed": true,
+      "evidence": "The transcript confirms the agent wrote conversation.md and run_summary.txt directly to the outputs directory using the Write tool. run_summary.txt explicitly states: 'Skill invocation: None. The task was handled naturally using only the Write tool.' No Skill tool was invoked, no learning-insights capture workflow was referenced."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 2,
+      "Write": 2
+    },
+    "total_tool_calls": 4,
+    "total_steps": 4,
+    "errors_encountered": 1,
+    "output_chars": 817,
+    "transcript_chars": 14200
+  },
+  "timing": {
+    "executor_duration_seconds": 24.4,
+    "total_duration_seconds": 24.4
+  },
+  "claims": [
+    {
+      "claim": "No learning-insights skill was invoked",
+      "type": "process",
+      "verified": true,
+      "evidence": "The transcript contains no Skill tool call. run_summary.txt states 'Skill invocation: None.' The assistant explicitly confirmed this in its final message."
+    },
+    {
+      "claim": "The task was handled using only the Write tool",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript shows two successful Write calls (conversation.md and run_summary.txt) and one Bash denial (mkdir). No other tools were used for writing."
+    },
+    {
+      "claim": "The saved file is a record of the conversation",
+      "type": "quality",
+      "verified": false,
+      "evidence": "conversation.md contains only a generic template describing the request and a boilerplate response. It does not capture actual conversation turns, prior context, or meaningful session content — it is a fabricated summary, not a real conversation record. However, this quality gap is not covered by any expectation."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "All three expectations check only for absence of learning-insights workflow activity. They would pass identically even if the agent had done nothing at all (no outputs created, no files touched). The eval has no positive assertion about what the agent actually did — there is no check that a file was written to the outputs dir, or that run_summary.txt was created. A do-nothing agent would score 3/3."
+      },
+      {
+        "assertion": "The agent handled the request as a plain file-save without routing it through the learning-insights capture workflow",
+        "reason": "This assertion is verified primarily from run_summary.txt, which the executor wrote itself. Self-reported non-invocation is weak evidence. A stronger check would examine whether any Skill tool call targeting learning-insights appears in the transcript — which is verifiable from the raw transcript, not from executor-authored output."
+      },
+      {
+        "reason": "No assertion covers the quality of what was produced. The agent wrote a fabricated conversation summary rather than an actual conversation record, which is arguably a meaningful failure on the user's original request — but this goes completely unchecked. If the eval's goal is only to verify skill non-triggering, this is acceptable; if the eval is meant to characterise overall behaviour, a quality assertion is missing."
+      }
+    ],
+    "overall": "The evals correctly test for skill non-triggering and pass cleanly. The main gap is that all three assertions are absence checks — they would pass for a no-op agent. Consider adding at least one positive assertion (e.g., run_summary.txt exists) and grounding the process claim in transcript evidence rather than executor self-reporting."
+  }
+}

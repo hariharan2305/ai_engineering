@@ -1,0 +1,40 @@
+## Run Summary
+
+### Files Created
+
+1. sandbox/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings.md
+   - Raw insight card captured from conversation
+   - LinkedIn post variations appended (polished in same file, per skill spec)
+
+2. sandbox/learning-insights/INDEX.md
+   - Updated with new entry for the chunking insight (status: polished)
+
+---
+
+### Format Selection
+
+The insight: a personal RAG pipeline experiment where 2 days on embedding model swaps produced near-zero RAGAS improvement, while 2 hours on chunk boundary fixes produced a 28% jump.
+
+Three formats were selected:
+
+**1. Real experience / Impact story**
+Selected because the insight has a concrete result (28%), a clear chronology (2 days vs 2 hours), and a pivot moment. The structure — hook on the number, what was tried, the pivot, the result, the lesson — fits this format exactly.
+
+**2. Myth-buster**
+Selected because the insight directly challenges a widely held belief: "when RAG quality is low, upgrade your embedding model." The user ran a controlled experiment that falsified this, which is the core material for a myth-buster. The format allows laying out the corrected mental model explicitly.
+
+**3. Assumption-flip**
+Selected because the user held the embedding model assumption confidently before the experiment — this is a first-person story of being wrong in a specific, measurable way. The assumption-flip format preserves that first-person arc and lands on the new mental model at the end.
+
+Formats NOT selected and why:
+- Narrative / Story: too similar to Real experience — would have produced a near-duplicate
+- Interview Q&A: the insight is experiential, not conceptual enough to anchor a realistic interview question
+- Learning confession: the raw card doesn't contain strong emotional language (surprise, delight) — using this format would have required manufacturing emotional register not present in the conversation
+- Contrarian take: the insight IS contrarian, but the Myth-buster format handles this with more structure and evidence
+- System / Technical breakdown: the insight is about priority/sequencing, not about how a mechanism works — this format would have shifted the post toward explanation rather than story
+
+---
+
+### Voice Notes
+
+No voice samples were available (fewer than 5 posts in voice_samples.md — file contained only a blank template). Fallback rules applied: short direct sentences, no LinkedIn cliches, no emoji, hooks carry the tension in line 1, posts close with the actual takeaway.

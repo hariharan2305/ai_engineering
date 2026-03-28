@@ -1,0 +1,20 @@
+run: capture-insight
+date: 2026-03-19
+status: success
+
+intent: why HNSW approximate search is acceptable for semantic retrieval
+
+insight_file: ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md
+index_updated: yes
+
+sections_written:
+- The Struggle: User confusion about why approximate search is acceptable when exact search guarantees the right answer
+- The Drill-Down: Progression from "why accept approximate at all" -> "does the error margin match semantic fuzziness?" -> latency argument at scale
+- The Aha Moment: Approximation tolerance of HNSW matches the fuzziness of semantic meaning; production latency difference (seconds vs milliseconds) matters more than rank 1 vs rank 3
+- The One-Liner: Preserved user's voice and their "that's actually kind of beautiful" emotional reaction
+
+voice_preservation: User's exact phrasing and emotional reaction ("that's actually kind of beautiful") preserved in the Aha Moment section. Casual framing maintained throughout.
+
+files_written:
+- /sandbox/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md
+- /sandbox/learning-insights/INDEX.md (new row prepended, newest-first order maintained)

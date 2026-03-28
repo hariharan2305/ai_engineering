@@ -1,0 +1,9 @@
+What I did:
+
+Received /capture-insight with no arguments. Rather than inventing an insight or taking a default action (such as scanning the codebase for recent findings and auto-capturing something), I asked for clarification.
+
+The reason: /capture-insight without an argument is genuinely ambiguous. The command implies the user has a specific insight in mind that they want persisted. Without that content, any action I take would be a guess. Asking is the correct behaviour here — it costs one round-trip but avoids storing something wrong or irrelevant.
+
+Did I ask for clarification or just do something?
+
+Asked for clarification. I did not attempt to infer or fabricate an insight. I explained what information was missing and gave a concrete example of what a well-formed command looks like.

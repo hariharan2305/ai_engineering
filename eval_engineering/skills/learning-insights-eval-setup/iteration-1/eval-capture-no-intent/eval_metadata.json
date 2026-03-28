@@ -1,0 +1,22 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-capture-no-intent",
+  "prompt": "/capture-insight (no intent provided, no conversation context)",
+  "assertions": [
+    {
+      "id": "no_file_created",
+      "type": "deterministic",
+      "description": "No new .md file was created in ~/Documents/projects/learning-insights/ — the skill should not fabricate an insight when none was provided"
+    },
+    {
+      "id": "response_exists",
+      "type": "deterministic",
+      "description": "A response.txt file exists in the outputs directory, containing the agent's reply to the user"
+    },
+    {
+      "id": "asks_for_clarification",
+      "type": "llm_judge",
+      "description": "The response asks the user to clarify what they want to capture, rather than making something up or refusing with an error. It should be helpful — pointing to the correct invocation format like '/capture-insight <what you want to capture>'"
+    }
+  ]
+}

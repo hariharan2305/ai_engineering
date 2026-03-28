@@ -1,0 +1,11 @@
+Task: Convert a RAG experiment insight into a LinkedIn post.
+
+What was created:
+- linkedin_post.md: A LinkedIn post built from the provided insight about chunking strategy vs embedding model choice in RAG pipelines.
+
+Approach:
+- Opened with the common assumption people make (embedding model choice matters most).
+- Introduced the experimental contrast: swapping embedding models vs fixing chunk boundaries.
+- Led with the concrete result: 28% improvement from chunking alone, with no other changes.
+- Closed with a practical, actionable takeaway for practitioners currently tuning RAG systems.
+- Kept the tone direct and grounded in real experimental data rather than generic advice.

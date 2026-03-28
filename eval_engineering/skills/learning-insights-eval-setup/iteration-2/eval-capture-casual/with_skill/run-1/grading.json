@@ -1,0 +1,99 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created in the sandbox path — confirming the skill triggered from casual phrasing without a slash command",
+      "passed": true,
+      "evidence": "run_summary.txt confirms: 'Trigger phrase: \"This is a really good insight — save it as a learning insight.\"' and 'Skill invoked: learning-insights / capture-insight'. The file exists at sandbox path /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/sandbox/learning-insights/ai_engineering/2026-03-19_chunk-quality-beats-model-swapping.md. No slash command was used — the skill triggered from a natural conversational phrase."
+    },
+    {
+      "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+      "passed": true,
+      "evidence": "The sandbox file at 2026-03-19_chunk-quality-beats-model-swapping.md contains all four sections verbatim: '## The Struggle' (line 10), '## The Drill-Down' (line 14), '## The Aha Moment' (line 18), '## The One-Liner' (line 22). All sections have substantive content."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": true,
+      "evidence": "Line 5 of the sandbox file reads: '**Status:** raw'. The outputs copy also confirms this on line 5."
+    },
+    {
+      "text": "The file preserves the specific detail '28%' from the conversation",
+      "passed": true,
+      "evidence": "'28%' appears twice in the file: in The Aha Moment ('jumped RAGAS scores from 0.55 to 0.71 — a 28% improvement') and in The One-Liner ('Two hours fixing chunk boundaries gave me a 28% jump.'). This figure originates from turn 7 of the conversation history embedded in the transcript prompt."
+    },
+    {
+      "text": "The Drill-Down uses the user's own phrasing — 'barely moved the needle' or 'two days' should appear",
+      "passed": true,
+      "evidence": "The Drill-Down section contains: 'Two days of model-swapping and barely moving the needle.' Both 'two days' (as 'Two days') and a near-match to 'barely moved the needle' ('barely moving the needle') appear in this section. The run_summary.txt also explicitly notes: 'Kept \"barely saw any change\" and \"barely moving the needle\" (user's exact phrasing)'."
+    },
+    {
+      "text": "The Aha Moment correctly identifies chunk boundaries (not model size) as the root cause",
+      "passed": true,
+      "evidence": "The Aha Moment reads: 'Fixed-size chunking cuts at character count boundaries — it doesn't care if it's splitting mid-sentence or mid-concept. When the retriever fetches those chunks, it's pulling in fragments that lack enough context for the LLM to reason from. A better embedding model can't fix broken chunks.' This directly identifies chunk boundaries (not model size) as the root cause, and explicitly rules out the embedding model as the lever."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": null,
+    "total_tool_calls": null,
+    "total_steps": null,
+    "errors_encountered": 0,
+    "output_chars": 1004,
+    "transcript_chars": null
+  },
+  "timing": {
+    "executor_duration_seconds": 82.3,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 82.3
+  },
+  "claims": [
+    {
+      "claim": "The skill was triggered by casual phrasing, not a slash command",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt records trigger phrase as 'This is a really good insight — save it as a learning insight.' — a natural sentence, not a /capture-insight command."
+    },
+    {
+      "claim": "Voice was preserved — phrasing is in the user's first-person voice, not cleaned up",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The Struggle section reads as first-person user voice ('My RAGAS scores...', 'I swapped...', 'barely moving the needle'). The run_summary.txt explicitly notes: 'Did not formalize or clean up the language' and 'No technical details added beyond what was in the conversation'."
+    },
+    {
+      "claim": "The INDEX.md was updated with a new row for this insight",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The outputs/INDEX.md contains a row for '2026-03-19_chunk-quality-beats-model-swapping.md' with status 'raw' and project 'ai_engineering'. The sandbox INDEX.md was also updated per run_summary.txt."
+    },
+    {
+      "claim": "RAGAS score improvement figures (0.55 to 0.71) are accurately captured",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The Aha Moment states: 'jumped RAGAS scores from 0.55 to 0.71 — a 28% improvement'. These numbers are consistent with the conversation turns referenced in the transcript prompt (scores stuck at 0.55, improvement noted after chunking change)."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The Drill-Down uses the user's own phrasing — 'barely moved the needle' or 'two days' should appear",
+        "reason": "The assertion accepts either phrase as sufficient, but both appear in the same sentence in this output ('Two days of model-swapping and barely moving the needle'). The real voice-preservation test is whether the section avoids reformulating the user's experience into neutral technical prose — an output could satisfy this assertion with a single planted phrase while rewriting everything else. Consider also checking that the first-person perspective is maintained throughout the Drill-Down, not just that one token phrase appears."
+      },
+      {
+        "reason": "No assertion checks that the file was written to the correct sandbox path (not the production learning-insights directory). The run_summary.txt confirms the right path was used, but no expectation catches a sandbox bypass — which would be a meaningful failure mode for eval isolation."
+      },
+      {
+        "reason": "No assertion verifies the RAGAS scores (0.55 baseline, 0.71 after change) are accurately preserved in the output. The '28%' check catches the delta but not whether the absolute values were hallucinated or corrupted. An eval that checks for both '0.55' and '0.71' in the Aha Moment would be more discriminating."
+      }
+    ],
+    "overall": "All six assertions pass with clear evidence. The evals cover the critical structural and content requirements well. The main gap is that the voice-preservation check (assertion 5) and the sandbox-path check are under-specified — a skill that planted the trigger phrase while rewriting everything else, or that wrote to the wrong location, would still pass the current assertions."
+  }
+}

@@ -1599,6 +1599,19 @@ wheels = [
 ]
 
 [[package]]
+name = "llama-index-llms-langchain"
+version = "0.8.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "langchain" },
+    { name = "llama-index-core" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/63/59/73ebaeafff73af902b821150fd4693515095bf0587fd9491dec91328253c/llama_index_llms_langchain-0.8.0.tar.gz", hash = "sha256:3642cb7ae840fdf6d440002df2d34064520b8ca030f26409610dd43fd435a450", size = 6064, upload-time = "2026-03-12T20:25:10.64Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/33/34/d6579b5a3535d02276a3e5bff976fb586592076a6d9ab718baa15af0ecc1/llama_index_llms_langchain-0.8.0-py3-none-any.whl", hash = "sha256:a36d09193a720689143e91f0875e9ece81975d653b4d2036a00b34688b82b702", size = 6113, upload-time = "2026-03-12T20:25:11.216Z" },
+]
+
+[[package]]
 name = "llama-index-workflows"
 version = "2.16.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3214,6 +3227,7 @@ dependencies = [
     { name = "langchain-text-splitters" },
     { name = "llama-index-core" },
     { name = "llama-index-embeddings-huggingface" },
+    { name = "llama-index-llms-langchain" },
     { name = "lxml" },
     { name = "numpy" },
     { name = "openai" },
@@ -3245,6 +3259,7 @@ requires-dist = [
     { name = "langchain-text-splitters", specifier = ">=0.3.0" },
     { name = "llama-index-core", specifier = ">=0.10.0" },
     { name = "llama-index-embeddings-huggingface", specifier = ">=0.2.0" },
+    { name = "llama-index-llms-langchain", specifier = ">=0.8.0" },
     { name = "lxml", specifier = ">=5.0.0" },
     { name = "numpy", specifier = ">=1.26.0" },
     { name = "openai", specifier = ">=1.0.0" },

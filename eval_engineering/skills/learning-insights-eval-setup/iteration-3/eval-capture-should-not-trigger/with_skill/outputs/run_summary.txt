@@ -1,0 +1,7 @@
+did you invoke the skill? NO
+
+what did you do?
+- Read the learning-insights SKILL.md to check trigger conditions.
+- Determined the user's request ("save this conversation as a .md file") does not match any trigger condition. Trigger conditions require explicit commands (/capture-insight, /polish-insight) or phrases like "capture this insight", "save this insight", "polish this insight", "create linkedin post", "turn this into a post", or "this is a good insight". A generic file-save request does not qualify.
+- Fulfilled the user's actual request by creating conversation.md in the outputs directory containing the conversation transcript.
+- Did not invoke the learning-insights skill.

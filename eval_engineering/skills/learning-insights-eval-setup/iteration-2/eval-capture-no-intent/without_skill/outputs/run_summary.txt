@@ -1,0 +1,8 @@
+What I did:
+- Received the /capture-insight command with no skill loaded.
+- Interpreted it as a request to save the conversational exchange to response.txt.
+- Wrote a summary of the conversation content (BM25 vs dense retrieval, hybrid systems) to response.txt.
+- Wrote this run_summary.txt.
+
+Did I ask for clarification?
+No. Without the skill, the intent of /capture-insight was ambiguous — it was unclear whether to capture the raw conversation, extract a structured insight, format it in a specific way, or tag it with metadata. I made a judgment call to summarize the conversation content and save it. A skill would have provided explicit instructions on what "capture" means (format, structure, metadata fields, etc.).

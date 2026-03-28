@@ -143,7 +143,7 @@ print(result["messages"][-1]["content"])  # final assistant message
 
 ### 2.3 Build your own LangGraph state graph (conceptual pattern)
 
-RealPython’s LangGraph tutorial outlines the pattern:[^8]
+RealPython's LangGraph tutorial outlines the pattern:[^8]
 
 1. Define a **state** (Pydantic model / dict) for your agent.
 2. Define **nodes** (functions) that operate on state.
@@ -285,7 +285,7 @@ resp2 = router_engine.query("What does file X say about error handling?")
 print(resp2)
 ```
 
-`RouterQueryEngine` is LlamaIndex’s core primitive for **routing between retrieval strategies** in a single orchestration object.[^9]
+`RouterQueryEngine` is LlamaIndex's core primitive for **routing between retrieval strategies** in a single orchestration object.[^9]
 
 ***
 
@@ -367,7 +367,7 @@ Haystack pipelines are particularly strong when you need **observable, typed ste
 
 ## 5. DSPy – Declarative RAG Modules & Optimization
 
-DSPy is a declarative framework from Stanford’s Hazy Research that lets you specify **modules** (retriever + generator) and then **optimize** prompts or models to improve metrics.[^4][^11]
+DSPy is a declarative framework from Stanford's Hazy Research that lets you specify **modules** (retriever + generator) and then **optimize** prompts or models to improve metrics.[^4][^11]
 
 ### 5.1 Install
 
@@ -496,7 +496,7 @@ Typical pattern for a RAG flow in Azure AI Studio:
 
 1. Create or use a **Prompt Flow** from templates (e.g., "Q&A on your data").[^13]
 2. Add components: document chunking, embedding, Azure AI Search index querying, prompt builder, Azure OpenAI chat.
-3. Wire them visually into a pipeline in the UI (similar to Haystack’s Pipeline code but GUI‑driven).[^6][^13]
+3. Wire them visually into a pipeline in the UI (similar to Haystack's Pipeline code but GUI‑driven).[^6][^13]
 4. Deploy as an endpoint that your app calls.
 
 Code‑wise, Azure ML exposes these flows as **pipelines** that can be triggered via the Azure ML Python SDK, but in many RAG apps you just call the deployed endpoint and let Azure orchestrate retrieval + generation.[^6]
@@ -518,7 +518,7 @@ A typical RAG agent in **Agent Builder**:
 3. Configure tools / APIs the agent can call.
 4. Test in the console and expose as an endpoint.
 
-From the Agent Builder walkthroughs, you don’t usually write Python for orchestration; you configure:
+From the Agent Builder walkthroughs, you don't usually write Python for orchestration; you configure:
 
 - Agent instructions and persona.
 - RAG tools pointing to data stores.
@@ -528,14 +528,302 @@ Your app then calls the **Agent endpoint** (REST/gRPC) instead of directly orche
 
 ***
 
-## 7. How to Choose and Combine Orchestration Frameworks
+## 7. Corrective RAG (CRAG) – Self-Grading with Fallback
+
+Corrective RAG adds a **relevance-grading step after retrieval**. If the retrieved chunks score below a threshold, the system triggers a fallback (re-query, web search, or query rewrite) instead of generating from weak context. The result is a retrieve → grade → decide loop before any generation happens.[^18]
+
+### 7.1 When to use CRAG
+
+- Your corpus has **coverage gaps** (some questions fall outside stored docs).
+- You can tolerate a slightly higher latency in exchange for fewer hallucinations.
+- You have a fallback source available (web search, a second index, a broader knowledge base).
+
+### 7.2 The eval-then-decide loop
+
+```
+User query
+    │
+    ▼
+[retrieve]  ──→  chunks
+    │
+    ▼
+[grade chunks]  ──→  all relevant?
+    ├── yes ──→ [generate answer]  ──→ response
+    └── no  ──→ [fallback: rewrite query / web search]
+                    │
+                    ▼
+                [retrieve again]  ──→ [generate answer]  ──→ response
+```
+
+### 7.3 Implementation with LangGraph
+
+#### Install
+
+```bash
+pip install -U langgraph "langchain-openai" "langchain-core>=0.3"
+```
+
+#### Grade documents node (binary relevance check)
+
+```python
+from pydantic import BaseModel, Field
+from typing import Literal
+from langchain.chat_models import init_chat_model
+
+GRADE_PROMPT = (
+    "You are a grader assessing relevance of a retrieved document to a user question.\n"
+    "Retrieved document:\n\n{context}\n\n"
+    "User question: {question}\n"
+    "Give a binary score 'yes' or 'no': is this document relevant?"
+)
+
+class GradeDocuments(BaseModel):
+    binary_score: str = Field(description="'yes' if relevant, 'no' if not relevant")
+
+grader_llm = init_chat_model("gpt-4o-mini", temperature=0)
+
+def grade_documents(state) -> Literal["generate_answer", "rewrite_question"]:
+    """Route based on whether retrieved docs are relevant."""
+    question = state["messages"][0].content
+    context  = state["messages"][-1].content
+    prompt   = GRADE_PROMPT.format(question=question, context=context)
+    result   = grader_llm.with_structured_output(GradeDocuments).invoke(
+        [{"role": "user", "content": prompt}]
+    )
+    return "generate_answer" if result.binary_score == "yes" else "rewrite_question"
+```
+
+#### Wire the CRAG graph
+
+```python
+from langgraph.graph import StateGraph, MessagesState, START, END
+from langgraph.prebuilt import ToolNode, tools_condition
+from langchain.chat_models import init_chat_model
+
+response_llm = init_chat_model("gpt-4o-mini", temperature=0)
+
+# Node: decide whether to retrieve or answer directly
+def generate_query_or_respond(state: MessagesState):
+    response = response_llm.bind_tools([retriever_tool]).invoke(state["messages"])
+    return {"messages": [response]}
+
+# Node: generate final answer from (now-graded) context
+def generate_answer(state: MessagesState):
+    response = response_llm.invoke(state["messages"])
+    return {"messages": [response]}
+
+# Node: rewrite query before re-retrieval (the fallback trigger)
+def rewrite_question(state: MessagesState):
+    question = state["messages"][0].content
+    rewritten = response_llm.invoke(
+        [{"role": "user", "content": f"Rewrite this question for better retrieval: {question}"}]
+    )
+    return {"messages": state["messages"] + [rewritten]}
+
+# Build graph
+workflow = StateGraph(MessagesState)
+workflow.add_node("generate_query_or_respond", generate_query_or_respond)
+workflow.add_node("retrieve", ToolNode([retriever_tool]))
+workflow.add_node("generate_answer", generate_answer)
+workflow.add_node("rewrite_question", rewrite_question)
+
+workflow.add_edge(START, "generate_query_or_respond")
+
+# After LLM decides: call retriever tool or respond directly
+workflow.add_conditional_edges(
+    "generate_query_or_respond",
+    tools_condition,
+    {"tools": "retrieve", END: END},
+)
+
+# After retrieval: grade docs, route to generate or fallback
+workflow.add_conditional_edges("retrieve", grade_documents)
+
+# Fallback loops back to let LLM retry with rewritten query
+workflow.add_edge("rewrite_question", "generate_query_or_respond")
+workflow.add_edge("generate_answer", END)
+
+crag_graph = workflow.compile()
+```
+
+The key difference from a plain RAG chain: `grade_documents` is a **conditional edge**, not a node, so the routing decision happens in-graph without any external control flow.
+
+### 7.4 Triggering fallback: decision criteria
+
+| Signal | Recommended fallback |
+|---|---|
+| Grader scores all chunks as irrelevant | Rewrite query → re-retrieve from same index |
+| Grader score is low AND query is time-sensitive | Web search (e.g., Tavily) |
+| Grader score is low AND query is relational | Knowledge-graph lookup |
+| Grader score is high but generation is uncertain | Ask clarifying question (human-in-the-loop) |
+
+***
+
+## 8. Agentic RAG – Planning-First Retrieval
+
+Agentic RAG replaces a fixed retrieve → generate chain with an **autonomous planning loop**. The agent inspects the query, selects the right retrieval tool (vector search, KG traversal, web search, SQL, etc.), runs it, checks whether the result is sufficient, and either generates or plans another retrieval step.[^19]
+
+### 8.1 When to use Agentic RAG
+
+- Queries span **multiple retrieval sources** with different access patterns.
+- The system needs to decide between retrieval strategies at runtime (not at design time).
+- Queries may require **multi-hop reasoning** (retrieve → process → retrieve again).
+
+### 8.2 The agent planning loop
+
+```
+User query
+    │
+    ▼
+[planner / router LLM]  ──→  picks tool(s)
+    │
+    ├── vector_search(query)   ←── general factual questions
+    ├── graph_lookup(entities) ←── relational / multi-hop questions
+    └── web_search(query)      ←── current events / unknown topics
+    │
+    ▼
+[retrieved context]
+    │
+    ▼
+[LLM checks sufficiency]
+    ├── sufficient ──→ [generate answer]
+    └── not enough  ──→ back to planner with refined query
+```
+
+### 8.3 Implementation with LangGraph (multi-tool agent)
+
+#### Define retrieval tools
+
+```python
+from langchain.tools import tool
+from langchain_core.vectorstores import InMemoryVectorStore
+from langchain_openai import OpenAIEmbeddings
+
+vectorstore = InMemoryVectorStore.from_documents(
+    documents=doc_splits, embedding=OpenAIEmbeddings()
+)
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+
+@tool
+def vector_search(query: str) -> str:
+    """Search the internal knowledge base for factual questions."""
+    docs = retriever.invoke(query)
+    return "\n\n".join(d.page_content for d in docs)
+
+@tool
+def web_search(query: str) -> str:
+    """Search the web for current events or topics not in the knowledge base."""
+    # Replace with Tavily, SerpAPI, or any live-search client
+    return f"[web results for: {query}]"
+
+@tool
+def graph_lookup(entities: str) -> str:
+    """Query the knowledge graph for relational or multi-hop questions."""
+    # Replace with your KG client (e.g., Neo4j, Amazon Neptune)
+    return f"[KG results for entities: {entities}]"
+
+tools = [vector_search, web_search, graph_lookup]
+```
+
+#### Option A: prebuilt ReAct agent (simplest for multi-tool routing)
+
+```python
+from langgraph.prebuilt import create_react_agent
+from langchain.chat_models import init_chat_model
+
+agent_llm = init_chat_model("gpt-4o-mini", temperature=0)
+
+agentic_rag = create_react_agent(
+    model=agent_llm,
+    tools=tools,
+    prompt=(
+        "You are an intelligent RAG agent. For each question:\n"
+        "- Use vector_search for factual questions over the knowledge base.\n"
+        "- Use web_search for current events or topics not in the knowledge base.\n"
+        "- Use graph_lookup for relational questions requiring multi-hop reasoning.\n"
+        "Retrieve before answering. Only answer when you have sufficient context."
+    ),
+)
+
+result = agentic_rag.invoke({
+    "messages": [{"role": "user", "content": "What is the current EU AI Act status?"}]
+})
+print(result["messages"][-1].content)
+```
+
+#### Option B: custom graph for explicit planner control
+
+```python
+from langgraph.graph import StateGraph, MessagesState, START, END
+from langgraph.prebuilt import ToolNode, tools_condition
+from langchain.chat_models import init_chat_model
+
+planner_llm = init_chat_model("gpt-4o-mini", temperature=0)
+
+def plan_and_route(state: MessagesState):
+    """Planner node: LLM decides which tool to call."""
+    response = planner_llm.bind_tools(tools).invoke(state["messages"])
+    return {"messages": [response]}
+
+def generate_final_answer(state: MessagesState):
+    """Generation node: produce answer from retrieved context."""
+    response = planner_llm.invoke(state["messages"])
+    return {"messages": [response]}
+
+workflow = StateGraph(MessagesState)
+workflow.add_node("planner", plan_and_route)
+workflow.add_node("tools", ToolNode(tools))
+workflow.add_node("generate", generate_final_answer)
+
+workflow.add_edge(START, "planner")
+
+# Planner either calls a tool or decides it has enough context
+workflow.add_conditional_edges(
+    "planner",
+    tools_condition,
+    {"tools": "tools", END: END},
+)
+
+# After tool execution, loop back to planner for sufficiency check
+workflow.add_edge("tools", "planner")
+
+agentic_graph = workflow.compile()
+```
+
+The `tools_condition` edge drives the planning loop: the planner keeps calling tools until it decides enough context exists, then routes to `END` with a final answer.
+
+### 8.4 Tool selection heuristics
+
+| Query characteristic | Tool to use |
+|---|---|
+| "What is…" / "Explain…" (static knowledge) | `vector_search` |
+| "Who is related to X via Y" (multi-hop) | `graph_lookup` |
+| "Latest / current / as of today" (temporal) | `web_search` |
+| "How many rows in table T" (structured) | SQL tool |
+| Mixed (e.g., compare KG entity to current news) | Multiple tools, planner sequences them |
+
+### 8.5 CRAG vs Agentic RAG
+
+| Dimension | CRAG | Agentic RAG |
+|---|---|---|
+| Control flow | Fixed: retrieve → grade → fallback | Dynamic: planner decides tool sequence |
+| Tool selection | Single retriever + one fallback | Multiple tools, runtime choice |
+| Latency | Low overhead (one extra grader call) | Higher (multi-step planning loop) |
+| Best for | Improving a single-retriever pipeline | Multi-source, multi-hop queries |
+| LangGraph primitive | Conditional edges on grader output | `create_react_agent` or `ToolNode` loop |
+
+***
+
+## 9. How to Choose and Combine Orchestration Frameworks
 
 - **LangChain**: best when you want **Python‑first**, code‑level control over RAG chains, retrievers, tools, and when you rely on the LangChain ecosystem (vector stores, tools, observability via LangSmith).[^17][^1]
 - **LangGraph**: use when you need **stateful, multi‑step, or multi‑agent** workflows (e.g., complex agentic RAG, tool‑calling with loops, human‑in‑the‑loop approval). Graphs make control flow explicit and testable.[^2][^8]
-- **LlamaIndex**: ideal when your mental model is **“build indices, then query them”** and you want advanced index types (tree, KG, graph) with built‑in prompt compression and router engines.[^9]
+- **LlamaIndex**: ideal when your mental model is **"build indices, then query them"** and you want advanced index types (tree, KG, graph) with built‑in prompt compression and router engines.[^9]
 - **Haystack**: good fit if you need **production‑grade, search‑centric pipelines** with strong OpenSearch/Elastic integration and typed components.[^10][^3]
 - **DSPy**: reach for it when you want **eval‑driven optimization** of RAG prompts and modules (LLMOps) rather than hand‑tuned prompts.[^4][^11]
 - **Cloud‑native orchestration** (Bedrock Agents, Azure Flows, Vertex Agent Builder): choose these when you prefer **managed orchestration**, tight cloud integration, IAM/security, and less bespoke Python orchestration code.[^13][^5][^7][^6]
+- **CRAG**: layer on top of any single-retriever pipeline when you need self-correction without full agent complexity.[^18]
+- **Agentic RAG**: use when queries are heterogeneous and require dynamic tool selection at runtime across multiple retrieval backends.[^19]
 
 You can mix them: for example, **LangGraph + LangChain** inside your app, while using **Vertex AI Search** as the retrieval backend and **LangSmith/Langfuse** for observability.
 
@@ -571,7 +859,7 @@ Use this cheat‑sheet as the orchestration layer in your RAC/RAG component docs
 
 13. [Enhancing Language Models Using RAG Architecture in Azure AI ...](https://arinco.com.au/blog/enhancing-language-models-using-rag-architecture-in-azure-ai-studio/) - Implementing the RAG pattern in Azure AI Studio involves creating prompt flow that define the intera...
 
-14. [LangChain Quickstart Guide | Part 1](https://www.youtube.com/watch?v=gVMp_vKwslI) - LangChain Quickstart Guide | Part 1 
+14. [LangChain Quickstart Guide | Part 1](https://www.youtube.com/watch?v=gVMp_vKwslI) - LangChain Quickstart Guide | Part 1
 
 LangChain is a framework for developing applications powered b...
 
@@ -580,4 +868,8 @@ LangChain is a framework for developing applications powered b...
 16. [Search from Vertex AI | Google quality search/RAG for enterprise](https://cloud.google.com/enterprise-search) - Vertex AI Search helps developers build secure, Google-quality search experiences for websites, intr...
 
 17. [Trace LangChain applications (Python and JS/TS)](https://docs.langchain.com/langsmith/trace-with-langchain) - LangSmith supports distributed tracing with LangChain Python. This allows you to link runs (spans) a...
+
+18. [Agentic RAG with LangGraph – LangChain OSS Python Docs](https://docs.langchain.com/oss/python/langgraph/agentic-rag) - Agentic RAG: conditional edges, document grading, and fallback routing with LangGraph StateGraph.
+
+19. [LangGraph Agents – prebuilt ReAct agent and multi-tool routing](https://langchain-ai.github.io/langgraph/agents/agents/) - Build reliable, stateful AI systems with LangGraph's prebuilt agent primitives and ToolNode.
 

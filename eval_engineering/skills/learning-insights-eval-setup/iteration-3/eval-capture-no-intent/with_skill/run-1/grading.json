@@ -1,0 +1,85 @@
+{
+  "expectations": [
+    {
+      "text": "No insight file was created in the sandbox",
+      "passed": true,
+      "evidence": "The transcript contains no Write tool calls to the sandbox path (/sandbox/learning-insights/). The only Write calls were to response.txt and run_summary.txt in the outputs directory. The sandbox files that exist (e.g., 2026-03-19_chunking-beats-embeddings-rag.md) contain content about chunking vs embeddings — topics from prior eval runs, not the BM25/GIL/precision-recall conversation in this eval. run_summary.txt explicitly states: 'No insight file was written. No index was updated.'"
+    },
+    {
+      "text": "The response asks for clarification — specifically which of the three topics the user wants to capture",
+      "passed": true,
+      "evidence": "response.txt reads: 'I can see three separate topics in this conversation — BM25 vs dense retrieval, Python's GIL, and precision vs recall. Which one did you want to capture as an insight? Or did you have a different one in mind?' This names all three topics explicitly and asks the user to select one."
+    },
+    {
+      "text": "The response does NOT pick a topic and capture it without asking",
+      "passed": true,
+      "evidence": "No insight file was written (verified via transcript Write calls). The response is exclusively a clarification question — it makes no selection and creates no insight content. The executor's run_summary.txt confirms: 'The skill correctly triggers a clarification request rather than arbitrarily picking one of the three topics.'"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 2,
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 5,
+    "total_steps": 5,
+    "errors_encountered": 0,
+    "output_chars": 635,
+    "transcript_chars": 14200
+  },
+  "timing": {
+    "executor_duration_seconds": 32.2,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 32.2
+  },
+  "claims": [
+    {
+      "claim": "The command /capture-insight was invoked with no intent argument",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The eval prompt in the transcript shows the current turn as '/capture-insight' with no trailing argument."
+    },
+    {
+      "claim": "The skill spec rule 'If the intent is ambiguous or no clear insight matches it, ask the user to clarify' was the trigger for this behavior",
+      "type": "process",
+      "verified": true,
+      "evidence": "Executor's reasoning in transcript (row 13) and run_summary.txt both cite this exact rule from the capture-insight.md spec."
+    },
+    {
+      "claim": "No index file was updated",
+      "type": "factual",
+      "verified": true,
+      "evidence": "No Write call to any INDEX.md path appears in the transcript. run_summary.txt states: 'No index was updated.'"
+    },
+    {
+      "claim": "The sandbox insight files are from prior eval runs, not this one",
+      "type": "factual",
+      "verified": true,
+      "evidence": "The existing sandbox files (e.g., 2026-03-19_chunking-beats-embeddings-rag.md) contain content about chunking and embeddings — topics absent from this eval's conversation (BM25/GIL/precision-recall). The transcript contains no Write to the sandbox path."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No insight file was created in the sandbox",
+        "reason": "This assertion is verified only by checking the transcript for Write calls and confirming sandbox files are pre-existing. It would be stronger to also assert that the sandbox directory file count is unchanged from before the run — without a baseline file count, a future run that creates a file with an unrelated name could slip through if the grader only checks content relevance."
+      },
+      {
+        "reason": "No assertion checks the quality of the clarification question itself — specifically whether it names all three topics from the conversation. A response that simply said 'Which topic?' would satisfy assertions 2 and 3 as currently written, but would be a weaker clarification. Consider adding: 'The clarification question enumerates the topics present in the conversation.'"
+      }
+    ],
+    "overall": "The three assertions cleanly cover the core behaviors (no file created, clarification asked, no unilateral capture). The main gap is assertion 1 relies on absence-of-action which is hard to verify conclusively from the transcript alone — a file-count check on the sandbox before and after would make it airtight."
+  }
+}

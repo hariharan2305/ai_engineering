@@ -1,0 +1,78 @@
+{
+  "skill_name": "learning-insights",
+  "evals": [
+    {
+      "id": 1,
+      "name": "eval-capture-clear",
+      "prompt": "During a learning session about RAG systems, this conversation happened:\n\nUser: 'I keep seeing HNSW mentioned for vector search but I don't get why approximate search is acceptable. If I'm doing semantic search, don't I want exact results?'\n\nClaude: 'Exact nearest neighbor search guarantees you find the mathematically closest vector. HNSW is approximate — it misses some neighbors. But in semantic space, vectors that are close to your query vector are semantically similar enough to be useful. The #1 true nearest neighbor and the #3 approximate nearest neighbor are probably both relevant to your query. The small accuracy loss is irrelevant for the use case.'\n\nUser: 'Wait so you're saying the error tolerance of HNSW matches the problem tolerance of semantic search?'\n\nClaude: 'Exactly. And HNSW is orders of magnitude faster — at 1M vectors, exact search takes seconds, HNSW takes milliseconds. For a real RAG system, that latency difference matters more than whether you got the #1 vs #2 nearest neighbor.'\n\nUser: 'Oh that's actually kind of beautiful. The approximation is fine because semantic meaning is fuzzy anyway.'\n\n/capture-insight why HNSW approximate search is acceptable for semantic retrieval",
+      "expected_output": "A markdown file created at ~/Documents/projects/learning-insights/ai_engineering/ with today's date in the filename, all required sections present, status=raw, under 400 words, INDEX.md updated.",
+      "files": [],
+      "expectations": [
+        "A .md file was created inside ~/Documents/projects/learning-insights/ai_engineering/ with '2026-03-19' in the filename",
+        "The file contains a '## The Struggle' section with non-empty content",
+        "The file contains a '## The Drill-Down' section with non-empty content",
+        "The file contains a '## The Aha Moment' section with non-empty content",
+        "The file contains a '## The One-Liner' section with a blockquote (line starting with '>')",
+        "The file metadata contains 'Status: raw'",
+        "The file body is under 400 words",
+        "~/Documents/projects/learning-insights/INDEX.md exists and contains a row referencing the new file",
+        "The One-Liner or Struggle sections preserve the user's casual language — the user said 'beautiful' and 'fuzzy', this energy should appear rather than being sanitized into formal prose",
+        "The content does not fabricate struggles or technical details not present in the provided conversation"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "eval-capture-casual",
+      "prompt": "I just had a really good insight while building my RAG pipeline. I realized that chunking strategy matters more than the embedding model for retrieval quality on domain-specific corpora. I spent two days swapping embedding models and barely moved the needle. Then I fixed my chunk boundaries to respect paragraph structure and my RAGAS scores jumped 28%. This is a good insight — save it as a learning insight.",
+      "expected_output": "A markdown file created in ~/Documents/projects/learning-insights/ even without a slash command. All required sections present, status=raw, content preserves the '28%' detail and user's casual voice.",
+      "files": [],
+      "expectations": [
+        "A .md file was created in ~/Documents/projects/learning-insights/ — confirming the skill triggered without an explicit /capture-insight slash command",
+        "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+        "The file metadata contains 'Status: raw'",
+        "The file content references '28%' — this specific detail from the prompt must be preserved",
+        "The Struggle and Drill-Down sections use the user's phrasing — 'barely moved the needle' should appear rather than a formal paraphrase",
+        "The Aha Moment correctly captures that chunk boundaries (not model size) were the root cause of retrieval failures"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eval-capture-no-intent",
+      "prompt": "/capture-insight",
+      "expected_output": "No file created. The skill asks for clarification since no intent was provided.",
+      "files": [],
+      "expectations": [
+        "No new .md file was created in ~/Documents/projects/learning-insights/",
+        "The response asks the user to clarify what they want to capture, not an error message and not a fabricated insight",
+        "The clarification response points to the correct usage format (e.g., '/capture-insight <what to capture>')"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "eval-capture-should-not-trigger",
+      "prompt": "Can you save this markdown file to disk? I want to keep a record of our conversation. Just save the current conversation as a .md file in my project directory.",
+      "expected_output": "Skill does NOT trigger. No file created in ~/Documents/projects/learning-insights/. Request handled as a plain file-save.",
+      "files": [],
+      "expectations": [
+        "No file was created in ~/Documents/projects/learning-insights/",
+        "~/Documents/projects/learning-insights/INDEX.md was not modified",
+        "The agent handled the request as a plain file-save without routing it through the learning-insights capture workflow"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "eval-polish-request",
+      "prompt": "I want to turn this insight into a LinkedIn post: chunking strategy matters more than embedding model choice for RAG quality. I tested both extensively — swapping from MiniLM to a larger model barely moved my RAGAS scores, but fixing chunk boundaries to respect paragraph structure gave me a 28% jump. The lesson: your retrieval pipeline is only as good as your chunks. Create a LinkedIn post from this.",
+      "expected_output": "Skill triggers. LinkedIn post variations produced. Posts are under 3000 chars, have strong hooks, no clichés, sound human.",
+      "files": [],
+      "expectations": [
+        "The skill triggered and produced LinkedIn post content",
+        "Each post variation is under 3000 characters",
+        "The posts do not contain banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', excessive hashtags, or one-word sentence hooks",
+        "The first 1-2 lines of each post create genuine curiosity through a surprising or counterintuitive claim",
+        "The posts include concrete details (28%, RAGAS, MiniLM) rather than generic motivational language",
+        "The posts sound like a practitioner sharing a real learning, not a thought leader performing expertise"
+      ]
+    }
+  ]
+}

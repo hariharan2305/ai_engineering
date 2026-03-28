@@ -1,0 +1,93 @@
+{
+  "experiment": "exp_04_multi_query_llamaindex",
+  "timestamp": "20260321_100743",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "retrieval_strategy": "LlamaIndex QueryFusionRetriever \u2014 DenseRetriever + RECIPROCAL_RANK",
+  "baseline_scores": {
+    "faithfulness": 0.641,
+    "answer_relevancy": 0.583,
+    "answer_similarity": 0.538
+  },
+  "scores": {
+    "faithfulness": 0.375,
+    "answer_relevancy": 0.35264543371784984,
+    "answer_similarity": 0.37429567471114145
+  },
+  "delta": {
+    "faithfulness": -0.266,
+    "answer_relevancy": -0.2304,
+    "answer_similarity": -0.1637
+  },
+  "samples": [
+    {
+      "question": "What is Retrieval Augmented Generation and why does it exist?",
+      "answer": "Retrieval Augmented Generation (RAG) is an AI technique that improves the accuracy and reliability of large language models by grounding their responses in external, retrieved knowledge. RAG systems dynamically fetch relevant documents at query time and pass them to the LLM as context, rather than relying solely on information baked into the model weights during training.\n\nRAG exists to address two fundamental limitations of large language models.",
+      "num_contexts": 2,
+      "ground_truth": "RAG is an AI technique that grounds LLM responses in externally retrieved knowledge. It exists to address two limitations of LLMs: knowledge cutoff (not knowing about post-training events) and hallucination (generating plausible but incorrect information)."
+    },
+    {
+      "question": "What are the two phases of a RAG system and what happens in each?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 2,
+      "ground_truth": "The two phases are indexing and querying. During indexing, documents are parsed, chunked, embedded, and stored in a vector database. During querying, the user's question is embedded, similar chunks are retrieved, and the LLM generates an answer grounded in those chunks."
+    },
+    {
+      "question": "How does chunk size affect RAG system quality?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 2,
+      "ground_truth": "Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. Larger chunks (512-1024 tokens) provide more context but can introduce noise. The optimal chunk size depends on the use case."
+    },
+    {
+      "question": "What is HNSW and why is it used in vector databases?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 2,
+      "ground_truth": "HNSW (Hierarchical Navigable Small World) is an Approximate Nearest Neighbor algorithm used in vector databases. It builds a multi-layered graph structure that allows logarithmic search complexity, making similarity search across millions of vectors fast."
+    },
+    {
+      "question": "What is hybrid search and when should it be used?",
+      "answer": "Hybrid search is a method that combines a dense vector score with a sparse BM25 keyword score to improve search results. It is particularly effective for queries with rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Hybrid search should be used when both semantic queries (like \"what is the capital of France\") and lexical queries (like \"error code NX-4012\") need to be effectively handled. Most production RAG systems utilize hybrid search for this reason.",
+      "num_contexts": 2,
+      "ground_truth": "Hybrid search combines dense vector similarity search with sparse BM25 keyword search. It should be used when queries include rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Scores are fused using Reciprocal Rank Fusion."
+    },
+    {
+      "question": "What does the RAGAS faithfulness metric measure?",
+      "answer": "The RAGAS faithfulness metric measures whether the generated answer is factually consistent with the retrieved context.",
+      "num_contexts": 2,
+      "ground_truth": "Faithfulness measures whether the generated answer is factually consistent with the retrieved context. A faithful answer only states claims supported by the context. It is computed by asking a judge LLM to verify each factual claim in the answer against the provided context."
+    },
+    {
+      "question": "What is the lost-in-the-middle problem in RAG?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 2,
+      "ground_truth": "The lost-in-the-middle problem occurs when relevant information is positioned in the middle of a long context window. Research shows LLMs perform better when relevant information appears at the beginning or end of the context, and may ignore information in the middle."
+    },
+    {
+      "question": "What is the difference between context precision and context recall in RAGAS?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 2,
+      "ground_truth": "Context precision measures whether retrieved chunks are relevant to the question (are the retrieved chunks useful). Context recall measures whether all information needed to answer the question was present in the retrieved context (was nothing missed). Recall requires ground truth answers to compute."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "eval_id": 4,
+  "eval_name": "eval-capture-should-not-trigger",
+  "prompt": "Save this markdown file to disk / keep a record of our conversation",
+  "assertions": [
+    {
+      "id": "no_insight_file_created",
+      "type": "deterministic",
+      "description": "No file was created in ~/Documents/projects/learning-insights/ — this is a plain file-save request, not a learning insight capture, and the skill should NOT trigger"
+    },
+    {
+      "id": "no_index_updated",
+      "type": "deterministic",
+      "description": "~/Documents/projects/learning-insights/INDEX.md was not modified — the learning-insights skill should not have run"
+    },
+    {
+      "id": "request_handled_directly",
+      "type": "llm_judge",
+      "description": "The agent handled the file-save request directly (e.g., saved a conversation summary as a .md file somewhere), without routing it through the insight capture workflow"
+    }
+  ]
+}

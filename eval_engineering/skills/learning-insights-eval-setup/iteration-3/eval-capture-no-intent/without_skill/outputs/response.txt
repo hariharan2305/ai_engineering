@@ -1,0 +1,7 @@
+The conversation covered three separate topics:
+
+1. BM25 vs dense retrieval
+2. Python's GIL
+3. Precision vs recall
+
+Which insight would you like to capture? Please specify one (or more) so I can save the right one.

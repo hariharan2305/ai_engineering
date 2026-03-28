@@ -1,0 +1,51 @@
+[
+  {
+    "prompt_inputs": {
+      "content": "The concept of liminality in postcolonial literature reveals how displacement functions not merely as a physical condition but as an epistemological rupture. Authors such as Salman Rushdie and Arundhati Roy employ fragmented narratives to mirror the fractured consciousness of diasporic subjects, wherein the boundaries between homeland and adopted nation become permeable and contested. This textual strategy interrogates the Western canon's monolithic representations of identity, suggesting instead that hybrid cultural formations emerge through processes of negotiation and resistance. The liminal space becomes a site of creative possibility, where marginalized voices articulate alternative genealogies of belonging that challenge nationalist frameworks and expose the constructed nature of cultural authenticity itself."
+    },
+    "solution_criteria": [
+      "Captures abstract concepts and implicit themes (e.g., liminality, epistemological rupture, hybridity) beyond surface keywords",
+      "Identifies thematic threads connecting to broader interpretive frameworks (e.g., postcolonial theory, diaspora, cultural identity)",
+      "Returns a valid JSON array of strings representing the extracted topics"
+    ],
+    "task_description": "Extract topics out of a passage of text from a scholarly article into a JSON array of strings",
+    "scenario": "Testing with a humanities passage containing implicit themes and abstract concepts that require interpretation beyond surface-level keywords"
+  },
+  {
+    "prompt_inputs": {
+      "content": "The intersection of climate change mitigation and global health equity presents complex regulatory challenges that demand interdisciplinary solutions. Carbon pricing mechanisms, traditionally designed by environmental economists to internalize externalities, now face scrutiny from public health advocates who argue that regressive taxation disproportionately affects low-income populations' access to essential energy services. Simultaneously, pharmaceutical companies operating in developing nations must navigate dual pressures: meeting WHO guidelines for antimicrobial stewardship while addressing local governance frameworks that lack enforcement capacity. Recent frameworks in environmental justice scholarship propose integrating health impact assessments into carbon policy design, creating synergies between climate adaptation infrastructure and primary healthcare delivery systems in vulnerable communities."
+    },
+    "solution_criteria": [
+      "Identifies topics spanning at least three distinct fields (e.g., environmental policy, public health, economics, ethics, governance)",
+      "Captures both primary topics and cross-domain concepts that bridge multiple disciplines",
+      "Returns results as a JSON array of strings with no duplicates"
+    ],
+    "task_description": "Extract topics out of a passage of text from a scholarly article into a JSON array of strings",
+    "scenario": "Testing with an interdisciplinary passage that spans multiple fields (e.g., bioethics, environmental policy) to verify handling of cross-domain topics"
+  },
+  {
+    "prompt_inputs": {
+      "content": "This study investigates the synergistic effects of CRISPR-Cas9 gene editing coupled with machine learning algorithms to identify optimal off-target mutation patterns in mammalian cell lines. We employed chromatin immunoprecipitation sequencing (ChIP-seq) to map histone modifications at predicted cleavage sites, integrating these epigenetic signatures with deep neural networks trained on transcriptomic datasets. Our results demonstrate that heterochromatin-associated H3K9me3 marks significantly reduce off-target activity by 67%, while simultaneously maintaining on-target efficiency through PAM-proximal sequence optimization. Furthermore, we validated our computational predictions using single-cell RNA-sequencing (scRNA-seq) across differentiated cell populations, revealing cell-type-specific variations in CRISPR specificity that correlate with chromatin accessibility patterns measured via ATAC-seq. These findings suggest that integrating epigenetic context into guide RNA design algorithms could substantially improve therapeutic applications in genetic disease correction."
+    },
+    "solution_criteria": [
+      "Extracts all major technical terms and methodologies mentioned (CRISPR-Cas9, ChIP-seq, machine learning, neural networks, scRNA-seq, ATAC-seq, etc.)",
+      "Captures key biological concepts and phenomena (off-target mutations, histone modifications, chromatin accessibility, epigenetic signatures, etc.)",
+      "Identifies nested conceptual relationships as distinct topics (e.g., gene editing, epigenetics, computational approaches, cell-type specificity)",
+      "Returns output as a valid JSON array of strings with no duplicate entries"
+    ],
+    "task_description": "Extract topics out of a passage of text from a scholarly article into a JSON array of strings",
+    "scenario": "Testing with a dense scientific abstract featuring domain-specific jargon, multiple technical terms, and nested conceptual relationships"
+  },
+  {
+    "prompt_inputs": {
+      "content": "This study examines the intersection of machine learning and cognitive science in understanding neural plasticity. We employ deep neural networks to model synaptic adaptation mechanisms, while simultaneously investigating how computational approaches inform theories of memory consolidation and learning. Our findings suggest that artificial neural networks exhibit properties analogous to biological neural reorganization, particularly in pattern recognition and adaptive behavior. We discuss implications for both neurotechnology development and artificial intelligence systems that mimic human cognitive flexibility."
+    },
+    "solution_criteria": [
+      "Identifies all distinct topics (e.g., machine learning, cognitive science, neural plasticity, deep neural networks, synaptic adaptation, memory consolidation, learning, pattern recognition, neurotechnology, artificial intelligence) without omitting significant concepts",
+      "Appropriately separates overlapping or related topics rather than consolidating them into single generic entries",
+      "Returns results as a valid JSON array of strings"
+    ],
+    "task_description": "Extract topics out of a passage of text from a scholarly article into a JSON array of strings",
+    "scenario": "Testing with a short passage containing ambiguous or overlapping topics to assess whether the extraction identifies distinct concepts or consolidates related ones"
+  }
+]

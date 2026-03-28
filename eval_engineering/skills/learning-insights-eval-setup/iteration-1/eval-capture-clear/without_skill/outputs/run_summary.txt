@@ -1,0 +1,27 @@
+Run Summary
+===========
+Date: 2026-03-19
+
+Task
+----
+Handle a /capture-insight command from a RAG learning conversation, without using any special skill. Save output to the designated directory.
+
+Files Created
+-------------
+1. insight_hnsw_approximate_search.md
+   - A structured insight document capturing the core concept from the conversation
+   - Covers: the core insight, why it matters, the key principle, and the practical implication for RAG
+   - Includes tags for discoverability
+
+2. run_summary.txt (this file)
+   - Documents what was done and what files were created
+
+What I Did
+----------
+- Interpreted /capture-insight as a request to extract and persist the key learning from the conversation into a structured insight document
+- Identified the core concept: HNSW approximate search is acceptable for semantic retrieval because the approximation tolerance of the algorithm matches the inherent fuzziness of semantic meaning
+- Wrote the insight in a format useful for future reference: titled, dated, structured with sections covering the concept, why it matters, the key principle, and practical implications
+- Added tags at the bottom for retrieval/discoverability
+- Created this run_summary.txt to document the run
+
+No special skill or framework was used — this was handled as a straightforward content extraction and structured note-writing task.

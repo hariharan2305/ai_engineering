@@ -1,0 +1,112 @@
+{
+  "expectations": [
+    {
+      "text": "The skill triggered and produced LinkedIn post content in the sandbox \u2014 NOT in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "Output file written to iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings-rag.md (sandbox). A search of ~/Documents/projects/learning-insights/ found no matching files \u2014 nothing was written to the user's permanent directory."
+    },
+    {
+      "text": "3 post variations were generated using different formats",
+      "passed": true,
+      "evidence": "Three named variations present in the output file: Variation 1 (Real experience / Impact story), Variation 2 (Myth-buster), Variation 3 (Assumption-flip). All three are distinct and present."
+    },
+    {
+      "text": "Each variation is under 3000 characters",
+      "passed": true,
+      "evidence": "Variation 1 is approximately 700 characters, Variation 2 approximately 600 characters, Variation 3 approximately 650 characters. All are well under the 3000-character limit."
+    },
+    {
+      "text": "Every variation's first line delivers a counterintuitive claim or surprising result \u2014 none open with scene-setters like 'I ran experiments', 'The common advice is', or 'I was confident that'",
+      "passed": true,
+      "evidence": "V1: 'Fixing chunk boundaries gave me a 28% RAGAS jump \u2014 more than two days of embedding model swaps ever did.' V2: 'Better embedding models don't fix a broken RAG pipeline \u2014 better chunks do.' V3: 'Two days of swapping embedding models, and my RAGAS scores barely moved \u2014 the problem was never the model.' None open with the banned scene-setters. The run_summary.txt confirms an earlier draft of V3 used 'I was confident that...' and was corrected before finalising."
+    },
+    {
+      "text": "No standalone number sentences \u2014 '28%.' or 'The result: 28%.' as isolated lines do not appear",
+      "passed": false,
+      "evidence": "Variation 1, line 49 in the output file reads: '28% improvement across RAGAS metrics.' \u2014 this is a standalone line containing only the impact number and a brief qualifier. While it technically differs from the literal examples '28%.' and 'The result: 28%.', it is structurally the same pattern: an isolated single-sentence line whose entire purpose is to deliver the number. The run_summary.txt defends it as 'embeds the number in meaning', but the line stands alone on its own paragraph with no surrounding sentence absorbing it. The spirit of this expectation is violated."
+    },
+    {
+      "text": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again'",
+      "passed": true,
+      "evidence": "Grep of the output file for all four banned strings returned no matches."
+    },
+    {
+      "text": "The 3 variations use genuinely different formats",
+      "passed": true,
+      "evidence": "Real experience/Impact story opens on a metric, walks through the two-step experiment, ends with a practitioner takeaway. Myth-buster opens with a direct corrective claim, explains the conventional belief, presents the evidence against it, and ends with a mental-model shift. Assumption-flip leads with time wasted, reconstructs the original assumption as reasonable, then flips it with the experimental result. The formats differ in structure and rhetorical mode, not just topic."
+    },
+    {
+      "text": "All outputs written to sandbox, not to ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "Files are present under iteration-3/sandbox/learning-insights/ and with_skill/outputs/. No files were found under ~/Documents/projects/learning-insights/."
+    }
+  ],
+  "summary": {
+    "passed": 7,
+    "failed": 1,
+    "total": 8,
+    "pass_rate": 0.875
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": 0,
+    "total_steps": 0,
+    "errors_encountered": 0,
+    "output_chars": 0,
+    "transcript_chars": 0,
+    "note": "No metrics.json found in outputs directory. Transcript was a single-line file exceeding token limits; detailed tool-call counts could not be extracted."
+  },
+  "timing": {
+    "executor_duration_seconds": 147.7,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 147.7,
+    "source": "timing.json (total_tokens: 33652, duration_ms: 147728)"
+  },
+  "claims": [
+    {
+      "claim": "An earlier draft of Variation 3 used 'I was confident that...' and was caught and corrected before finalising",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt line 45: 'An earlier draft of Variation 3 opened with \"I was confident that swapping to a larger embedding model would improve my RAG retrieval quality.\" \u2014 this is the banned scene-setter pattern. It was caught and corrected before finalising the file.'"
+    },
+    {
+      "claim": "Voice samples were unavailable (fewer than 5) and fallback rules were applied",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt line 7: 'Voice samples available: none (fewer than 5) \u2014 fallback rules applied'"
+    },
+    {
+      "claim": "Variation 1 embeds the 28% number in a sentence rather than as an isolated dramatic line",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The run_summary.txt claims the number is 'embedded in meaning' and passes the hook test. However, in the output file line 49, '28% improvement across RAGAS metrics.' is a paragraph-isolated standalone line \u2014 it is not embedded within a larger sentence. The claim is not justified."
+    },
+    {
+      "claim": "Three genuinely different formats were selected, avoiding overlap",
+      "type": "quality",
+      "verified": true,
+      "evidence": "run_summary.txt provides explicit reasoning for selecting the three formats and ruling out Narrative/Story (overlaps with Real experience), Contrarian take (too broad), Interview Q&A (strips personal evidence), and Learning confession (wrong emotional register). The three selected formats demonstrably differ in rhetorical structure."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": [],
+    "note": "No user_notes.md found in outputs directory. run_summary.txt was present and reviewed \u2014 it contains the executor's hook verification and format reasoning but flags no uncertainties."
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "No standalone number sentences \u2014 '28%.' or 'The result: 28%.' as isolated lines do not appear",
+        "reason": "The assertion is too narrow: it only bans two exact phrasings. Variation 1 contains '28% improvement across RAGAS metrics.' as an isolated standalone line \u2014 same structural problem, different wording. The assertion should be broadened to catch any isolated single-sentence line whose sole content is the impact number, regardless of phrasing. A better formulation: 'The 28% result never appears as the only sentence in a paragraph.'"
+      },
+      {
+        "reason": "No assertion checks whether the polished variations were written back to the source insight file (updating its status from 'raw' to 'polished' and appending the variations). The sandbox file shows status='raw' in the metadata header even though variations were appended. If the skill is supposed to update the status field, this went undetected."
+      },
+      {
+        "reason": "Expectation 1 and expectation 8 are functionally identical \u2014 both check that output landed in the sandbox and not in ~/Documents/projects/learning-insights/. One of them should be dropped or the two should be merged to avoid redundant passing."
+      }
+    ],
+    "overall": "Assertions are mostly well-targeted. The main gap is the standalone number sentence rule being too literal \u2014 it can be satisfied by rephrasing while keeping the problematic structure intact, which is exactly what happened here."
+  }
+}

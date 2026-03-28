@@ -1,0 +1,113 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created inside the sandbox path (iteration-2/sandbox/learning-insights/) — NOT in ~/Documents/projects/learning-insights/",
+      "passed": false,
+      "evidence": "The file was created at '...without_skill/outputs/insight_hnsw_approximate_search.md'. The path 'iteration-2/sandbox/learning-insights/' does not appear anywhere in the transcript or outputs. The executor wrote to the outputs_dir it was given, not to the required sandbox path."
+    },
+    {
+      "text": "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+      "passed": false,
+      "evidence": "The output file contains four sections: '## Core Insight', '## Key Points', '## Why This Matters for RAG', '## Source'. There is no '## The Struggle' section. The file uses a generic informational structure, not the required card template."
+    },
+    {
+      "text": "The file contains '## The Drill-Down' section showing the progression from 'why accept approximate?' to the error-tolerance insight",
+      "passed": false,
+      "evidence": "No '## The Drill-Down' section exists in the output file. The file does not represent the conversational progression at all — it compresses the dialogue into a static summary."
+    },
+    {
+      "text": "The file contains '## The Aha Moment' section capturing the semantic fuzziness realization",
+      "passed": false,
+      "evidence": "No '## The Aha Moment' section exists in the output file. The semantic fuzziness insight appears inline in '## Core Insight' and '## Key Points', but not as a dedicated section marking the moment of realization."
+    },
+    {
+      "text": "The file contains '## The One-Liner' with a blockquote",
+      "passed": false,
+      "evidence": "No '## The One-Liner' section exists. No blockquote syntax ('>') appears anywhere in the output file."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": false,
+      "evidence": "The output file has no frontmatter or metadata section at all. It begins directly with '# Insight: Why HNSW Approximate Search is Acceptable for Semantic Retrieval' and contains no YAML/TOML header or any 'Status' field."
+    },
+    {
+      "text": "The emotional language from turn 7 is preserved — 'beautiful' or 'fuzzy' or equivalent emotional register appears in the card",
+      "passed": true,
+      "evidence": "The word 'fuzzy' and 'fuzziness' appear multiple times: '## Core Insight' reads 'aligns with the fuzziness of semantic meaning itself'; '## Key Points' reads 'semantic meaning is inherently fuzzy'. The user's exact word 'beautiful' from turn 7 is absent, but 'fuzzy' — the other keyword from turn 7 — is present. Marginal pass: the register is analytical rather than emotionally resonant, but the specific vocabulary criterion is technically satisfied."
+    },
+    {
+      "text": "The file does not fabricate confusion or technical details not present in the conversation history",
+      "passed": true,
+      "evidence": "All technical content in the output file (HNSW graph search, rank 1 vs rank 3, 1M vectors latency comparison, semantic fuzziness) traces directly to turns 2, 4, 5, and 6 of the conversation. No extraneous details were added."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 6,
+    "total": 8,
+    "pass_rate": 0.25
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 1076,
+    "transcript_chars": 9842
+  },
+  "timing": {
+    "executor_duration_seconds": 29.8,
+    "total_duration_seconds": 29.8
+  },
+  "claims": [
+    {
+      "claim": "The executor captured the core insight from the conversation",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The output file correctly identifies that HNSW approximation tolerance matches semantic meaning fuzziness — the central idea of the conversation."
+    },
+    {
+      "claim": "The capture was done without any templating or automated tagging",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt states: 'There was no templating, no automated tagging, no memory file update — just a manual write to the output directory.' The output file structure confirms this — it is a flat markdown document with no structured card format."
+    },
+    {
+      "claim": "The file was written to the output directory",
+      "type": "factual",
+      "verified": true,
+      "evidence": "File confirmed present at '...without_skill/outputs/insight_hnsw_approximate_search.md'. However, this is not the expected sandbox path from expectation 1."
+    },
+    {
+      "claim": "The insight crystallized in turns 5-6",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt attributes the key insight to turns 5-6. The conversation confirms turn 5 is where the user articulates the error-tolerance alignment, and turn 6 where Claude confirms and adds latency context."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "A .md file was created inside the sandbox path (iteration-2/sandbox/learning-insights/) — NOT in ~/Documents/projects/learning-insights/",
+        "reason": "This assertion tests the wrong path constraint. The eval prompt instructs the executor to write to 'outputs/' and says nothing about 'iteration-2/sandbox/learning-insights/'. Without a skill enforcing that specific path, there is no mechanism to produce output there. The assertion is testing skill-specific behavior in a baseline (no-skill) run — it is structurally guaranteed to fail, which makes it a useful discriminating signal but only if the intent is confirmed: baseline should fail this while the skilled run should pass it."
+      },
+      {
+        "assertion": null,
+        "reason": "Expectations 2-6 all test card template adherence (sections, blockquotes, metadata frontmatter). These are all testing the same thing: does the output conform to the learning-insight card schema? They will all pass together or fail together. Consider collapsing them into a single structural assertion, or keeping them separate only if you want to measure which template elements the skill gets right vs wrong individually."
+      },
+      {
+        "assertion": "The emotional language from turn 7 is preserved — 'beautiful' or 'fuzzy' or equivalent emotional register appears in the card",
+        "reason": "The 'or equivalent emotional register' escape clause makes this too easy to pass. The output file uses 'fuzzy' analytically ('semantic meaning is inherently fuzzy'), not in a way that captures the user's moment of delight ('that's actually kind of beautiful'). A stronger assertion would require the emotional language to appear in a section specifically dedicated to the user's reaction (e.g., '## The Aha Moment'), not just anywhere in the file."
+      }
+    ],
+    "overall": "The eval is well-designed as a baseline vs. skilled comparison: a no-skill run should fail most structural expectations, and it does. The main gap is that expectation 7 (emotional language) passed too easily — 'fuzzy' appears but in dry analytical prose, not in the emotionally resonant context the assertion intends. Consider tightening that assertion to require placement within the aha-moment section."
+  }
+}

@@ -1,0 +1,15 @@
+Learning Insight: Chunk Quality Gates Embedding Model Performance
+
+Context: RAG pipeline with RAGAS scores stuck at ~0.55.
+
+Observation:
+- Swapping all-MiniLM for a larger embedding model produced negligible improvement.
+- Switching from fixed-size 512-token chunking (no overlap) to paragraph-based chunking jumped RAGAS scores from 0.55 to 0.71 — a 28% improvement.
+- Two days spent on model changes: near-zero gain.
+- Two hours spent on chunking strategy: 28% gain.
+
+Insight:
+Chunk quality is the gating factor in RAG pipelines, not embedding model size. A better embedding model cannot compensate for poor chunk boundaries. On domain-specific corpora, chunking strategy is almost always the higher-leverage variable. Fix chunking first; only then does model selection become meaningful.
+
+Actionable Rule:
+When RAG quality is stuck, audit chunk boundaries before swapping models.

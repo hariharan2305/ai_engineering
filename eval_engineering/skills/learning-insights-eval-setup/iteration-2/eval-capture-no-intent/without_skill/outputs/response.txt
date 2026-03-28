@@ -1,0 +1,1 @@
+Hybrid retrieval combines BM25 and dense retrieval by running both in parallel, then merging results using Reciprocal Rank Fusion (RRF) or weighted scoring. BM25 handles exact keyword matches well; dense retrieval handles semantic similarity. Together they cover cases where either alone would miss.

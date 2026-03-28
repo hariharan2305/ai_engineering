@@ -1,0 +1,32 @@
+{
+  "eval_id": 5,
+  "eval_name": "eval-polish-request",
+  "prompt": "Create a LinkedIn post from this insight (chunking > embedding model, 28% RAGAS jump)",
+  "assertions": [
+    {
+      "id": "skill_triggered",
+      "type": "deterministic",
+      "description": "The skill triggered — either a raw insight card was created, or LinkedIn post variations were produced directly"
+    },
+    {
+      "id": "post_under_3000_chars",
+      "type": "deterministic",
+      "description": "Each LinkedIn post variation is under 3000 characters (LinkedIn text post limit)"
+    },
+    {
+      "id": "no_linkedin_cliches",
+      "type": "llm_judge",
+      "description": "The posts do not contain any of these banned patterns: 'Here's the thing', 'Let me break this down', 'Game-changer', 'Stop.', 'Read that again', 'I was today years old', 'Unpopular opinion', 'agree?', excessive hashtags, or one-word sentences used as hooks"
+    },
+    {
+      "id": "strong_hook",
+      "type": "llm_judge",
+      "description": "The first 1-2 lines of each post create genuine curiosity through a surprising claim or counterintuitive framing — not through clickbait or vague teasing. The hook should be backed up by the content that follows"
+    },
+    {
+      "id": "sounds_human",
+      "type": "llm_judge",
+      "description": "The posts sound like a practitioner sharing a real learning, not a thought leader performing expertise. Concrete details (28%, RAGAS, MiniLM) should appear; generic motivational language should not"
+    }
+  ]
+}

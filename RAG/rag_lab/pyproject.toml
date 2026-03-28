@@ -31,4 +31,5 @@ dependencies = [
     "pgvector>=0.3.0",
     "sqlalchemy>=2.0.0",
     "rank-bm25>=0.2.2",
+    "llama-index-llms-langchain>=0.8.0",
 ]

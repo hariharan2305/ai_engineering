@@ -1,0 +1,111 @@
+{
+  "skill_name": "learning-insights",
+  "sandbox_storage": "iteration-2/sandbox/learning-insights/",
+  "note": "All executor agents must write to the sandbox path, not ~/Documents/projects/learning-insights/",
+  "evals": [
+    {
+      "id": 1,
+      "name": "eval-capture-clear",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "I'm building a RAG system and I keep seeing HNSW recommended for vector search. But I don't get it — if I'm doing semantic search, don't I want exact nearest neighbor results? Why would I accept approximate?"},
+        {"turn": 2, "role": "Claude", "text": "This is a really common confusion. Exact nearest neighbor search (like brute-force cosine similarity) guarantees you get the mathematically closest vector. HNSW trades that guarantee for speed — it searches a graph of nearby nodes rather than the entire index, so it might miss the true #1 nearest neighbor and return #2 or #3 instead."},
+        {"turn": 3, "role": "User", "text": "Right, so why is that acceptable? If I miss the most relevant result that seems like a problem."},
+        {"turn": 4, "role": "Claude", "text": "Here's the thing — in semantic space, the gap in relevance between the true #1 nearest neighbor and #3 is almost always negligible for practical retrieval. Both are semantically similar to your query. The question your RAG system is answering is 'find me something relevant' — not 'find me the single most mathematically similar vector.' The approximation tolerance of HNSW matches the tolerance of the problem itself."},
+        {"turn": 5, "role": "User", "text": "Oh wait — so you're saying the error margin of the algorithm matches the fuzziness of semantic meaning itself?"},
+        {"turn": 6, "role": "Claude", "text": "Exactly. And there's a practical upside: at 1 million vectors, exact search takes seconds. HNSW takes milliseconds. For a production RAG serving real users, that latency difference matters far more than whether you got rank 1 vs rank 3."},
+        {"turn": 7, "role": "User", "text": "Oh that's actually kind of beautiful. The approximation is fine because semantic meaning is fuzzy anyway — you're not looking for the one right answer, you're looking for something good enough to reason from."}
+      ],
+      "current_turn": "/capture-insight why HNSW approximate search is acceptable for semantic retrieval",
+      "expected_output": "A markdown file in the sandbox with all required sections. The Struggle should reflect turn 1/3 confusion. The Aha Moment should reflect turns 4-6. The emotional register from turn 7 ('beautiful', 'fuzzy') must be preserved.",
+      "expectations": [
+        "A .md file was created inside the sandbox path (iteration-2/sandbox/learning-insights/) with '2026-03-19' in the filename — NOT in ~/Documents/projects/learning-insights/",
+        "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+        "The file contains '## The Drill-Down' section showing the progression from 'why accept approximate?' to the error-tolerance insight",
+        "The file contains '## The Aha Moment' section capturing the semantic fuzziness realization",
+        "The file contains '## The One-Liner' with a blockquote",
+        "The file metadata has 'Status: raw'",
+        "The emotional language from turn 7 is preserved — 'beautiful' or 'fuzzy' or equivalent emotional register appears in the card",
+        "The file does not fabricate confusion or technical details not present in the conversation history"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "eval-capture-casual",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "My RAG pipeline RAGAS scores are stuck around 0.55. I've been trying to improve them. I swapped out all-MiniLM for a larger sentence-transformers model and barely saw any change."},
+        {"turn": 2, "role": "Claude", "text": "Interesting. What does your chunking look like right now?"},
+        {"turn": 3, "role": "User", "text": "Fixed-size, 512 tokens, no overlap. Pretty standard."},
+        {"turn": 4, "role": "Claude", "text": "That's likely your bottleneck. Fixed-size chunking cuts at character count boundaries — it doesn't care if it's splitting mid-sentence or mid-concept. When your retriever fetches those chunks, it's pulling in fragments that lack enough context for the LLM to reason from. A better embedding model can't fix broken chunks."},
+        {"turn": 5, "role": "User", "text": "So you're saying the embedding model is not the lever here?"},
+        {"turn": 6, "role": "Claude", "text": "For domain-specific corpora, almost never. The embedding model matters at the margins. Chunk quality determines whether the right information is even retrievable in the first place. Two days of model-swapping is often less useful than one afternoon fixing chunk boundaries to respect paragraph or section structure."},
+        {"turn": 7, "role": "User", "text": "I changed the chunking to respect paragraph breaks. RAGAS scores jumped from 0.55 to 0.71. That's a 28% improvement. I literally spent two days swapping models and barely moved the needle, and this took two hours."}
+      ],
+      "current_turn": "This is a really good insight — save it as a learning insight.",
+      "expected_output": "Skill triggers from casual phrasing with no slash command. File created in sandbox. The '28%' detail and 'barely moved the needle' phrasing must be preserved.",
+      "expectations": [
+        "A .md file was created in the sandbox path — confirming the skill triggered from casual phrasing without a slash command",
+        "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+        "The file metadata has 'Status: raw'",
+        "The file preserves the specific detail '28%' from turn 7",
+        "The Drill-Down uses the user's own phrasing — 'barely moved the needle' or 'two days' should appear",
+        "The Aha Moment correctly identifies chunk boundaries (not model size) as the root cause"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eval-capture-no-intent",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "Quick question — what's the difference between BM25 and dense retrieval?"},
+        {"turn": 2, "role": "Claude", "text": "BM25 is keyword-based — it scores documents by term frequency and inverse document frequency. Dense retrieval uses embedding vectors to find semantically similar content regardless of exact word match. BM25 is fast and interpretable. Dense is better for paraphrases and conceptual queries."},
+        {"turn": 3, "role": "User", "text": "Makes sense. So for a hybrid system you'd combine both?"},
+        {"turn": 4, "role": "Claude", "text": "Exactly. You run both retrievers and merge the results — typically with RRF (Reciprocal Rank Fusion) or a weighted score. You get the precision of keyword matching plus the recall of semantic search."}
+      ],
+      "current_turn": "/capture-insight",
+      "expected_output": "No file created. Skill asks for clarification since no intent was given despite prior conversation existing.",
+      "expectations": [
+        "No file was created in the sandbox path",
+        "The response asks the user to specify what they want to capture from the conversation",
+        "The clarification request acknowledges that there is conversation context available and asks which part to focus on"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "eval-capture-should-not-trigger",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "Can you help me write a bash script that renames all .txt files in a directory to .md?"},
+        {"turn": 2, "role": "Claude", "text": "Sure. Here's a simple one-liner: `for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done`"},
+        {"turn": 3, "role": "User", "text": "Perfect, that worked. Can you save this conversation to a markdown file so I have a record of it?"}
+      ],
+      "current_turn": "Just save the current conversation as a .md file in my project directory.",
+      "expected_output": "Skill does NOT trigger. This is a file-save request, not a learning insight capture. No file in sandbox learning-insights path.",
+      "expectations": [
+        "No file was created in the sandbox's learning-insights path",
+        "The skill was not invoked — the agent handled this as a plain file-save request",
+        "The agent saved a conversation record somewhere appropriate (e.g. the outputs folder) without using the insight capture workflow"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "eval-polish-request",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "I've been testing different components in my RAG pipeline to see what actually moves the RAGAS scores."},
+        {"turn": 2, "role": "Claude", "text": "What have you tried so far?"},
+        {"turn": 3, "role": "User", "text": "Started with embedding model swaps — went from MiniLM to a much larger model. Almost no change. Then I fixed my chunk boundaries to respect paragraph structure instead of fixed-size splitting."},
+        {"turn": 4, "role": "Claude", "text": "And the chunking change moved the needle?"},
+        {"turn": 5, "role": "User", "text": "28% jump in RAGAS scores. Two days on embedding models gave me nothing. Two hours on chunking gave me 28%. The lesson is pretty clear — your retrieval pipeline is only as good as your chunks. Fix the chunks before touching anything else."}
+      ],
+      "current_turn": "Create a LinkedIn post from this insight.",
+      "expected_output": "Skill triggers. 3 post variations generated using dynamically selected formats. All hooks are counterintuitive claims in line 1. No LinkedIn clichés. Concrete details (28%, MiniLM, RAGAS) present.",
+      "expectations": [
+        "The skill triggered and produced LinkedIn post content",
+        "3 post variations were generated using different formats from the format library",
+        "Each post variation is under 3000 characters",
+        "The first line of each post delivers a counterintuitive claim or surprising result — not a scene-setter like 'I ran some experiments'",
+        "The posts contain concrete details: 28%, RAGAS, MiniLM, or chunk boundaries",
+        "No banned patterns appear: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', one-word sentence hooks",
+        "The 3 variations use genuinely different formats — not just the same structure with different words",
+        "All outputs are written to the sandbox, not to ~/Documents/projects/learning-insights/"
+      ]
+    }
+  ]
+}

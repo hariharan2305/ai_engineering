@@ -1,0 +1,97 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created in the sandbox path — confirming the skill triggered from casual phrasing without a slash command",
+      "passed": false,
+      "evidence": "The executor created two .txt files: 'learning_insight.txt' and 'run_summary.txt'. No .md file was created at any point in the transcript or found in the outputs directory. The skill did not trigger (this is the without_skill baseline), and the executor produced plain text output instead of the structured markdown format the skill would have generated."
+    },
+    {
+      "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+      "passed": false,
+      "evidence": "The file 'learning_insight.txt' uses its own ad-hoc structure: 'Insight:', 'Context:', 'Key takeaway:', and 'Diagnosis order for stuck RAGAS scores:'. None of the four required markdown sections (## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner) are present."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": false,
+      "evidence": "Neither output file contains any metadata, frontmatter, or the string 'Status: raw'. The files are plain prose text with no structured metadata fields whatsoever."
+    },
+    {
+      "text": "The file preserves the specific detail '28%' from the conversation",
+      "passed": true,
+      "evidence": "learning_insight.txt line 6: 'Switching to paragraph-based chunking moved RAGAS from 0.55 to 0.71 — a 28% improvement in two hours'. Also present in run_summary.txt: 'the user confirmed a 28% RAGAS improvement (0.55 to 0.71)'."
+    },
+    {
+      "text": "The Drill-Down uses the user's own phrasing — 'barely moved the needle' or 'two days' should appear",
+      "passed": false,
+      "evidence": "There is no '## The Drill-Down' section in any output file. 'Two days' does appear in learning_insight.txt ('two days of effort') and run_summary.txt ('two days of model-swapping'), but 'barely moved the needle' does not appear anywhere. Since the required section does not exist, this expectation fails regardless of incidental phrase presence."
+    },
+    {
+      "text": "The Aha Moment correctly identifies chunk boundaries (not model size) as the root cause",
+      "passed": false,
+      "evidence": "There is no '## The Aha Moment' section in any output file. The key takeaway in learning_insight.txt does correctly state 'A better embedding model cannot compensate for broken chunks. Chunk quality determines whether the right information is retrievable' — the substance is there, but the structured section the expectation requires does not exist."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 5,
+    "total": 6,
+    "pass_rate": 0.17
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 778,
+    "transcript_chars": 9842
+  },
+  "timing": {
+    "executor_duration_seconds": 23.1,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 23.1
+  },
+  "claims": [
+    {
+      "claim": "The insight was 'captured and saved as a standalone file'",
+      "type": "quality",
+      "verified": true,
+      "evidence": "learning_insight.txt exists and contains the core RAG insight from the conversation. The content accurately reflects the key points raised in turns 1-7."
+    },
+    {
+      "claim": "The executor treated the request as a generic 'save notes' task rather than invoking any structured insight format",
+      "type": "process",
+      "verified": true,
+      "evidence": "Without the skill, the executor defaulted to free-form prose in a .txt file. No attempt was made to use the four-section structured format or .md file type that the skill would have enforced."
+    },
+    {
+      "claim": "The content correctly identifies chunk quality (not model size) as the lever",
+      "type": "quality",
+      "verified": true,
+      "evidence": "learning_insight.txt key takeaway: 'A better embedding model cannot compensate for broken chunks. Chunk quality determines whether the right information is retrievable in the first place.'"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "A .md file was created in the sandbox path — confirming the skill triggered from casual phrasing without a slash command",
+        "reason": "This assertion collapses two distinct things into one check: file extension (.md) and skill trigger confirmation. They should be separate assertions. A file could be .md without the skill having triggered any structured format logic (e.g. the executor could just create an empty .md), and conversely the skill structure could appear in a .txt file. Splitting these makes failures more diagnostic."
+      },
+      {
+        "reason": "No assertion checks that the output is meaningfully different from what a naive LLM response would produce without the skill. The baseline here (without_skill) writes a well-structured .txt file that correctly captures the insight, the 28% figure, and the root cause. Assertions 4 and 6 both pass substantively in the output even though the required sections don't exist. This means the eval doesn't cleanly distinguish 'skill output' from 'good LLM output without skill' — a more discriminating assertion would check for the exact section headers and metadata that only the skill enforces."
+      },
+      {
+        "assertion": "The Drill-Down uses the user's own phrasing — 'barely moved the needle' or 'two days' should appear",
+        "reason": "'Two days' is present in the without_skill output, meaning this assertion would pass even without the structured Drill-Down section if evaluated purely on string presence. The assertion should require the phrase to appear specifically inside the ## The Drill-Down section, not anywhere in the file."
+      }
+    ],
+    "overall": "The evals correctly identify the skill's core contract (file type, section structure, metadata, verbatim user phrasing). However, assertions 5 and 6 are under-specified: they depend on section existence but don't state that dependency explicitly, making them appear to be about content when they're actually structural checks. The eval set would benefit from separating structure checks (sections exist) from content checks (sections contain the right substance)."
+  }
+}

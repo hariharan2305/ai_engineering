@@ -1,0 +1,28 @@
+## Run Summary
+
+### Did you create an insight file?
+Yes.
+
+### Did you ask for clarification?
+No. The skill spec says to ask if the intent is ambiguous or no clear insight matches. In this case, /capture-insight was invoked with no intent argument, but the entire conversation was a single coherent exchange about one topic (BM25 vs dense retrieval and hybrid systems). There was nothing ambiguous about what to capture — the absence of an explicit intent did not create ambiguity about the subject matter. So the insight was captured directly, and the response noted that a more specific intent could be used if the user wanted a different slice.
+
+### What happened exactly?
+
+1. Read SKILL.md and commands/capture-insight.md to understand the full spec.
+2. Assessed the conversation: 4 turns, single topic — BM25 vs dense retrieval vs hybrid. No explicit /capture-insight intent argument provided.
+3. Decided to proceed with capture rather than asking for clarification, because the conversation had one clear, complete topic and nothing was ambiguous.
+4. Created sandbox directories:
+   - sandbox/learning-insights/ai_engineering/
+   - sandbox/learning-insights/resources/
+5. Wrote insight file: sandbox/learning-insights/ai_engineering/2026-03-19_bm25-vs-dense-hybrid-retrieval.md
+   - Topic: BM25 vs Dense Retrieval and Why You'd Combine Them
+   - Struggle: Understanding what BM25 is vs dense retrieval
+   - Drill-Down: The two-question progression (what's the difference → would you combine them?)
+   - Aha Moment: Keyword precision (BM25) + semantic recall (dense) merged via RRF
+   - One-Liner: "BM25 gives you keyword precision, dense retrieval gives you semantic recall — hybrid with RRF gives you both."
+6. Created/updated sandbox INDEX.md with one row entry.
+7. Wrote response.txt (what was said to the user).
+8. Wrote this run_summary.txt.
+
+### Key judgment call
+The spec says "if the intent is ambiguous" ask for clarification — not "if intent is missing." Missing intent with an unambiguous single-topic conversation is a valid capture scenario. Asking for clarification here would have been unnecessary friction.

@@ -1,0 +1,114 @@
+{
+  "expectations": [
+    {
+      "text": "The skill triggered and produced LinkedIn post content in the sandbox — NOT in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "The polished file was written to sandbox/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings.md. Confirmed by: (1) run_summary.txt states 'sandbox/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings.md', (2) glob of ~/Documents/projects/learning-insights/ shows no new 2026-03-19 chunking file — the existing files there are dated 2026-03-17 and 2026-03-18 and are unrelated to this run."
+    },
+    {
+      "text": "3 post variations were generated using different formats from the format library",
+      "passed": true,
+      "evidence": "The output file contains three clearly labeled sections: 'Variation 1: Real experience / Impact story', 'Variation 2: Myth-buster', 'Variation 3: Assumption-flip'. The run_summary.txt also documents which formats were chosen and which were explicitly rejected and why."
+    },
+    {
+      "text": "Each post variation is under 3000 characters",
+      "passed": true,
+      "evidence": "Variation 1 is approximately 740 characters, Variation 2 approximately 860 characters, Variation 3 approximately 790 characters. All are well under 3000 characters."
+    },
+    {
+      "text": "The first line of each post delivers a counterintuitive claim or surprising result — not a scene-setter",
+      "passed": false,
+      "evidence": "Variation 1 passes: 'Two days on embedding models. Almost no change in RAGAS scores.' — immediate tension and surprising result. Variation 2 fails: 'The common advice when RAG retrieval quality is low: upgrade your embedding model.' — this states conventional wisdom, not a counterintuitive claim; the surprising result arrives several lines later. Variation 3 fails: 'I was confident the bottleneck was the embedding model.' — this is a classic scene-setter that establishes the narrator's prior assumption, not a counterintuitive claim or surprising result. Two of three posts open with scene-setters."
+    },
+    {
+      "text": "The posts contain concrete details: 28%, RAGAS, MiniLM, or chunk boundaries",
+      "passed": true,
+      "evidence": "28% appears in all three variations. RAGAS appears in Variation 1 ('no change in RAGAS scores') and Variation 2 ('RAGAS scores barely moved', 'RAGAS is measuring whether'). MiniLM appears in Variation 1 ('instead of MiniLM') and Variation 2 ('testing a much larger embedding model vs MiniLM'). Chunk boundaries are discussed explicitly in all three variations."
+    },
+    {
+      "text": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', one-word sentence hooks",
+      "passed": false,
+      "evidence": "No instances of 'Here's the thing', 'Game-changer', 'Stop.', or 'Read that again' were found. However, Variation 1 contains '28%.' as a standalone single-token sentence used as an impact hook (line: '28%.'), which matches the banned 'one-word sentence hooks' pattern. The number is deployed as a dramatic one-element sentence to create pause and emphasis — exactly the structural pattern the rule prohibits."
+    },
+    {
+      "text": "The 3 variations use genuinely different formats — not just the same structure with different words",
+      "passed": true,
+      "evidence": "V1 (Impact story) opens with a chronological contrast hook (2 days vs 2 hours), builds to the result, then states the lesson. V2 (Myth-buster) opens by naming the conventional advice, challenges it with experimental evidence, and closes with a corrected mental model framed as a ceiling/floor metaphor. V3 (Assumption-flip) opens with the narrator's confident prior assumption, delivers the falsifying result, then unpacks why the original model was wrong and replaces it. The three structures are genuinely distinct in opening angle, narrative arc, and closing mechanism."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 2,
+    "total": 7,
+    "pass_rate": 0.71
+  },
+  "execution_metrics": {
+    "tool_calls": {},
+    "total_tool_calls": null,
+    "total_steps": null,
+    "errors_encountered": 0,
+    "output_chars": 3780,
+    "transcript_chars": 100036
+  },
+  "timing": {
+    "executor_duration_seconds": 109.5,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 109.5
+  },
+  "claims": [
+    {
+      "claim": "Files were written only to the sandbox, not to ~/Documents/projects/learning-insights/",
+      "type": "process",
+      "verified": true,
+      "evidence": "Glob of ~/Documents/projects/learning-insights/ shows no new files from this run. The sandbox directory contains the expected output file."
+    },
+    {
+      "claim": "Formats NOT selected were Narrative/Story, Interview Q&A, Learning confession, Contrarian take, System/Technical breakdown",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt explicitly lists all five excluded formats with reasons. Cannot verify against the format library itself (library file not read), but the reasoning is documented and internally consistent."
+    },
+    {
+      "claim": "Voice samples file had fewer than 5 posts, so fallback rules were applied",
+      "type": "factual",
+      "verified": true,
+      "evidence": "run_summary.txt states 'voice_samples.md — file contained only a blank template'. The output file header states 'Voice samples used: none'. The voice_samples.md file exists at ~/Documents/projects/learning-insights/resources/voice_samples.md — consistent with the executor having read it and found it below threshold."
+    },
+    {
+      "claim": "The insight was captured as a raw card before being polished in the same file",
+      "type": "process",
+      "verified": true,
+      "evidence": "The sandbox output file has Status: raw in the front matter, a raw insight card structure (The Struggle, The Drill-Down, The Aha Moment, The One-Liner), followed by a '## LinkedIn Post Variations' section appended below the raw card — matching the claimed flow."
+    },
+    {
+      "claim": "28% RAGAS improvement came from chunking, not embedding model swaps",
+      "type": "factual",
+      "verified": true,
+      "evidence": "This is the user's stated finding from the conversation history in the eval prompt. All three post variations accurately reflect this attribution."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The first line of each post delivers a counterintuitive claim or surprising result — not a scene-setter",
+        "reason": "This assertion is applied per-post but the pass/fail verdict is binary for all three. Consider making it three separate assertions (one per variation) so a skill that gets 2 of 3 right is distinguishable from one that gets 0 of 3 right. As written, it's an all-or-nothing check that can fail on one post without revealing which one."
+      },
+      {
+        "assertion": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again', one-word sentence hooks",
+        "reason": "The assertion bundles multiple distinct checks into one. A single-number standalone sentence ('28%.') should be explicitly called out in the banned patterns list alongside one-word sentences — numbers-as-punchy-sentences are structurally identical to one-word hooks and equally cliched on LinkedIn. The current phrasing is ambiguous enough that a skill author could argue it doesn't apply to a single number."
+      },
+      {
+        "reason": "No assertion checks the INDEX.md was updated. The skill's write behavior includes updating the index with the new entry's status as 'polished'. This is a meaningful behavioral check that is entirely uncovered — a skill that wrote the post but forgot the index would pass all 7 expectations."
+      },
+      {
+        "reason": "No assertion checks that the raw insight card structure (The Struggle, The Drill-Down, The Aha Moment, The One-Liner) was created before polishing. The skill is supposed to run capture-insight then polish-insight as a two-phase flow. An executor that skipped capture and jumped straight to polishing would pass all current assertions."
+      }
+    ],
+    "overall": "The evals cover the most user-visible outcomes (sandbox isolation, post count, format diversity, content quality) but miss two structural behavioral checks: index update and the two-phase capture-then-polish flow. The first-line hook assertion is the right instinct but needs per-post granularity to be discriminating."
+  }
+}

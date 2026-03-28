@@ -1,0 +1,33 @@
+Run Summary — without_skill capture
+Date: 2026-03-19
+
+Task
+----
+User shared a learning insight: chunking strategy matters more than embedding model selection
+for retrieval quality on domain-specific corpora. They observed that two days of swapping
+embedding models barely moved RAGAS scores, while fixing chunk boundaries to respect paragraph
+structure produced a 28% RAGAS score jump. They asked to "save it as a learning insight."
+
+What was done
+-------------
+The insight was appended to the project MEMORY.md file at:
+  /Users/hariharansampathkumar/.claude/projects/-Users-hariharansampathkumar-Documents-projects-ai-engineering/memory/MEMORY.md
+
+A new section "RAG Lab — Learning Insights" was added under the existing "RAG Lab — Key Findings So Far"
+section. The insight was written as a titled, dated entry with a concise summary of the finding
+and its practical implication.
+
+Files created
+-------------
+- /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-1/eval-capture-casual/without_skill/outputs/run_summary.txt (this file)
+
+Files modified
+--------------
+- /Users/hariharansampathkumar/.claude/projects/-Users-hariharansampathkumar-Documents-projects-ai-engineering/memory/MEMORY.md
+
+Approach taken (no skill)
+--------------------------
+No special skill was invoked. The natural interpretation of "save it as a learning insight"
+was to persist it to the project's persistent memory file (MEMORY.md), which is the existing
+mechanism for retaining cross-session context in this project. The insight was formatted
+consistently with existing entries — titled, dated, and written as a concise takeaway.

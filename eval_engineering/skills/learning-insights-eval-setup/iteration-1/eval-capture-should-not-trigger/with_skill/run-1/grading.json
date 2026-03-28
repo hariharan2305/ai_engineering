@@ -1,0 +1,79 @@
+{
+  "expectations": [
+    {
+      "text": "No file was created in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "The transcript shows only one Write call, targeting the eval outputs directory (run_summary.txt). The filesystem listing of ~/Documents/projects/learning-insights/ shows no new files attributable to this run — all files present are pre-existing insight captures with dates predating this session."
+    },
+    {
+      "text": "~/Documents/projects/learning-insights/INDEX.md was not modified",
+      "passed": true,
+      "evidence": "INDEX.md was read and contains only pre-existing entries (latest entry dates to 2026-03-19 but matches prior ai_engineering insight files, not a conversation transcript). No tool call in the transcript touches INDEX.md."
+    },
+    {
+      "text": "The agent handled the request as a plain file-save without routing it through the learning-insights capture workflow",
+      "passed": true,
+      "evidence": "Transcript line 8 shows the agent explicitly reasoned: 'The learning-insights skill does NOT apply here. This is a straightforward request to save the conversation as a markdown file.' The agent wrote only run_summary.txt to the eval outputs directory and documented 'Skill invoked: NO'. No capture-insight or polish-insight command was triggered."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 1,
+      "Bash": 1,
+      "Write": 1
+    },
+    "total_tool_calls": 3,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 941,
+    "transcript_chars": 14200
+  },
+  "timing": {
+    "executor_duration_seconds": 25.3,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 25.3
+  },
+  "claims": [
+    {
+      "claim": "The learning-insights skill triggers on specific phrases like 'save this insight', 'capture this insight', etc., and the user request did not match these",
+      "type": "process",
+      "verified": true,
+      "evidence": "SKILL.md description confirms the trigger phrases. The user prompt 'save this markdown file to disk... save the current conversation as a .md file in my project directory' contains 'save' but not in the insight-capture context. The agent's reasoning correctly distinguished 'save this insight' from 'save the conversation as a file.'"
+    },
+    {
+      "claim": "The agent correctly determined it could not save the raw conversation transcript (no file on disk to read)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "run_summary.txt states: 'A correct agent should either inform the user that saving the raw conversation transcript is not something it can do directly (since the conversation history is not a file on disk it can read)'. The agent did not attempt to fabricate or hallucinate conversation content."
+    },
+    {
+      "claim": "Only run_summary.txt was written as output",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Glob of the outputs directory returned exactly one file: run_summary.txt. Transcript confirms a single Write tool call to that path."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "All three assertions are absence checks (no file created, no INDEX.md modified, skill not invoked). They pass trivially if the agent does nothing at all. Consider adding a positive assertion: that the agent wrote a run_summary.txt explaining its non-invocation decision — this ensures the agent actively reasoned about the skill rather than simply ignoring the request."
+      },
+      {
+        "assertion": "The agent handled the request as a plain file-save without routing it through the learning-insights capture workflow",
+        "reason": "This assertion is ambiguous: 'plain file-save' could mean it attempted to save a conversation .md file directly, but the agent actually concluded it couldn't do that and documented why. The assertion passes, but the agent didn't really execute a file-save — it punted. A sharper assertion would be: 'The agent did not invoke the Skill tool or any learning-insights command, and did not write any file to ~/Documents/projects/learning-insights/'. That's more discriminating."
+      }
+    ],
+    "overall": "The evals correctly catch false positives (skill firing when it shouldn't), but all three are negative/absence assertions. Adding one positive assertion about the quality of the non-invocation decision would make the eval suite more robust."
+  }
+}

@@ -1,0 +1,45 @@
+RUN SUMMARY
+===========
+
+Date: 2026-03-19
+Insight file: 2026-03-19_chunking-beats-embeddings-rag.md
+Voice samples available: none (fewer than 5) — fallback rules applied
+
+
+FORMATS SELECTED
+----------------
+
+1. Real experience / Impact story
+   Reason: The insight is a direct before/after experiment with a concrete number (28%) and a clear pivot. This format is built exactly for that: hook on the result, show what was tried first, show the pivot, extract the lesson. The structure matches the shape of the story the user told.
+
+2. Myth-buster
+   Reason: The user's experience directly contradicts the common belief that upgrading embedding models is the primary lever for RAG quality. The myth is widely held (it's the intuitive assumption), the user tested it and it failed, and the corrected mental model is concrete. Myth-buster serves this well.
+
+3. Assumption-flip
+   Reason: The user held a confident assumption (bigger model = better retrieval), acted on it for two days, and had that assumption reversed by evidence. Assumption-flip captures the first-person arc of believing something, testing it, and updating — which matches the energy of the conversation closely.
+
+Format NOT selected: Narrative / Story — overlaps too heavily with Real experience / Impact story for this insight.
+Format NOT selected: Contrarian take — would require making a general claim about embedding models broadly; the insight is scoped to this specific experiment and pipeline stage.
+Format NOT selected: Interview Q&A — the insight is experiential, not conceptual; framing it as an interview question would strip the personal evidence that makes it credible.
+Format NOT selected: Learning confession — the user didn't express confusion or a feeling of being wrong; they ran an experiment, got data, and drew a conclusion. No confession energy in the raw card.
+
+
+HOOK VERIFICATION (line-1 test)
+--------------------------------
+
+Variation 1 (Real experience / Impact story):
+  Line 1: "Fixing chunk boundaries gave me a 28% RAGAS jump — more than two days of embedding model swaps ever did."
+  Test: Does reading only line 1 create tension or surprise? Yes — the number is embedded in a sentence that contrasts two actions, making the gap immediate. The reader feels the counterintuitive result before reading further.
+  Banned pattern check: Not a scene-setter. Not "I ran two experiments." Not a standalone dramatic number sentence ("The result: 28%." is banned — this version embeds the number in meaning). PASS.
+
+Variation 2 (Myth-buster):
+  Line 1: "Better embedding models don't fix a broken RAG pipeline — better chunks do."
+  Test: Does reading only line 1 create tension or surprise? Yes — it states a counterintuitive claim directly. Anyone who has assumed the opposite (which is most people) feels the challenge immediately.
+  Banned pattern check: Not a scene-setter. Not "The common advice is X." States the corrected claim directly. PASS.
+
+Variation 3 (Assumption-flip):
+  Line 1 (as written in file): "Two days of swapping embedding models, and my RAGAS scores barely moved — the problem was never the model."
+  Test: Does reading only line 1 create tension or surprise? Yes — the reader immediately knows something went wrong with the expected approach and the claim ("the problem was never the model") creates forward pull.
+  Banned pattern check: Not a scene-setter. Not "I was confident that X" (original draft used this and was corrected). Not a standalone dramatic number. The number is embedded in a sentence that carries meaning. PASS.
+
+  Note: An earlier draft of Variation 3 opened with "I was confident that swapping to a larger embedding model would improve my RAG retrieval quality." — this is the banned scene-setter pattern. It was caught and corrected before finalising the file.

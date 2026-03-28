@@ -1,0 +1,1 @@
+{"eval_id": 4, "eval_name": "eval-capture-should-not-trigger", "prompt": "3-turn bash script conversation then 'save this conversation as .md'", "assertions": []}

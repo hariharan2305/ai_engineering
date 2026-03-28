@@ -1,0 +1,23 @@
+run: eval-capture-casual / with_skill
+date: 2026-03-19
+
+skill triggered: yes
+trigger phrase: "This is a really good insight — save it as a learning insight."
+
+files created:
+- ai_engineering/2026-03-19_chunk-quality-over-embedding-model.md (insight card)
+- INDEX.md (global index, new entry added)
+
+insight summary:
+  topic: Chunk Quality Beats Embedding Model for RAG Score Improvements
+  slug: chunk-quality-over-embedding-model
+  status: raw
+  one-liner: "I spent two days swapping embedding models and barely moved the needle — switched to paragraph chunking in two hours and got a 28% jump."
+
+process notes:
+- SKILL.md and capture-insight.md were read before writing any output
+- Sandbox override applied: files written to iteration-3/sandbox/learning-insights/ instead of ~/Documents/projects/learning-insights/
+- Project name (ai_engineering) detected from working directory git repo root
+- All sections populated from conversation content only — no fabrication or embellishment
+- User's voice preserved: kept "barely moved the needle", "two days vs two hours" framing
+- Emotional register (frustration + surprise at the delta) preserved in The Aha Moment

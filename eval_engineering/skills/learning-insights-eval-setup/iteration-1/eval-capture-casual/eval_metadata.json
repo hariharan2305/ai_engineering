@@ -1,0 +1,37 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-capture-casual",
+  "prompt": "Casual 'save it as a learning insight' with no slash command",
+  "assertions": [
+    {
+      "id": "skill_triggered",
+      "type": "deterministic",
+      "description": "A .md file was created in ~/Documents/projects/learning-insights/ — this confirms the skill triggered without an explicit /capture-insight slash command"
+    },
+    {
+      "id": "has_all_sections",
+      "type": "deterministic",
+      "description": "The created file contains all four required sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner"
+    },
+    {
+      "id": "status_raw",
+      "type": "deterministic",
+      "description": "The file metadata contains 'Status: raw'"
+    },
+    {
+      "id": "mentions_28_percent",
+      "type": "deterministic",
+      "description": "The file content references the '28%' RAGAS score improvement — a specific detail from the prompt that should be preserved, not paraphrased away"
+    },
+    {
+      "id": "voice_casual",
+      "type": "llm_judge",
+      "description": "The Struggle and Drill-Down sections use the user's own phrasing and energy. User said 'barely moved the needle' and 'spent two days' — the card should preserve this first-person, practical tone, not elevate it into formal writing"
+    },
+    {
+      "id": "correct_insight_focus",
+      "type": "llm_judge",
+      "description": "The Aha Moment correctly captures the insight that chunk boundaries (not embedding model size) were the root cause of retrieval failures. The mental model shift — from 'model quality' to 'chunk quality' — should be clear"
+    }
+  ]
+}

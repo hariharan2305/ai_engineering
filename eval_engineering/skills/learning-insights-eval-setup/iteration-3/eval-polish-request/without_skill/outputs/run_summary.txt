@@ -1,0 +1,16 @@
+run: without_skill
+model: claude-sonnet-4-6
+date: 2026-03-19
+
+input_insight:
+  - Two days on embedding model swaps (MiniLM to larger model): no measurable change
+  - Two hours on chunk boundary fix (paragraph-aware chunking): 28% RAGAS improvement
+
+output:
+  - linkedin_post.md created
+  - Core message: chunking strategy has more leverage than model size; fix data quality before upgrading models
+  - Post format: short paragraphs, concrete contrast (days vs hours, 0% vs 28%), closes with actionable takeaway
+  - Hashtags: #RAG #LLM #GenAI #MachineLearning #MLEngineering
+
+approach:
+  No skill invoked. Post written directly from conversation context without a structured template or skill scaffold.

@@ -1,0 +1,13 @@
+I received the command /capture-insight with no arguments.
+
+It is unclear what insight you want to capture. The command appears to be for saving a learning insight to some log or record, but without an argument I do not know:
+
+- What the insight is
+- Which topic or experiment it relates to
+- Where it should be stored
+
+Could you provide the insight you want to capture? For example:
+
+  /capture-insight Recursive chunking outperformed semantic chunking on prose corpora with chunk_size=512
+
+That would give me something concrete to act on.

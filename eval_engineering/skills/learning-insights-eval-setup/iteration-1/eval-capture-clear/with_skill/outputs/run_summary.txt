@@ -1,0 +1,39 @@
+Run Summary — /capture-insight execution
+========================================
+
+Task: Capture insight about why HNSW approximate search is acceptable for semantic retrieval.
+
+Files Created
+-------------
+
+1. /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md
+   - New raw insight card
+   - Topic: Why HNSW Approximate Search is Acceptable for Semantic Retrieval
+   - Status: raw
+   - Contains: The Struggle, The Drill-Down, The Aha Moment, The One-Liner sections
+
+2. /Users/hariharansampathkumar/Documents/projects/learning-insights/INDEX.md
+   - Updated (not created) — prepended new entry for the HNSW insight at the top
+   - Now contains 5 entries total (previously 4)
+
+Files Copied to Outputs Directory
+----------------------------------
+
+1. 2026-03-19_hnsw-approximate-search-semantic.md — copy of the insight card
+2. INDEX.md — copy of the updated global index
+
+Errors Encountered
+------------------
+
+None. All files written successfully.
+
+Skill Execution Notes
+---------------------
+
+- Project detected as: ai_engineering (from cwd /Users/hariharansampathkumar/Documents/projects/ai_engineering git root)
+- Date used: 2026-03-19 (current date per environment)
+- learning-insights/ directory already existed, no auto-creation required
+- ai_engineering/ subdirectory already existed, no auto-creation required
+- resources/ directory already existed, no auto-creation required
+- INDEX.md already existed and was updated with new row prepended (newest first)
+- Insight stays strictly within what was expressed in the conversation — no fabricated confusion or embellishment added

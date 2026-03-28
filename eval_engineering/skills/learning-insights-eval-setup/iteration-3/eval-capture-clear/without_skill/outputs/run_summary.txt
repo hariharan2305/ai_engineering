@@ -1,0 +1,12 @@
+Insight: Why HNSW approximate search is acceptable for semantic retrieval
+
+HNSW (Hierarchical Navigable Small World) uses approximate nearest neighbor search, meaning it may return rank 2 or rank 3 results instead of the true rank 1. This sounds like a flaw, but it is not a meaningful problem for semantic retrieval for two reasons:
+
+1. Semantic meaning is fuzzy. In embedding space, rank 1 and rank 3 are both semantically relevant to the query. The precision lost by approximation falls within the natural ambiguity of semantic meaning itself. The error margin of the algorithm matches the fuzziness of the problem.
+
+2. Exact search does not scale. At 1 million vectors, exhaustive nearest neighbor search takes seconds. HNSW returns results in milliseconds. In production, that latency gap is the difference between a usable system and an unusable one.
+
+The core insight: HNSW's approximation is acceptable precisely because semantic retrieval does not require mathematical exactness. The algorithm trades a type of precision that does not matter (exact rank) for something that does (speed at scale). The approximation is not a compromise — it is the right fit for the problem.
+
+Source: Conversation reasoning through HNSW vs exact search trade-offs.
+Date captured: 2026-03-19

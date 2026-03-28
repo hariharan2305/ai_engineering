@@ -1,0 +1,126 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created inside ~/Documents/projects/learning-insights/ai_engineering/ with '2026-03-19' in the filename",
+      "passed": true,
+      "evidence": "File confirmed at /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md — correct directory and date in filename."
+    },
+    {
+      "text": "The file contains a '## The Struggle' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present with substantive content: 'I kept seeing HNSW mentioned everywhere for vector search but couldn't get past one thing: if I'm doing semantic search, don't I want exact results?'"
+    },
+    {
+      "text": "The file contains a '## The Drill-Down' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present with ~90 words describing the progression: initial question, the error-tolerance-alignment reframe, latency angle at 1M vectors."
+    },
+    {
+      "text": "The file contains a '## The Aha Moment' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present with ~80 words: 'The key reframe was this: semantic meaning is fuzzy. Vectors that are close to your query vector are semantically similar enough to be useful...'"
+    },
+    {
+      "text": "The file contains a '## The One-Liner' section with a blockquote (line starting with '>')",
+      "passed": true,
+      "evidence": "Section present with blockquote: '> HNSW's approximation is fine because semantic meaning is fuzzy anyway — and it's orders of magnitude faster.'"
+    },
+    {
+      "text": "The file metadata contains 'Status: raw'",
+      "passed": true,
+      "evidence": "Line 5 of the file: '**Status:** raw'"
+    },
+    {
+      "text": "The file body is under 400 words",
+      "passed": true,
+      "evidence": "The file body (all four sections plus footer) is approximately 240 words — well under the 400-word limit."
+    },
+    {
+      "text": "~/Documents/projects/learning-insights/INDEX.md exists and contains a row referencing the new file",
+      "passed": true,
+      "evidence": "INDEX.md exists. Row present: '| 2026-03-19 | ai_engineering | Why HNSW Approximate Search is Acceptable for Semantic Retrieval | raw | [2026-03-19_hnsw-approximate-search-semantic.md](ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md) |'"
+    },
+    {
+      "text": "The One-Liner or Struggle sections preserve the user's casual language — the user said 'beautiful' and 'fuzzy', this energy should appear rather than being sanitized into formal prose",
+      "passed": true,
+      "evidence": "'fuzzy' appears twice — in The Aha Moment ('semantic meaning is fuzzy') and The One-Liner ('semantic meaning is fuzzy anyway'). The Struggle section preserves first-person casual register ('I kept seeing', 'couldn't get past', 'sounded like'). The word 'beautiful' does not appear, but the casual energy and the key word 'fuzzy' are clearly preserved. The overall tone avoids sanitized formal prose."
+    },
+    {
+      "text": "The content does not fabricate struggles or technical details not present in the provided conversation",
+      "passed": true,
+      "evidence": "All content is grounded in the conversation: the 'exact vs approximate' framing, the #1/#3 nearest neighbor example, the '1M vectors / seconds vs milliseconds' latency figures, and the 'semantic meaning is fuzzy' phrasing all directly trace to the provided transcript."
+    }
+  ],
+  "summary": {
+    "passed": 10,
+    "failed": 0,
+    "total": 10,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 2,
+      "Write": 2
+    },
+    "total_tool_calls": 4,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 2083,
+    "transcript_chars": 12940
+  },
+  "timing": {
+    "executor_duration_seconds": 39.1,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 39.1
+  },
+  "claims": [
+    {
+      "claim": "The executor created insight_hnsw_approximate_search.md in the outputs directory",
+      "type": "factual",
+      "verified": true,
+      "evidence": "File confirmed at the outputs directory path. However, this is a local scratchpad file, not the canonical learning-insights file — the canonical file is at the learning-insights repo path."
+    },
+    {
+      "claim": "The executor handled /capture-insight as a straightforward content extraction and structured note-writing task",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt confirms: 'No special skill or framework was used — this was handled as a straightforward content extraction and structured note-writing task.' The transcript shows only two Write calls with no complex tooling."
+    },
+    {
+      "claim": "The output file in the outputs directory is the same as the file in learning-insights/",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The executor wrote insight_hnsw_approximate_search.md to the outputs dir (generic format, no sections like The Struggle/Drill-Down). The graded file at learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md has the correct structured format. The transcript does NOT show this second file being created — it appears to have been created by a different agent run or pre-existing. The executor's transcript only shows writes to the outputs directory."
+    },
+    {
+      "claim": "The file at learning-insights/ was created by this executor run",
+      "type": "process",
+      "verified": false,
+      "evidence": "The transcript shows only two Write calls: outputs/insight_hnsw_approximate_search.md and outputs/run_summary.txt. There is no Write call for learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md and no INDEX.md update in this transcript. The correctly formatted file must have been created by a different execution."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Critical gap: The executor did NOT create the graded file. The transcript shows writes only to the outputs directory (insight_hnsw_approximate_search.md and run_summary.txt). The file at learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md was created by a different run. All 10 assertions evaluated against a file this executor did not produce. The eval setup should verify that the file being graded was actually created in the executor's transcript — e.g., by checking the file's creation timestamp against the run start time, or by requiring the executor to record the canonical output path in run_summary.txt."
+      },
+      {
+        "assertion": "The file body is under 400 words",
+        "reason": "This assertion passes trivially — the file is ~240 words and there is almost no scenario where a single insight capture would breach 400 words. The limit does not discriminate good from bad outputs. A more useful assertion would check that the body is between 100–300 words (not too thin, not too verbose)."
+      },
+      {
+        "assertion": "The One-Liner or Struggle sections preserve the user's casual language — the user said 'beautiful' and 'fuzzy', this energy should appear rather than being sanitized into formal prose",
+        "reason": "'beautiful' does not appear anywhere in the output despite being explicitly cited in the assertion. If the assertion is checking for that specific word, it should test for it directly. If it is checking for general casual energy, 'beautiful' should be removed from the assertion to avoid confusion about what 'energy' means."
+      },
+      {
+        "reason": "No assertion checks whether the output file was written to the correct canonical path (~/Documents/projects/learning-insights/ai_engineering/) by the executor itself. Assertion 1 checks filename and directory but cannot distinguish between a file the executor created vs a pre-existing file from a prior run."
+      }
+    ],
+    "overall": "The 10-assertion pass is misleading: the executor did not create the graded file. The canonical learning-insights file appears to be a carry-over from a prior run or a different agent. The evals need a mechanism to confirm file provenance — otherwise any pre-existing correctly-formatted file causes all structural assertions to pass regardless of executor behavior."
+  }
+}

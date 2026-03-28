@@ -1,0 +1,117 @@
+{
+  "skill_name": "learning-insights",
+  "sandbox_storage": "iteration-3/sandbox/learning-insights/",
+  "changes_from_previous": [
+    "Hook rule tightened: explicit banned patterns added, numbers-as-dramatic-pause explicitly banned",
+    "No-intent eval redesigned: multi-topic conversation forces genuine ambiguity, requiring clarification"
+  ],
+  "evals": [
+    {
+      "id": 1,
+      "name": "eval-capture-clear",
+      "note": "Same as iteration-2. Verifying 8/8 holds with no regression.",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "I'm building a RAG system and I keep seeing HNSW recommended for vector search. But I don't get it — if I'm doing semantic search, don't I want exact nearest neighbor results? Why would I accept approximate?"},
+        {"turn": 2, "role": "Claude", "text": "Exact nearest neighbor search guarantees you get the mathematically closest vector. HNSW trades that guarantee for speed — it searches a graph of nearby nodes rather than the entire index, so it might miss the true #1 nearest neighbor and return #2 or #3 instead."},
+        {"turn": 3, "role": "User", "text": "Right, so why is that acceptable? If I miss the most relevant result that seems like a problem."},
+        {"turn": 4, "role": "Claude", "text": "In semantic space, the gap in relevance between rank 1 and rank 3 is almost always negligible. Both are semantically similar to your query. The question your RAG system answers is 'find me something relevant' — not 'find me the single most mathematically similar vector.' The approximation tolerance of HNSW matches the tolerance of the problem itself."},
+        {"turn": 5, "role": "User", "text": "Oh wait — so you're saying the error margin of the algorithm matches the fuzziness of semantic meaning itself?"},
+        {"turn": 6, "role": "Claude", "text": "Exactly. And at 1 million vectors, exact search takes seconds. HNSW takes milliseconds. For production RAG, that latency difference matters far more than whether you got rank 1 vs rank 3."},
+        {"turn": 7, "role": "User", "text": "Oh that's actually kind of beautiful. The approximation is fine because semantic meaning is fuzzy anyway — you're not looking for the one right answer, you're looking for something good enough to reason from."}
+      ],
+      "current_turn": "/capture-insight why HNSW approximate search is acceptable for semantic retrieval",
+      "expectations": [
+        "A .md file was created inside the sandbox path — NOT in ~/Documents/projects/learning-insights/",
+        "The file contains '## The Struggle' section reflecting turns 1 and 3",
+        "The file contains '## The Drill-Down' showing the progression from 'why accept approximate?' to error-tolerance insight",
+        "The file contains '## The Aha Moment' capturing the semantic fuzziness realization",
+        "The file contains '## The One-Liner' with a blockquote",
+        "The file metadata has 'Status: raw'",
+        "The emotional language from turn 7 is preserved — 'beautiful' or 'fuzzy' or equivalent appears in the card",
+        "The file does not fabricate confusion or technical details not in the conversation"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "eval-capture-casual",
+      "note": "Same as iteration-2. Verifying 6/6 holds.",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "My RAG pipeline RAGAS scores are stuck around 0.55. I swapped out all-MiniLM for a larger sentence-transformers model and barely saw any change."},
+        {"turn": 2, "role": "Claude", "text": "What does your chunking look like right now?"},
+        {"turn": 3, "role": "User", "text": "Fixed-size, 512 tokens, no overlap. Pretty standard."},
+        {"turn": 4, "role": "Claude", "text": "That's likely your bottleneck. Fixed-size chunking cuts at character count boundaries — it doesn't care if it's splitting mid-sentence or mid-concept. A better embedding model can't fix broken chunks."},
+        {"turn": 5, "role": "User", "text": "So you're saying the embedding model is not the lever here?"},
+        {"turn": 6, "role": "Claude", "text": "For domain-specific corpora, almost never. Chunk quality determines whether the right information is even retrievable in the first place."},
+        {"turn": 7, "role": "User", "text": "I changed to paragraph-based chunking. RAGAS jumped from 0.55 to 0.71 — a 28% improvement. I literally spent two days swapping models and barely moved the needle, and this took two hours."}
+      ],
+      "current_turn": "This is a really good insight — save it as a learning insight.",
+      "expectations": [
+        "A .md file was created in the sandbox path — skill triggered from casual phrasing without a slash command",
+        "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+        "The file metadata has 'Status: raw'",
+        "The file preserves '28%' from turn 7",
+        "The Drill-Down uses the user's phrasing — 'barely moved the needle' or 'two days' appears",
+        "The Aha Moment correctly identifies chunk boundaries as the root cause"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "eval-capture-no-intent",
+      "note": "REDESIGNED from iteration-2. Conversation jumps across 3 unrelated topics — the skill cannot infer which one to capture and must ask.",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "What's the difference between BM25 and dense retrieval?"},
+        {"turn": 2, "role": "Claude", "text": "BM25 is keyword-based — scores by term frequency and inverse document frequency. Dense retrieval uses embedding vectors for semantic similarity regardless of exact word match."},
+        {"turn": 3, "role": "User", "text": "Got it. Completely different question — can you explain how Python's GIL works and why it matters for multi-threaded code?"},
+        {"turn": 4, "role": "Claude", "text": "The GIL (Global Interpreter Lock) is a mutex that allows only one thread to execute Python bytecode at a time. It simplifies memory management but means CPU-bound multithreaded Python code doesn't actually run in parallel — threads take turns rather than running simultaneously."},
+        {"turn": 5, "role": "User", "text": "Interesting. And one more thing — what's the difference between precision and recall in information retrieval?"},
+        {"turn": 6, "role": "Claude", "text": "Precision is what fraction of retrieved results are actually relevant. Recall is what fraction of all relevant results you actually retrieved. They trade off — casting a wider net improves recall but hurts precision."}
+      ],
+      "current_turn": "/capture-insight",
+      "expected_output": "The skill must ask for clarification. Three completely unrelated topics were discussed (BM25 vs dense, Python GIL, precision vs recall). There is no single obvious insight to capture — the skill should ask which topic to focus on.",
+      "expectations": [
+        "No insight file was created in the sandbox",
+        "The response asks for clarification — specifically which of the topics discussed the user wants to capture",
+        "The response does NOT pick a topic and capture it without asking"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "eval-capture-should-not-trigger",
+      "note": "Same as iteration-2.",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "Can you help me write a bash script that renames all .txt files in a directory to .md?"},
+        {"turn": 2, "role": "Claude", "text": "Sure. Here's a one-liner: `for f in *.txt; do mv \"$f\" \"${f%.txt}.md\"; done`"},
+        {"turn": 3, "role": "User", "text": "Perfect, that worked."}
+      ],
+      "current_turn": "Can you save this conversation as a .md file in my project directory?",
+      "expectations": [
+        "No file was created in ~/Documents/projects/learning-insights/ or the sandbox learning-insights path",
+        "The skill was not invoked — the agent handled this as a plain file-save request",
+        "A conversation record was saved to the outputs directory"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "eval-polish-request",
+      "note": "Same conversation as iteration-2. Testing tightened hook rule — specifically that no variation opens with a scene-setter and no standalone number sentences appear.",
+      "conversation_history": [
+        {"turn": 1, "role": "User", "text": "I've been testing different components in my RAG pipeline to see what actually moves the RAGAS scores."},
+        {"turn": 2, "role": "Claude", "text": "What have you tried so far?"},
+        {"turn": 3, "role": "User", "text": "Started with embedding model swaps — went from MiniLM to a much larger model. Almost no change. Then I fixed my chunk boundaries to respect paragraph structure instead of fixed-size splitting."},
+        {"turn": 4, "role": "Claude", "text": "And the chunking change moved the needle?"},
+        {"turn": 5, "role": "User", "text": "28% jump in RAGAS scores. Two days on embedding models gave me nothing. Two hours on chunking gave me 28%. The lesson is clear — your retrieval pipeline is only as good as your chunks. Fix the chunks before touching anything else."}
+      ],
+      "current_turn": "Create a LinkedIn post from this insight.",
+      "expectations": [
+        "The skill triggered and produced LinkedIn post content in the sandbox",
+        "3 post variations were generated using different formats",
+        "Each variation is under 3000 characters",
+        "Every variation's first line delivers a counterintuitive claim or surprising result — none open with scene-setters like 'I ran experiments', 'The common advice is', or 'I was confident that'",
+        "No standalone number sentences appear — '28%.' or 'The result: 28%.' as isolated lines are banned",
+        "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again'",
+        "The 3 variations use genuinely different formats",
+        "All outputs written to sandbox, not to ~/Documents/projects/learning-insights/"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+Run Summary — capture-insight eval (iteration-2, with_skill)
+
+Command invoked: /capture-insight why HNSW approximate search is acceptable for semantic retrieval
+
+Files created:
+1. Insight file:
+   /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/sandbox/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md
+
+2. INDEX.md updated (new row prepended as newest entry):
+   /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/sandbox/learning-insights/INDEX.md
+
+Both files copied to:
+   /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/eval-capture-clear/with_skill/outputs/
+
+Errors: None.
+
+Notes:
+- INDEX.md already contained 3 prior entries from other eval runs in the same sandbox. New entry was prepended at the top per the "newest first" rule.
+- The insight captures the full conversation arc: initial confusion about accepting approximate results, the drill-down questioning, and the aha moment that the approximation tolerance of HNSW matches the fuzziness of semantic meaning itself.
+- User's emotional reaction ("that's actually kind of beautiful") was preserved in the Aha Moment section as required by the skill spec.

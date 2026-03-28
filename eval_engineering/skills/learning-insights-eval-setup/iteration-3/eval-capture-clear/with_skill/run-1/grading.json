@@ -1,0 +1,120 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created inside the sandbox path — NOT in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "Transcript line 26 shows the Write tool created the file at: /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md — confirmed inside the sandbox path. The outputs directory copy also confirms this (file was copied from sandbox, not from ~/Documents/projects/learning-insights/)."
+    },
+    {
+      "text": "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+      "passed": true,
+      "evidence": "Output file line 10-12: '## The Struggle' section is present and reads: 'I kept seeing HNSW recommended for vector search but it didn't make sense to me. If I'm doing semantic search, don't I want exact nearest neighbor results? I was worried that if HNSW misses the true #1 nearest neighbor and returns #2 or #3 instead, I'm missing the most relevant result — and that seems like a problem.' This directly reflects the Turn 1 and Turn 3 confusion from the transcript."
+    },
+    {
+      "text": "The file contains '## The Drill-Down' showing the progression to the error-tolerance insight",
+      "passed": true,
+      "evidence": "Output file line 14-16: '## The Drill-Down' section is present and shows the progression: 'First I asked: why accept approximate at all? ... Then when I heard that the relevance gap between rank 1 and rank 3 is almost always negligible in semantic space, I pushed further — so you're saying the error margin of the algorithm matches the fuzziness of semantic meaning itself? And then the latency argument landed.' This maps accurately to Turns 2-6 of the conversation."
+    },
+    {
+      "text": "The file contains '## The Aha Moment' capturing the semantic fuzziness realization",
+      "passed": true,
+      "evidence": "Output file line 18-20: '## The Aha Moment' section is present and reads: 'The approximation is acceptable because semantic meaning is fuzzy anyway. You're not looking for the one right answer — you're looking for something good enough to reason from. The error tolerance of HNSW matches the tolerance of the problem itself.' This directly captures the semantic fuzziness realization from Turn 5-7."
+    },
+    {
+      "text": "The file contains '## The One-Liner' with a blockquote",
+      "passed": true,
+      "evidence": "Output file lines 22-24: '## The One-Liner' section is present, followed by a properly formatted blockquote: '> HNSW's approximation is fine because semantic meaning is fuzzy anyway — you're not after the one right answer, you're after something good enough to reason from.'"
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": true,
+      "evidence": "Output file line 5: '**Status:** raw' — exactly as required by the skill spec."
+    },
+    {
+      "text": "The emotional language from turn 7 is preserved — 'beautiful' or equivalent appears in the card",
+      "passed": true,
+      "evidence": "Output file line 20 (end of The Aha Moment section): 'That's actually kind of beautiful.' — this is the exact phrase used by the user in Turn 7: 'Oh that's actually kind of beautiful.' The emotional language is preserved verbatim."
+    },
+    {
+      "text": "The file does not fabricate confusion or technical details not in the conversation",
+      "passed": true,
+      "evidence": "All content in The Struggle, Drill-Down, and Aha Moment sections traces directly to conversation turns 1-7. No technical details appear that were not discussed (e.g., no mention of ef_construction parameters, recall rates, or other HNSW internals that were not in the conversation). The latency figures (seconds vs milliseconds at 1M vectors) match Turn 6 exactly."
+    }
+  ],
+  "summary": {
+    "passed": 8,
+    "failed": 0,
+    "total": 8,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Read": 4,
+      "Write": 2,
+      "Bash": 4,
+      "Edit": 1
+    },
+    "total_tool_calls": 11,
+    "total_steps": 59,
+    "errors_encountered": 1,
+    "output_chars": 1422,
+    "transcript_chars": 27800
+  },
+  "timing": {
+    "executor_duration_seconds": 79.5,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 79.5
+  },
+  "claims": [
+    {
+      "claim": "The insight file was written to the sandbox, not to ~/Documents/projects/learning-insights/",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript shows Write tool target was the sandbox path. The file does not appear in ~/Documents/projects/learning-insights/ai_engineering/ — it was routed correctly."
+    },
+    {
+      "claim": "INDEX.md was updated with the new row prepended (newest-first order)",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript line 42-45 shows Edit tool successfully prepended the HNSW row above the existing entries. The INDEX.md in the outputs directory was copied from the sandbox."
+    },
+    {
+      "claim": "User's voice was preserved — casual first-person narration, exact emotional phrase retained",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The Drill-Down reads as first-person narrative ('First I asked...', 'I pushed further'). The Aha Moment preserves 'That's actually kind of beautiful.' from Turn 7. No formalization or polish was introduced."
+    },
+    {
+      "claim": "An Edit tool error occurred but was correctly handled",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript line 36 shows an Edit tool error ('File has not been read yet') when attempting to update INDEX.md. The executor recovered by reading the file first (line 37) and then re-applying the edit successfully (line 45)."
+    },
+    {
+      "claim": "No technical details were fabricated beyond what was in the conversation",
+      "type": "quality",
+      "verified": true,
+      "evidence": "All specific claims in the card (rank 1 vs rank 3 distinction, seconds vs milliseconds at 1M vectors, semantic fuzziness argument) appear verbatim or near-verbatim in Turns 2-6 of the transcript."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": ["Edit tool failed on first attempt because INDEX.md had not been read first; executor recovered by reading the file before re-attempting the edit"]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "reason": "Expectation 1 checks that the file was created in the sandbox path, but does NOT verify it was NOT also written to ~/Documents/projects/learning-insights/. A skill implementation that writes to both paths would pass this assertion. Consider adding an explicit 'no file exists at ~/Documents/projects/learning-insights/ai_engineering/2026-03-19_hnsw*' check."
+      },
+      {
+        "assertion": "The file does not fabricate confusion or technical details not in the conversation",
+        "reason": "This assertion cannot be automatically verified by checking the file alone — it requires cross-referencing card content against the transcript. It is the right thing to test, but it is only properly evaluated when the grader reads both the transcript and the output. Consider making this explicit in the grader prompt to ensure it is always checked against the source conversation, not just inspected in isolation."
+      },
+      {
+        "reason": "No assertion checks that the INDEX.md was updated in the sandbox (not in ~/Documents/projects/learning-insights/INDEX.md). The INDEX update is a required step per the skill spec and a meaningful signal of complete execution. Adding an assertion would catch partial-execution failures."
+      }
+    ],
+    "overall": "Assertions are well-targeted to the core skill outputs and pass only when the work is genuinely done correctly. The fabrication check is particularly valuable. The main gap is the absence of a negative-path check for sandbox isolation (file not created in the real destination) and no coverage of the INDEX update step."
+  }
+}

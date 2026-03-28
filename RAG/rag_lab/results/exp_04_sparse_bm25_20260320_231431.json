@@ -1,0 +1,93 @@
+{
+  "experiment": "exp_04_sparse_bm25",
+  "timestamp": "20260320_231431",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "retrieval_strategy": "BM25Okapi (sparse keyword)",
+  "baseline_scores": {
+    "faithfulness": 0.641,
+    "answer_relevancy": 0.583,
+    "answer_similarity": 0.538
+  },
+  "scores": {
+    "faithfulness": 0.7881944444444444,
+    "answer_relevancy": 0.87191096354022,
+    "answer_similarity": 0.7877843282063014
+  },
+  "delta": {
+    "faithfulness": 0.1472,
+    "answer_relevancy": 0.2889,
+    "answer_similarity": 0.2498
+  },
+  "samples": [
+    {
+      "question": "What is Retrieval Augmented Generation and why does it exist?",
+      "answer": "Retrieval Augmented Generation (RAG) is an AI technique that enhances the accuracy and reliability of large language models by grounding their responses in external, retrieved knowledge. Instead of relying solely on the information incorporated into model weights during training, RAG systems dynamically fetch relevant documents at query time and provide them to the language model as context. RAG exists to address two fundamental limitations of large language models: the reliance on static, pre-trained information and the need for more accurate, contextually relevant responses.",
+      "num_contexts": 5,
+      "ground_truth": "RAG is an AI technique that grounds LLM responses in externally retrieved knowledge. It exists to address two limitations of LLMs: knowledge cutoff (not knowing about post-training events) and hallucination (generating plausible but incorrect information)."
+    },
+    {
+      "question": "What are the two phases of a RAG system and what happens in each?",
+      "answer": "The two phases of a RAG system are indexing and querying.\n\nDuring indexing, source documents are loaded and parsed into plain text, then split into smaller segments called chunks. Each chunk is converted into a dense vector embedding using an embedding model, and these embeddings are stored in a vector database alongside the original text and metadata.\n\nDuring querying, the user's question is embedded using the same embedding model, and the query embedding is compared against stored chunk embeddings using cosine similarity or another distance metric to retrieve the most similar chunks. These chunks are injected into the LLM prompt as context for generating an answer.",
+      "num_contexts": 5,
+      "ground_truth": "The two phases are indexing and querying. During indexing, documents are parsed, chunked, embedded, and stored in a vector database. During querying, the user's question is embedded, similar chunks are retrieved, and the LLM generates an answer grounded in those chunks."
+    },
+    {
+      "question": "How does chunk size affect RAG system quality?",
+      "answer": "The optimal chunk size affects RAG system quality in the following ways: Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. On the other hand, larger chunks (512-1024 tokens) provide more context but can introduce noise that confuses the LLM. Therefore, there is a trade-off between retrieval precision and the amount of context available for generating responses.",
+      "num_contexts": 5,
+      "ground_truth": "Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. Larger chunks (512-1024 tokens) provide more context but can introduce noise. The optimal chunk size depends on the use case."
+    },
+    {
+      "question": "What is HNSW and why is it used in vector databases?",
+      "answer": "HNSW (Hierarchical Navigable Small World) is the most widely used Approximate Nearest Neighbor (ANN) algorithm in vector databases. It builds a multi-layered graph structure that allows for logarithmic search complexity, enabling faster searches. HNSW is used because it provides an efficient way to search through high-dimensional vector embeddings while maintaining a reasonable level of accuracy.",
+      "num_contexts": 5,
+      "ground_truth": "HNSW (Hierarchical Navigable Small World) is an Approximate Nearest Neighbor algorithm used in vector databases. It builds a multi-layered graph structure that allows logarithmic search complexity, making similarity search across millions of vectors fast."
+    },
+    {
+      "question": "What is hybrid search and when should it be used?",
+      "answer": "Hybrid search combines vector similarity with BM25 keyword search in a single query. It should be used in scenarios where there are queries with rare proper nouns, product codes, or specific terminology that embedding models may not represent well. It effectively handles both semantic queries and lexical queries, making it suitable for most production RAG systems.",
+      "num_contexts": 5,
+      "ground_truth": "Hybrid search combines dense vector similarity search with sparse BM25 keyword search. It should be used when queries include rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Scores are fused using Reciprocal Rank Fusion."
+    },
+    {
+      "question": "What does the RAGAS faithfulness metric measure?",
+      "answer": "The RAGAS faithfulness metric measures whether the generated answer is factually consistent with the retrieved context.",
+      "num_contexts": 5,
+      "ground_truth": "Faithfulness measures whether the generated answer is factually consistent with the retrieved context. A faithful answer only states claims supported by the context. It is computed by asking a judge LLM to verify each factual claim in the answer against the provided context."
+    },
+    {
+      "question": "What is the lost-in-the-middle problem in RAG?",
+      "answer": "The lost-in-the-middle problem occurs when too many retrieved chunks are passed to the LLM, causing the model to ignore relevant information that is positioned in the middle of a long context. This typically happens when the relevant information appears neither at the beginning nor at the end of the context window.",
+      "num_contexts": 5,
+      "ground_truth": "The lost-in-the-middle problem occurs when relevant information is positioned in the middle of a long context window. Research shows LLMs perform better when relevant information appears at the beginning or end of the context, and may ignore information in the middle."
+    },
+    {
+      "question": "What is the difference between context precision and context recall in RAGAS?",
+      "answer": "Context precision measures the relevance of the retrieved context, ensuring that the retrieved information is applicable to the question. In contrast, context recall measures whether all the information needed to answer the question was present in the retrieved context, requiring that each piece of the ground truth can be derived from the retrieved information.",
+      "num_contexts": 5,
+      "ground_truth": "Context precision measures whether retrieved chunks are relevant to the question (are the retrieved chunks useful). Context recall measures whether all information needed to answer the question was present in the retrieved context (was nothing missed). Recall requires ground truth answers to compute."
+    }
+  ]
+}

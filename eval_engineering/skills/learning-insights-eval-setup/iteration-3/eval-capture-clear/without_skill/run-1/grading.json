@@ -1,0 +1,110 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created inside the sandbox path — NOT in ~/Documents/projects/learning-insights/",
+      "passed": false,
+      "evidence": "The executor created run_summary.txt (plain text), not a .md file. The file was written to the correct sandbox path (outputs/), but the format requirement of .md was not met. Transcript line 7 shows the Write tool targeting 'run_summary.txt', not any markdown file."
+    },
+    {
+      "text": "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+      "passed": false,
+      "evidence": "run_summary.txt contains no section headers at all. The content is unstructured prose. No '## The Struggle' section exists."
+    },
+    {
+      "text": "The file contains '## The Drill-Down' showing the progression to the error-tolerance insight",
+      "passed": false,
+      "evidence": "No '## The Drill-Down' section exists in run_summary.txt. The file is prose-only with no markdown headers."
+    },
+    {
+      "text": "The file contains '## The Aha Moment' capturing the semantic fuzziness realization",
+      "passed": false,
+      "evidence": "No '## The Aha Moment' section in run_summary.txt. The insight about semantic fuzziness is present in the prose (point 1: 'Semantic meaning is fuzzy') but not in the required structured section format."
+    },
+    {
+      "text": "The file contains '## The One-Liner' with a blockquote",
+      "passed": false,
+      "evidence": "No '## The One-Liner' section in run_summary.txt. There is no blockquote formatting (no '>' prefix) anywhere in the file."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": false,
+      "evidence": "run_summary.txt contains no frontmatter or metadata section of any kind. There is no 'Status' field anywhere in the file."
+    },
+    {
+      "text": "The emotional language from turn 7 is preserved — 'beautiful' or equivalent appears in the card",
+      "passed": false,
+      "evidence": "The word 'beautiful' does not appear anywhere in run_summary.txt. Turn 7 of the conversation explicitly contained 'Oh that's actually kind of beautiful' — this emotional marker was not carried into the output."
+    },
+    {
+      "text": "The file does not fabricate confusion or technical details not in the conversation",
+      "passed": true,
+      "evidence": "The content of run_summary.txt accurately reflects the conversation. The two reasons given (semantic fuzziness, scale/latency) directly correspond to turns 4 and 6 of the conversation. No fabricated details, invented steps, or embellishments are present."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 7,
+    "total": 8,
+    "pass_rate": 0.125
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 1
+    },
+    "total_tool_calls": 2,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 676,
+    "transcript_chars": 8542
+  },
+  "timing": {
+    "executor_duration_seconds": 20.8,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 20.8
+  },
+  "claims": [
+    {
+      "claim": "The insight has been written to run_summary.txt",
+      "type": "process",
+      "verified": true,
+      "evidence": "File exists at outputs/run_summary.txt and contains the insight content. Transcript confirms successful Write tool call."
+    },
+    {
+      "claim": "The file captures the core reasoning: HNSW's approximation is acceptable because (1) semantic meaning is fuzzy and (2) exact search becomes too slow at production scale",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Both reasons are present and accurately stated in run_summary.txt, faithfully derived from the conversation."
+    },
+    {
+      "claim": "The output is an insight card in the expected structured format",
+      "type": "quality",
+      "verified": false,
+      "evidence": "The executor's final message says the file 'captures the core reasoning' but makes no claim about structured format. The output is prose only — no markdown sections, no metadata, no blockquote. The skill format was entirely absent."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "A .md file was created inside the sandbox path — NOT in ~/Documents/projects/learning-insights/",
+        "reason": "This assertion checks two things at once (file extension AND location) and passes only if both are true, which is good. However, it would fail to catch an empty .md file. Consider splitting into separate assertions: one for format (.md extension), one for location (not in ~/Documents/projects/learning-insights/), and add a content check."
+      },
+      {
+        "assertion": "The file does not fabricate confusion or technical details not in the conversation",
+        "reason": "This is an important anti-hallucination check, but it's structurally weak — a file that says nothing at all would pass. Consider adding a positive counterpart: 'The file accurately references the user's phrasing or question from the conversation' to ensure the faithfulness check has teeth."
+      },
+      {
+        "reason": "No assertion checks that the output file name matches the expected insight card naming convention (e.g., a slug or timestamp-based name). The executor named the file run_summary.txt which is a generic execution artifact name, not an insight card name. This is a meaningful quality signal that went unchecked."
+      },
+      {
+        "reason": "No assertion verifies that the output is a single file (the insight card itself) rather than a meta-summary of what was done. run_summary.txt reads as an executor report, not a reusable insight card. An assertion like 'The output file is addressable as a standalone insight card, not a run summary' would catch this."
+      }
+    ],
+    "overall": "6 of the 7 failing assertions all test for structured format (sections, metadata, blockquote). In aggregate they confirm the same root failure: the executor produced unstructured prose instead of a structured card. The evals are well-targeted for detecting this failure mode. The main gap is the absence of any assertion about file naming convention, and the anti-fabrication check needs a positive counterpart to be discriminating."
+  }
+}

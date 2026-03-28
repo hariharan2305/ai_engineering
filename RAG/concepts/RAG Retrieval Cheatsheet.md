@@ -12,6 +12,12 @@ This cheat‑sheet shows how to implement **advanced retrieval strategies** usin
 - Cloud / managed retrieval
   - Bedrock Knowledge Base `retrieve` (KB retrieval API)[^8]
   - Vertex AI Search retriever (as RAG backend)[^9]
+- Advanced retrieval strategies
+  - Hybrid Search (Dense + Sparse + RRF fusion)
+  - HyDE (Hypothetical Document Embeddings)
+  - Parent Document Retrieval
+  - Query Decomposition
+  - GraphRAG
 
 All snippets follow **current docs and cookbook patterns as of early 2026**.[^10]
 
@@ -353,16 +359,138 @@ This code follows the current Vertex AI Search retriever docs in LangChain OSS.[
 
 ***
 
-## 8. How to Use This Retrieval Cheat‑Sheet
+## 8. Hybrid Search (Dense + Sparse + RRF)
 
-1. **For custom RAG over your own vector DB**:
-   - Start with a basic retriever (LangChain or LlamaIndex).
-   - Add **MultiQueryRetriever** for better recall on complex queries and synonyms.[^1][^2]
-   - Add **ContextualCompressionRetriever** to trim noisy context and reduce tokens.[^4][^3]
-2. **For multi‑index / multi‑strategy setups**:
-   - Use LlamaIndex’s **RouterQueryEngine** to route between summarization, vector retrieval, and keyword indices.[^5][^6][^7]
-3. **For managed search/RAG**:
-   - Use **Bedrock KB** or **Vertex AI Search** as retrievers and focus your code on prompt‑time fusion and evaluation, rather than low‑level retrieval plumbing.[^8][^9]
+Hybrid search combines **dense vector search** (semantic similarity) with **sparse BM25** (exact keyword match) and fuses the results.
+
+**Why it matters:** Dense search misses exact terms — product codes, acronyms, proper nouns. BM25 misses paraphrases and conceptual matches. Hybrid catches both, making it the current standard for production RAG.
+
+**Process:**
+1. Run a dense ANN query against your vector store (top-K by cosine similarity)
+2. Run a BM25 query over the same corpus (top-K by term frequency)
+3. Fuse both ranked lists with **Reciprocal Rank Fusion (RRF)**
+4. Return the top-K from the unified list to the LLM
+
+**RRF formula:** For each document, its fused score = Σ `1 / (k + rank_i)` across all ranked lists, where `k = 60` is a smoothing constant. Higher score = better combined rank.
+
+```python
+def reciprocal_rank_fusion(ranked_lists: list[list[str]], k: int = 60) -> list[str]:
+    scores: dict[str, float] = {}
+    for ranked in ranked_lists:
+        for rank, doc_id in enumerate(ranked, start=1):
+            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)
+    return sorted(scores, key=scores.get, reverse=True)
+```
+
+**When to use:** Almost always. Hybrid is the default for production — pure dense retrieval is a starting point, not the end state.
+
+**Libraries:** Qdrant native hybrid API (sparse + dense), Weaviate hybrid search, LangChain `EnsembleRetriever` (combines any two retrievers with weighted fusion), `rank_bm25` for a custom BM25 layer.
+
+***
+
+## 9. HyDE (Hypothetical Document Embeddings)
+
+Instead of embedding the user's short query directly, ask an LLM to generate a **hypothetical answer**, then embed that and retrieve documents similar to it.
+
+**Why it matters:** A user query ("What causes transformer attention to fail on long sequences?") is short and sparse. A hypothetical answer lives in the same semantic space as real documents — longer, richer, better aligned with how the corpus is written. This narrows the gap between query space and document space.
+
+**Process:**
+1. User submits a query
+2. LLM generates a plausible but possibly fictional answer (the "hypothetical document")
+3. Embed the hypothetical document (not the original query)
+4. Retrieve real documents by vector similarity to that embedding
+5. Pass real retrieved docs (not the hypothetical) to the LLM for final generation
+
+```python
+# Step: generate the hypothetical document
+response = llm.invoke(
+    f"Write a short passage that directly answers this question:\n{query}"
+)
+hypothetical_doc = response.content
+# Then embed hypothetical_doc and query your vector store with it
+```
+
+**Trade-off:** Adds one LLM call per query. Most effective when queries are short or phrased differently from how documents are written. Less useful on corpora where query and document vocabulary already align well.
+
+***
+
+## 10. Parent Document Retrieval
+
+Index small, precise chunks for retrieval but return the larger **parent document** (or surrounding context) to the LLM.
+
+**Why it matters:** Small chunks produce better embedding matches (focused semantics), but give the LLM too little context to answer well. Large chunks give full context but embed poorly (diluted semantics). Parent document retrieval gets the best of both.
+
+**Process:**
+1. **At index time:** split each document into small child chunks (e.g. 200 tokens). Store each child with a pointer back to its parent (e.g. 1000-token block or the full document).
+2. **At query time:** retrieve the top-K child chunks by vector similarity (small = precise match).
+3. **Before generation:** swap each child for its parent — feed the full parent context to the LLM.
+
+**Variants:**
+- **Small-to-big:** child is a sentence or short paragraph; parent is the full section
+- **Sentence window:** retrieve a single sentence but expand to ±N surrounding sentences before passing to LLM
+
+**LangChain implementation:** `ParentDocumentRetriever` from `langchain.retrievers` handles the child→parent mapping automatically using an in-memory or persistent docstore.
+
+***
+
+## 11. Query Decomposition
+
+For complex, multi-part questions, use an LLM to break the query into 2–4 focused sub-questions, retrieve independently for each, then synthesise.
+
+**Why it matters:** A single complex query ("Compare the refund policies of our EU and US stores, and flag any regulatory conflicts") retrieves poorly because no single chunk answers all parts. Decomposition lets each sub-question find the right chunk.
+
+**Process:**
+1. LLM receives the complex query and outputs N sub-questions
+2. Each sub-question is run through the retriever independently (in parallel where possible)
+3. Retrieved chunks are deduplicated and merged
+4. LLM synthesises a final answer across all retrieved context
+
+**Variants:**
+- **Parallel decomposition:** all sub-questions are independent, run concurrently
+- **Sequential decomposition (step-back):** answer sub-Q1 first, use that answer to refine sub-Q2 (useful for reasoning chains)
+
+**When to use:** Multi-hop questions, comparison questions, questions that span multiple documents or topics. Not worth the extra LLM calls for simple factual lookups.
+
+***
+
+## 12. GraphRAG
+
+GraphRAG replaces the flat vector index with a **knowledge graph** — entities and relationships extracted from documents become nodes and edges that can be traversed to answer relational questions.
+
+**Why it matters:** Vector search finds semantically similar text but cannot reason about relationships ("How is Company A connected to the regulatory failure in Report B?"). A knowledge graph makes those connections explicit and traversable.
+
+**Process:**
+1. **Ingestion:** an LLM or NLP pipeline extracts entities (people, orgs, concepts) and relationships from documents and builds a graph
+2. **At query time:** the query is parsed for entities → graph traversal collects the relevant subgraph (nodes + edges)
+3. The subgraph is serialised as text context and passed to the LLM alongside (or instead of) vector-retrieved chunks
+
+**When to use:**
+- Global, "big-picture" questions across a large corpus ("What are the main themes?")
+- Multi-hop relational questions ("Who approved the policy that led to X?")
+- Domains with rich entity structure: legal, medical, financial, org knowledge bases
+
+**Tools:** Microsoft GraphRAG (`github.com/microsoft/graphrag`), LlamaIndex `KnowledgeGraphIndex`, Neo4j + LangChain graph retriever.
+
+**Trade-off:** High ingestion cost (LLM extractions per document). Best suited for corpora that are queried repeatedly and where relational questions matter. For straightforward factual retrieval, hybrid dense+sparse is cheaper and usually sufficient.
+
+***
+
+## 13. How to Use This Retrieval Cheat‑Sheet
+
+1. **Start here — basic to production:**
+   - Basic vector retriever → add **Hybrid Search** (BM25 + dense + RRF) → your retrieval is now production-grade
+   - Add **MultiQueryRetriever** for better recall on ambiguous or synonym-heavy queries
+   - Add **ContextualCompressionRetriever** to trim noisy context before it reaches the LLM
+2. **When retrieval quality is still poor:**
+   - Try **HyDE** if queries are short and don’t match document vocabulary
+   - Try **Parent Document Retrieval** if answers feel incomplete or miss nuance
+   - Try **Query Decomposition** if questions are multi-part or span multiple topics
+3. **For multi‑index / multi‑strategy setups:**
+   - Use **RouterQueryEngine** to route between summarization, vector retrieval, and keyword indices
+4. **For relational or global questions:**
+   - Use **GraphRAG** when entity relationships matter and vector search produces shallow answers
+5. **For managed search/RAG:**
+   - Use **Bedrock KB** or **Vertex AI Search** and focus on prompt-time fusion and evaluation, not low-level plumbing
 
 Keep this Markdown alongside your other component cheat‑sheets so you and your agents can wire up or experiment with retrieval strategies quickly while building RAC/RAG systems.
 

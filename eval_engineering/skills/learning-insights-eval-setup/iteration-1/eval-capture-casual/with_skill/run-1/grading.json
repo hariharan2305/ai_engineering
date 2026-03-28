@@ -1,0 +1,97 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created in ~/Documents/projects/learning-insights/ — confirming the skill triggered without an explicit /capture-insight slash command",
+      "passed": true,
+      "evidence": "File confirmed at /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings-domain-corpora.md. The run_summary.txt confirms it was written there. The eval prompt is a casual conversation message with no slash command."
+    },
+    {
+      "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+      "passed": true,
+      "evidence": "All four sections present in the actual file at lines 10, 14, 18, and 22 respectively: '## The Struggle', '## The Drill-Down', '## The Aha Moment', '## The One-Liner'."
+    },
+    {
+      "text": "The file metadata contains 'Status: raw'",
+      "passed": true,
+      "evidence": "Line 5 of the file: '**Status:** raw'. The field name and value both match."
+    },
+    {
+      "text": "The file content references '28%' — this specific detail from the prompt must be preserved",
+      "passed": true,
+      "evidence": "Found twice in the file: in The Drill-Down ('the scores jumped 28%') and in The One-Liner ('RAGAS jumped 28%'). The specific figure is preserved verbatim."
+    },
+    {
+      "text": "The Struggle and Drill-Down sections use the user's phrasing — 'barely moved the needle' should appear rather than a formal paraphrase",
+      "passed": true,
+      "evidence": "Exact phrase 'barely moved the needle' appears in The Struggle section: 'I spent two days swapping embedding models and barely moved the needle.' It also appears in The One-Liner. No formal paraphrase was substituted."
+    },
+    {
+      "text": "The Aha Moment correctly captures that chunk boundaries (not model size) were the root cause of retrieval failures",
+      "passed": true,
+      "evidence": "The Aha Moment reads: 'If your chunks are cutting across paragraph boundaries, you're feeding the embedding model broken context — and no embedding model, no matter how good, can recover meaning from a fragment that lost its beginning or end.' This explicitly identifies chunk boundaries as root cause and explicitly rules out model size as the lever."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "note": "No metrics.json found in outputs dir. Estimates derived from run_summary.txt and timing.json.",
+    "output_chars": 1080,
+    "transcript_chars": null
+  },
+  "timing": {
+    "executor_duration_seconds": 130.3,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 130.3,
+    "total_tokens": 31287
+  },
+  "claims": [
+    {
+      "claim": "Skill triggered automatically from a casual conversation message without an explicit slash command",
+      "type": "process",
+      "verified": true,
+      "evidence": "The eval prompt is a conversational message ('Two days on embeddings...') with no slash command. The run_summary.txt confirms the file was created. The transcript shows the skill fired from that casual input."
+    },
+    {
+      "claim": "User's exact phrasing was preserved: 'barely moved the needle', 'jumped 28%', 'don't skip it'",
+      "type": "quality",
+      "verified": true,
+      "evidence": "All three phrases verified in the actual file: 'barely moved the needle' (The Struggle), 'scores jumped 28%' (The Drill-Down), 'RAGAS jumped 28%' and 'don't skip it' (The One-Liner)."
+    },
+    {
+      "claim": "INDEX.md was updated with the new entry",
+      "type": "process",
+      "verified": true,
+      "evidence": "outputs/INDEX.md contains a row for '2026-03-19_chunking-beats-embeddings-domain-corpora.md' with status 'raw'. run_summary.txt confirms INDEX.md was updated (not created) and that a concurrent-write conflict was detected and handled by re-reading before writing."
+    },
+    {
+      "claim": "No errors were encountered during execution",
+      "type": "factual",
+      "verified": true,
+      "evidence": "run_summary.txt ERRORS section reads: 'None. All files written successfully.'"
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": ["INDEX.md had a concurrent write conflict — a new entry was added between the initial read and first write attempt. The executor re-read INDEX.md before writing to preserve the new entry. Final INDEX.md is correct."]
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "A .md file was created in ~/Documents/projects/learning-insights/ — confirming the skill triggered without an explicit /capture-insight slash command",
+        "reason": "The assertion conflates two things: file existence and trigger mechanism. A skill that required a slash command but still produced the file would pass this assertion. Consider splitting: one assertion for file existence, one that explicitly checks the eval prompt contains no slash command and the skill still fired."
+      },
+      {
+        "reason": "No assertion checks the filename format. The skill produced '2026-03-19_chunking-beats-embeddings-domain-corpora.md' — a correctly slugified, date-prefixed filename. A skill that wrote the file with a random or wrong name would pass all six assertions. Adding a filename pattern check (date prefix + slug derived from topic) would catch that failure mode."
+      },
+      {
+        "reason": "No assertion checks that the One-Liner is a single sentence or short pithy statement rather than a paragraph. The One-Liner section is defined as a compact distillation — a multi-sentence rambling output would satisfy the current assertion ('section exists') but violate the format intent."
+      }
+    ],
+    "overall": "All six assertions pass with strong, specific evidence. The main gap is that the trigger-mechanism assertion is underspecified, the filename format is unchecked, and the One-Liner format constraint has no coverage."
+  }
+}

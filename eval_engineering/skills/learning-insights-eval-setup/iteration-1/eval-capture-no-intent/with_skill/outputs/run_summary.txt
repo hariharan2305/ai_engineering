@@ -1,0 +1,10 @@
+Did you create a file? No.
+
+Did you ask for clarification? Yes.
+
+What happened:
+
+The command was invoked as /capture-insight with no intent argument. The capture-insight.md spec states:
+  "If the intent is ambiguous or no clear insight matches it, ask the user to clarify."
+
+Since intent is required to scope which part of the conversation to extract an insight from, and no intent was provided, the correct behaviour is to ask the user to supply one. No insight file was written, no index was updated. The response asked the user to re-invoke the command with a short description of what they want captured.

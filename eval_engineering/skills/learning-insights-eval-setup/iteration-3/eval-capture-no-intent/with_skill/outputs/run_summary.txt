@@ -1,0 +1,11 @@
+Did you create an insight file? No.
+
+Did you ask for clarification? Yes.
+
+Which behavior occurred and why?
+
+The command was invoked as /capture-insight with no intent argument. The conversation contained three completely unrelated topics: BM25 vs dense retrieval, Python's GIL, and precision vs recall. With no intent provided, there is no basis for selecting which topic to capture.
+
+The capture-insight spec is explicit on this: "If the intent is ambiguous or no clear insight matches it, ask the user to clarify." No intent = ambiguous by definition. The skill correctly triggers a clarification request rather than arbitrarily picking one of the three topics or fabricating a struggle/aha-moment that wasn't expressed.
+
+No insight file was written. No index was updated. The response asks the user to specify which topic they want captured.

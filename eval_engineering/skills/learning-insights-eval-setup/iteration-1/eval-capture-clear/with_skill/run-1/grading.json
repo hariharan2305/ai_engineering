@@ -1,0 +1,119 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created inside ~/Documents/projects/learning-insights/ai_engineering/ with '2026-03-19' in the filename",
+      "passed": true,
+      "evidence": "File /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md was directly read and confirmed to exist with '2026-03-19' in the filename."
+    },
+    {
+      "text": "The file contains a '## The Struggle' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present with: 'I kept seeing HNSW mentioned everywhere for vector search but couldn't get past one thing: if I'm doing semantic search, don't I want exact results? Approximate search sounded like it was deliberately giving me worse answers. Why would anyone accept that?'"
+    },
+    {
+      "text": "The file contains a '## The Drill-Down' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present with a narrative tracing the reasoning from asking about approximate search, through the error-tolerance reframe, to the latency angle ('at 1M vectors, exact search takes seconds, HNSW takes milliseconds')."
+    },
+    {
+      "text": "The file contains a '## The Aha Moment' section with non-empty content",
+      "passed": true,
+      "evidence": "Section present: 'The key reframe was this: semantic meaning is fuzzy. Vectors that are close to your query vector are semantically similar enough to be useful...' — substantive content directly present."
+    },
+    {
+      "text": "The file contains a '## The One-Liner' section with a blockquote (line starting with '>')",
+      "passed": true,
+      "evidence": "Section present with: \"> HNSW's approximation is fine because semantic meaning is fuzzy anyway — and it's orders of magnitude faster.\""
+    },
+    {
+      "text": "The file metadata contains 'Status: raw'",
+      "passed": true,
+      "evidence": "Metadata line present: '**Status:** raw'"
+    },
+    {
+      "text": "The file body is under 400 words",
+      "passed": true,
+      "evidence": "Body content across all four sections totals approximately 220 words (The Struggle ~47, The Drill-Down ~80, The Aha Moment ~75, The One-Liner ~15, plus minor footer text). Well under 400 words."
+    },
+    {
+      "text": "~/Documents/projects/learning-insights/INDEX.md exists and contains a row referencing the new file",
+      "passed": true,
+      "evidence": "INDEX.md was directly read. Row confirmed: '| 2026-03-19 | ai_engineering | Why HNSW Approximate Search is Acceptable for Semantic Retrieval | raw | [2026-03-19_hnsw-approximate-search-semantic.md](ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md) |'"
+    },
+    {
+      "text": "The One-Liner or Struggle sections preserve the user's casual language — the user said 'beautiful' and 'fuzzy', this energy should appear rather than being sanitized into formal prose",
+      "passed": false,
+      "evidence": "The word 'fuzzy' appears in both The Aha Moment and The One-Liner ('semantic meaning is fuzzy anyway'). However, the user's word 'beautiful' (as in 'Oh that's actually kind of beautiful') does not appear anywhere in the file. The casual energy of the 'beautiful' reaction — the moment of genuine delight — was dropped entirely. Only partial credit on the intent of this assertion, but the standard is pass/fail: one of the two explicitly cited words is absent."
+    },
+    {
+      "text": "The content does not fabricate struggles or technical details not present in the provided conversation",
+      "passed": true,
+      "evidence": "All technical details in the file trace directly to the provided conversation: the HNSW/exact-search tradeoff, the #1 vs #3 nearest neighbor framing, the 1M vectors / milliseconds vs seconds latency claim, the error-tolerance-matches-problem-tolerance reframe. The run_summary.txt also explicitly notes: 'Insight stays strictly within what was expressed in the conversation — no fabricated confusion or embellishment added.' No fabricated details found on inspection."
+    }
+  ],
+  "summary": {
+    "passed": 9,
+    "failed": 1,
+    "total": 10,
+    "pass_rate": 0.90
+  },
+  "execution_metrics": {
+    "tool_calls": null,
+    "total_tool_calls": null,
+    "total_steps": null,
+    "errors_encountered": 0,
+    "output_chars": 3614,
+    "transcript_chars": 97219
+  },
+  "timing": {
+    "executor_duration_seconds": null,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 83.6
+  },
+  "claims": [
+    {
+      "claim": "Files were written successfully with no errors",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt states 'Errors Encountered: None. All files written successfully.' Both the insight file and INDEX.md were verified by direct read."
+    },
+    {
+      "claim": "INDEX.md was updated (not created), with new entry prepended at top",
+      "type": "process",
+      "verified": true,
+      "evidence": "The live INDEX.md shows 7 entries with the HNSW entry at row 3 (not top — two 2026-03-19 entries from earlier runs precede it). The outputs/ copy of INDEX.md shows it as row 1, consistent with it being prepended at time of run. The live file has been subsequently updated by later runs, which is expected."
+    },
+    {
+      "claim": "Project detected as ai_engineering from cwd",
+      "type": "process",
+      "verified": true,
+      "evidence": "run_summary.txt: 'Project detected as: ai_engineering (from cwd /Users/hariharansampathkumar/Documents/projects/ai_engineering git root)'. File is correctly placed under ai_engineering/ subdirectory."
+    },
+    {
+      "claim": "The insight captures the user's actual learning arc, not a summary of the topic",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The Drill-Down section narrates the user's reasoning progression first-person ('First I asked... Then the answer reframed... That clicked, and I pushed on it'), matching the conversational structure. It is not a generic explainer about HNSW."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The One-Liner or Struggle sections preserve the user's casual language — the user said 'beautiful' and 'fuzzy', this energy should appear rather than being sanitized into formal prose",
+        "reason": "The assertion bundles two distinct signals ('beautiful' and 'fuzzy') into one pass/fail check. A skill could preserve one word and drop the other — which is exactly what happened here — and the pass/fail result is ambiguous. Consider splitting into two separate assertions, one per quoted word, to make the eval discriminating."
+      },
+      {
+        "reason": "No assertion checks the Drill-Down section's voice/perspective: the skill is supposed to capture the user's learning arc (first-person, questioning, progressive), not produce a third-person topic summary. The Drill-Down passed the non-empty check, but a technically passing response could be a generic HNSW explainer rather than the user's actual thought progression. An assertion like 'The Drill-Down section narrates the user's reasoning in first-person or question-answer form' would catch regressions here."
+      },
+      {
+        "reason": "No assertion verifies the file path structure beyond directory and filename. The outputs/ copy is not the same as the file at the canonical path ~/Documents/projects/learning-insights/ai_engineering/. Expectation 1 passed because the canonical file exists — but a skill that only wrote to outputs/ and not to the real location would be harder to catch without explicitly checking the canonical path."
+      }
+    ],
+    "overall": "9 of 10 expectations pass. The single failure is the omission of the user's word 'beautiful' — a genuine fidelity gap. The eval set is well-designed and catches real outcomes, but the voice-preservation assertion could be split and the Drill-Down section could have stronger quality coverage."
+  }
+}

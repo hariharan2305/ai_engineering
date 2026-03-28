@@ -1,0 +1,116 @@
+{
+  "expectations": [
+    {
+      "text": "The skill triggered and produced LinkedIn post content in the sandbox — NOT in ~/Documents/projects/learning-insights/",
+      "passed": false,
+      "evidence": "run_summary.txt explicitly states: 'No skill invoked. Post written directly from conversation context without a structured template or skill scaffold.' This is the without_skill baseline run, so no skill was triggered. Content was written to the outputs dir, not ~/Documents/projects/learning-insights/, but the skill-trigger half of the assertion fails."
+    },
+    {
+      "text": "3 post variations were generated using different formats",
+      "passed": false,
+      "evidence": "Only 1 file was produced: linkedin_post.md containing a single post. No variations were generated. The transcript shows two Write calls — one for linkedin_post.md (single post) and one for run_summary.txt. No variations exist anywhere in the outputs directory."
+    },
+    {
+      "text": "Each variation is under 3000 characters",
+      "passed": false,
+      "evidence": "Only 1 post was produced (approx 670 characters), not 3 variations. The assertion cannot be meaningfully satisfied — there are no '3 variations' to measure. The single post is under 3000 chars, but the precondition (3 variations) is not met."
+    },
+    {
+      "text": "Every variation's first line delivers a counterintuitive claim or surprising result — none open with scene-setters",
+      "passed": false,
+      "evidence": "The single post opens with: 'I spent two days swapping embedding models in my RAG pipeline. MiniLM to a larger model. Almost no change in RAGAS scores.' This is a scene-setter (chronological narrative setup), not a counterintuitive claim or surprising result. Additionally, only 1 post exists, not 3 variations."
+    },
+    {
+      "text": "No standalone number sentences — '28%.' as an isolated line does not appear",
+      "passed": false,
+      "evidence": "Line 5 of linkedin_post.md reads: '28% jump.' — this is a standalone near-number sentence on its own line. While it reads '28% jump.' rather than the exact string '28%.' the assertion is testing for isolated number lines, and '28% jump.' on its own line is exactly that pattern."
+    },
+    {
+      "text": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again'",
+      "passed": true,
+      "evidence": "The full text of linkedin_post.md was reviewed. None of the banned phrases ('Here's the thing', 'Game-changer', 'Stop.', 'Read that again') appear anywhere in the post."
+    },
+    {
+      "text": "The 3 variations use genuinely different formats",
+      "passed": false,
+      "evidence": "Only 1 post was produced. There are no 3 variations, so this assertion cannot pass. Outputs directory contains only linkedin_post.md (single post) and run_summary.txt."
+    },
+    {
+      "text": "All outputs written to sandbox, not to ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "Both Write calls in the transcript target paths under .../without_skill/outputs/. Neither file was written to ~/Documents/projects/learning-insights/. Transcript confirms: 'File created successfully at: /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-3/eval-polish-request/without_skill/outputs/linkedin_post.md' and the same path prefix for run_summary.txt."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 6,
+    "total": 8,
+    "pass_rate": 0.25
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 2
+    },
+    "total_tool_calls": 3,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 687,
+    "transcript_chars": 9834
+  },
+  "timing": {
+    "executor_duration_seconds": 28.1,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 28.1
+  },
+  "claims": [
+    {
+      "claim": "Post was written directly from conversation context without a structured template or skill scaffold",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript shows no skill invocation — only Bash (ls) and two Write calls. run_summary.txt explicitly states 'No skill invoked.'"
+    },
+    {
+      "claim": "Post leads with concrete contrast (days vs hours, no change vs 28%)",
+      "type": "quality",
+      "verified": true,
+      "evidence": "linkedin_post.md opens with the two-day/no-change setup and two-hour/28% contrast in the first three lines, though framed as a narrative scene-setter rather than a direct upfront claim."
+    },
+    {
+      "claim": "Post format uses short paragraphs and closes with an actionable takeaway",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Post has 4 short paragraph blocks and closes with 'Fix the data before you upgrade the model.' — a direct actionable takeaway."
+    },
+    {
+      "claim": "3 variations were generated",
+      "type": "factual",
+      "verified": false,
+      "evidence": "Only 1 post was produced in linkedin_post.md. No mention of multiple variations in the transcript. run_summary.txt describes a single post output."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The skill triggered and produced LinkedIn post content in the sandbox — NOT in ~/Documents/projects/learning-insights/",
+        "reason": "This assertion bundles two distinct checks (skill triggered + output location) into one. In the without_skill baseline, the skill is deliberately not invoked, so the 'skill triggered' half will always fail — making this assertion a guaranteed FAIL for baseline runs regardless of output quality. Split into separate assertions: one for 'skill triggered' (with_skill runs only) and one for 'output written to sandbox, not ~/Documents/projects/learning-insights/' (applicable to both). The location check is the meaningful one for the baseline."
+      },
+      {
+        "assertion": "No standalone number sentences — '28%.' as an isolated line does not appear",
+        "reason": "The exact string check ('28%.') is too narrow. The actual violation in this run is '28% jump.' on its own line — which passes the literal string match but fails the spirit of the assertion. Broaden the check to: 'no line consists solely of a number or percentage with minimal surrounding text (e.g., under 5 words).'"
+      },
+      {
+        "reason": "No assertion checks whether a single post (without_skill run) produces a structurally sound post at all — e.g., whether it has a hook, body, and call-to-action. The current evals are calibrated for 3-variation output from a skill run and largely don't apply to the baseline. Consider a separate, lighter eval set for baseline runs that checks single-post quality rather than assuming 3 variations."
+      },
+      {
+        "reason": "No assertion checks post length floors — an empty or trivially short post would pass all character-count assertions. Add a minimum character count (e.g., 'each post is at least 400 characters') to guard against degenerate outputs."
+      }
+    ],
+    "overall": "Most failures here are structural: the expectations were designed for a 3-variation skill output, but this baseline run produces a single post. Six of eight assertions fail primarily because 3 variations don't exist, not because the single post produced is bad quality. The evals need a baseline-specific variant or the assertions need to be scoped to 'with_skill' runs only."
+  }
+}

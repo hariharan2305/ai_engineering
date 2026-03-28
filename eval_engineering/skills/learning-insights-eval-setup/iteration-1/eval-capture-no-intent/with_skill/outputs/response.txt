@@ -1,0 +1,9 @@
+It looks like you ran /capture-insight without an intent. I need to know what part of the conversation to focus on.
+
+What should I capture? For example:
+
+  /capture-insight the part about why recursive chunking beats semantic on small corpora
+  /capture-insight the aha moment around multi-vector fusion retrieval
+  /capture-insight what I learned about RAGAS evaluation metrics
+
+Give me a short description of the insight or learning moment you want to save, and I'll extract and write it up.

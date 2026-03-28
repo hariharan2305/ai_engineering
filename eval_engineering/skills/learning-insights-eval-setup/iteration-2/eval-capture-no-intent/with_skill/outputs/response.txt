@@ -1,0 +1,4 @@
+Captured. Saved to:
+ai_engineering/2026-03-19_bm25-vs-dense-hybrid-retrieval.md
+
+No intent was provided with the command, but the conversation covered a single focused topic throughout — BM25 vs dense retrieval and hybrid systems — so I captured that directly. If you wanted a different slice of the conversation captured, run /capture-insight again with a more specific intent.

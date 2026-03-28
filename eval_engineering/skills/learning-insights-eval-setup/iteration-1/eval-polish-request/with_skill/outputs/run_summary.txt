@@ -1,0 +1,74 @@
+Run Summary — eval-polish-request / with_skill
+===============================================
+Date: 2026-03-19
+
+SKILL FLOW EXECUTED
+-------------------
+The task requested a LinkedIn post from a direct insight (not an existing file).
+The skill requires: capture raw insight card first, then polish it.
+Both steps were executed in sequence.
+
+STEP 1: CAPTURE (capture-insight)
+----------------------------------
+Raw insight card created at:
+  /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_chunking-over-embeddings.md
+
+Topic:   Chunking Strategy Beats Embedding Model Choice for RAG Quality
+Status:  polished (after Step 2)
+Project: ai_engineering (detected from working directory git repo root)
+
+Content sections captured:
+- The Struggle: Expected embedding model to be the bigger lever; it wasn't.
+- The Drill-Down: MiniLM vs larger model barely moved RAGAS; fixing chunk boundaries jumped it 28%.
+- The Aha Moment: Pipeline is a chain — bad chunks destroy semantic signal before embedding even runs. Better model just encodes garbage more accurately.
+- The One-Liner: "Your retrieval pipeline is only as good as your chunks — a better embedding model just encodes the garbage more accurately."
+
+STEP 2: POLISH (polish-insight)
+---------------------------------
+Voice samples status: File exists at ~/Documents/projects/learning-insights/resources/voice_samples.md
+  but contains only the template placeholder — 0 actual posts.
+  Fewer than 5 samples → used fallback voice approach per skill spec.
+  Fallback: mirrored voice patterns from existing polished cards in the project
+  (hybrid-retrieval and stripe-blueprint posts, both marked "voice samples used: none").
+
+3 LinkedIn post variations generated and appended to the same file:
+  Variation 1: Myth-Buster
+  Variation 2: Narrative / Story
+  Variation 3: Technical Breakdown
+
+All variations: under 3000 characters, mobile-friendly line breaks, genuine hooks,
+no LinkedIn cliches, no engagement bait closings.
+
+INDEX UPDATED
+-------------
+/Users/hariharansampathkumar/Documents/projects/learning-insights/INDEX.md
+New row added (newest first):
+  2026-03-19 | ai_engineering | Chunking Strategy Beats Embedding Model Choice for RAG Quality | polished
+
+FILES CREATED
+-------------
+1. /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_chunking-over-embeddings.md
+   — Raw insight card + LinkedIn post variations (the canonical insight file)
+
+2. /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-1/eval-polish-request/with_skill/outputs/2026-03-19_chunking-over-embeddings.md
+   — Copy of the full polished file (eval output)
+
+3. /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-1/eval-polish-request/with_skill/outputs/run_summary.txt
+   — This file
+
+ERRORS
+------
+None. voice_samples.md existed but had no content — handled gracefully per skill spec
+(fallback to project's established voice patterns from existing polished cards).
+
+NOTE: A parallel raw card also exists at:
+  /Users/hariharansampathkumar/Documents/projects/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings-domain-corpora.md
+This was created by a different session (already present in INDEX.md before this run).
+It covers the same insight but is still marked "raw". Not modified.
+
+POST CONTENT SUMMARY
+--------------------
+The three variations address the same core claim from different angles:
+- Myth-Buster: Leads with the failed assumption (embedding = bottleneck), reveals 28% jump from chunking fix
+- Narrative: Tells the experimental sequence as a story, lands on the chain-breaks-at-weakest-link insight
+- Technical Breakdown: Walks through the pipeline stages to show exactly where the signal destruction happens

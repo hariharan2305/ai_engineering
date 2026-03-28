@@ -1,0 +1,81 @@
+{
+  "expectations": [
+    {
+      "text": "No new .md file was created in ~/Documents/projects/learning-insights/",
+      "passed": true,
+      "evidence": "The outputs directory contains only response.txt and run_summary.txt. The learning-insights directory was checked via glob and the existing .md files all have dates of 2026-03-17 to 2026-03-19 with no new file matching this session. The transcript shows no Write tool call targeting ~/Documents/projects/learning-insights/. No new .md was created."
+    },
+    {
+      "text": "The response asks the user to clarify what they want to capture, not an error message and not a fabricated insight",
+      "passed": true,
+      "evidence": "response.txt reads: 'It is unclear what insight you want to capture... Could you provide the insight you want to capture?' This is a genuine clarification request. It does not return an error code or message, and it does not fabricate or invent an insight. The run_summary.txt confirms: 'Asked for clarification. I did not attempt to infer or fabricate an insight.'"
+    },
+    {
+      "text": "The clarification response points to the correct usage format (e.g., '/capture-insight <what to capture>')",
+      "passed": true,
+      "evidence": "response.txt contains the example: '/capture-insight Recursive chunking outperformed semantic chunking on prose corpora with chunk_size=512' — this directly illustrates the correct invocation format with the command name followed by the insight content."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 2,
+      "Write": 2
+    },
+    "total_tool_calls": 4,
+    "total_steps": 4,
+    "errors_encountered": 0,
+    "output_chars": 731,
+    "transcript_chars": 14821
+  },
+  "timing": {
+    "executor_duration_seconds": 28.7,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 28.7
+  },
+  "claims": [
+    {
+      "claim": "The executor asked for clarification rather than guessing or fabricating an insight",
+      "type": "quality",
+      "verified": true,
+      "evidence": "response.txt contains a genuine request for the insight content with no fabricated insight present. run_summary.txt explicitly states: 'I did not attempt to infer or fabricate an insight.'"
+    },
+    {
+      "claim": "The executor recognised /capture-insight as a command for saving a learning insight",
+      "type": "factual",
+      "verified": true,
+      "evidence": "response.txt: 'The command appears to be for saving a learning insight to some log or record' — the executor correctly inferred the purpose without having the skill available."
+    },
+    {
+      "claim": "No file was written to ~/Documents/projects/learning-insights/",
+      "type": "process",
+      "verified": true,
+      "evidence": "Transcript Write tool calls only target the outputs directory (response.txt and run_summary.txt). Glob of learning-insights shows no files with today's session timestamp that would be new."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "The clarification response points to the correct usage format (e.g., '/capture-insight <what to capture>')",
+        "reason": "This assertion passes even if the usage example is wrong or misleading. A stronger form would check that the example uses the actual command name '/capture-insight' and contains a placeholder or concrete insight text after it — not just that some example exists."
+      },
+      {
+        "reason": "No assertion checks the tone of the clarification: a response that says 'Error: missing argument' technically fails expectation 2 (not an error message) but the boundary between a terse refusal and a friendly clarification is not tested. Consider adding an assertion like 'The response is phrased as a question or invitation, not a rejection.'"
+      },
+      {
+        "reason": "No assertion verifies that the response does NOT mention a file path or attempt to suggest where the insight will be stored — which would be a premature assumption. This absence of over-specification is a meaningful quality signal that the current evals do not capture."
+      }
+    ],
+    "overall": "All three assertions are well-targeted for this eval scenario and cover the critical outcomes. The suggestions above are edge cases worth hardening if this eval is used as a regression gate."
+  }
+}

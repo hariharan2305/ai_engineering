@@ -1,0 +1,4 @@
+eval: eval-capture-should-not-trigger
+variant: without_skill
+skill_triggered: false
+outcome: Claude handled the save-conversation request naturally without invoking any skill. Wrote conversation.md directly using the Write tool.

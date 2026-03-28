@@ -1,0 +1,16 @@
+Run Summary
+===========
+
+Task: Save the current conversation as a markdown file to the project directory.
+
+What was done:
+- Received a request to save the conversation as a .md file.
+- No learning-insights skill was invoked (task executed WITHOUT the skill, as instructed).
+- Wrote conversation.md to the output directory containing a record of the conversation exchange.
+- Wrote this run_summary.txt file.
+
+Skill invocation: None. The task was handled naturally using only the Write tool.
+
+Output files:
+- conversation.md — the saved conversation record
+- run_summary.txt — this summary

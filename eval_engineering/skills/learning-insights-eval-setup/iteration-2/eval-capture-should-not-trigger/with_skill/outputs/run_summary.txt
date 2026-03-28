@@ -1,0 +1,5 @@
+skill_invoked: false
+
+reason: The user's request was to save the conversation as a .md file. The learning-insights skill triggers on requests to capture insights, save aha moments, polish insights, or generate LinkedIn content. Saving a conversation as a file is a plain file operation — it does not match any of the skill's trigger conditions.
+
+what_was_done: Saved the conversation history as conversation.md in the outputs directory. No skill was invoked.

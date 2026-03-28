@@ -1,0 +1,102 @@
+{
+  "expectations": [
+    {
+      "text": "A .md file was created in the sandbox path — skill triggered from casual phrasing without a slash command",
+      "passed": false,
+      "evidence": "The executor created run_summary.txt (plain text), not a .md file. The casual trigger condition is met — user said 'save it as a learning insight' with no slash command — but the file format requirement fails. File path: outputs/run_summary.txt"
+    },
+    {
+      "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+      "passed": false,
+      "evidence": "None of the four required sections exist. The file uses a different structure: 'Context:', 'Observation:', 'Insight:', 'Actionable Rule:'. No markdown headers matching the expected schema appear anywhere in the file."
+    },
+    {
+      "text": "The file metadata has 'Status: raw'",
+      "passed": false,
+      "evidence": "The file has no metadata block of any kind. No 'Status' field, no front matter, no YAML header."
+    },
+    {
+      "text": "The file preserves '28%' from the conversation",
+      "passed": true,
+      "evidence": "The string '28%' appears twice in run_summary.txt: line 7 ('jumped RAGAS scores from 0.55 to 0.71 — a 28% improvement') and line 9 ('Two hours spent on chunking strategy: 28% gain')."
+    },
+    {
+      "text": "The Drill-Down uses the user's phrasing — 'barely saw any change' or 'two days' appears",
+      "passed": false,
+      "evidence": "The phrase 'two days' does appear in line 8 ('Two days spent on model changes: near-zero gain'). However, there is no '## The Drill-Down' section. The expectation implicitly requires the phrasing to appear inside that section, which does not exist. Graded as FAIL because the required structural container is absent."
+    },
+    {
+      "text": "The Aha Moment correctly identifies chunk boundaries as the root cause",
+      "passed": false,
+      "evidence": "No '## The Aha Moment' section exists. The substance of the insight is present in the 'Insight:' prose block ('A better embedding model cannot compensate for poor chunk boundaries'), but it is not in the required structural section. Graded as FAIL because the required section is absent."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 5,
+    "total": 6,
+    "pass_rate": 0.17
+  },
+  "execution_metrics": {
+    "tool_calls": {
+      "Bash": 1,
+      "Write": 1
+    },
+    "total_tool_calls": 2,
+    "total_steps": 3,
+    "errors_encountered": 0,
+    "output_chars": 658,
+    "transcript_chars": 8234
+  },
+  "timing": {
+    "executor_duration_seconds": 14.6,
+    "grader_duration_seconds": null,
+    "total_duration_seconds": 14.6
+  },
+  "claims": [
+    {
+      "claim": "The file captures the core insight: chunk quality gates embedding model performance",
+      "type": "quality",
+      "verified": true,
+      "evidence": "The file's 'Insight:' section directly states: 'Chunk quality is the gating factor in RAG pipelines, not embedding model size.'"
+    },
+    {
+      "claim": "The file captures the 0.55 to 0.71 delta",
+      "type": "factual",
+      "verified": true,
+      "evidence": "Line 7: 'jumped RAGAS scores from 0.55 to 0.71 — a 28% improvement'"
+    },
+    {
+      "claim": "The file includes an actionable rule to audit chunking before swapping models",
+      "type": "quality",
+      "verified": true,
+      "evidence": "Line 15: 'When RAG quality is stuck, audit chunk boundaries before swapping models.'"
+    },
+    {
+      "claim": "The output is a plain-text file, not a structured learning insight document",
+      "type": "factual",
+      "verified": true,
+      "evidence": "File is run_summary.txt with freeform prose. None of the skill's required schema sections (Struggle, Drill-Down, Aha Moment, One-Liner) or metadata fields (Status, tags, date) are present."
+    }
+  ],
+  "user_notes_summary": {
+    "uncertainties": [],
+    "needs_review": [],
+    "workarounds": []
+  },
+  "eval_feedback": {
+    "suggestions": [
+      {
+        "assertion": "A .md file was created in the sandbox path — skill triggered from casual phrasing without a slash command",
+        "reason": "This assertion bundles two distinct things: file format (.md) and trigger mechanism (casual phrasing). They should be separate expectations so each can fail independently. A .txt file with the right structure would pass the trigger check but fail the format check — the current bundled form gives ambiguous signal."
+      },
+      {
+        "reason": "No assertion checks whether the One-Liner is a genuine single-sentence distillation vs. a verbose summary. A weak one-liner that is just the full insight rephrased in one long sentence would pass the structural check. Consider adding an assertion like: 'The One-Liner section contains exactly one sentence under 20 words.'"
+      },
+      {
+        "reason": "No assertion checks the metadata fields beyond 'Status: raw'. A complete learning insight document would typically include a date, topic tag, or source. Consider asserting that at least one tag field is present to ensure the document is minimally useful for retrieval."
+      }
+    ],
+    "overall": "The evals correctly test the skill's output schema (sections, metadata, user phrasing). The main gap is the bundled assertion in expectation 1 — split it. The section-content assertions (Drill-Down phrasing, Aha Moment root cause) are well-designed: they are discriminating and would fail for a superficially compliant output that gets the substance wrong."
+  }
+}

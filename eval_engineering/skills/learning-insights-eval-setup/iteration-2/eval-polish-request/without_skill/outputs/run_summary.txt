@@ -1,0 +1,3 @@
+Created: linkedin_post.md
+
+A single LinkedIn post distilling the insight from the conversation: two days of embedding model swaps produced no measurable improvement; two hours of fixing chunk boundaries to respect paragraph structure produced a 28% RAGAS improvement. The post frames this as a prioritization lesson — fix data representation before optimizing models. Written in first-person, practitioner voice. Ends with a prompt for readers to self-audit their own pipelines.

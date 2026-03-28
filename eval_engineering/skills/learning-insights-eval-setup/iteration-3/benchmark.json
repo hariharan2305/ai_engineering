@@ -1,0 +1,529 @@
+{
+  "metadata": {
+    "skill_name": "learning-insights",
+    "skill_path": "<path/to/skill>",
+    "executor_model": "<model-name>",
+    "analyzer_model": "<model-name>",
+    "timestamp": "2026-03-19T07:08:06Z",
+    "evals_run": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "runs_per_configuration": 3
+  },
+  "runs": [
+    {
+      "eval_id": 0,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 6,
+        "failed": 0,
+        "total": 6,
+        "time_seconds": 85.9,
+        "tokens": 1268,
+        "tool_calls": 8,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A .md file was created in the sandbox path \u2014 skill triggered from casual phrasing without a slash command",
+          "passed": true,
+          "evidence": "File created at iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_chunk-quality-over-embedding-model.md. Trigger phrase was 'This is a really good insight \u2014 save it as a learning insight.' \u2014 no slash command used. Confirmed by transcript Write tool call and successful file creation."
+        },
+        {
+          "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+          "passed": true,
+          "evidence": "All four sections present and non-empty in the output file. Lines 10, 14, 18, 22 contain '## The Struggle', '## The Drill-Down', '## The Aha Moment', '## The One-Liner' respectively."
+        },
+        {
+          "text": "The file metadata has 'Status: raw'",
+          "passed": true,
+          "evidence": "Line 5 of the output file: '**Status:** raw'"
+        },
+        {
+          "text": "The file preserves '28%' from the conversation",
+          "passed": true,
+          "evidence": "The One-Liner section reads: '> I spent two days swapping embedding models and barely moved the needle \u2014 switched to paragraph chunking in two hours and got a 28% jump.' The figure comes from the conversation Turn 7 ('RAGAS jumped from 0.55 to 0.71 \u2014 a 28% improvement')."
+        },
+        {
+          "text": "The Drill-Down uses the user's phrasing \u2014 'barely saw any change' or 'two days' appears",
+          "passed": true,
+          "evidence": "'barely saw any change' appears in The Struggle section ('barely saw any change'). 'two days' appears in both The Struggle ('I spent two days swapping models') and The Aha Moment ('Two hours vs two days'). The Drill-Down itself uses the user's exact question from the transcript: 'so the embedding model is not the lever here?'"
+        },
+        {
+          "text": "The Aha Moment correctly identifies chunk boundaries as the root cause",
+          "passed": true,
+          "evidence": "The Aha Moment opens: 'Fixed-size chunking cuts at character boundaries regardless of sentence or concept breaks. A better embedding model can't fix broken chunks.' This directly names chunk boundaries as the structural failure and as the root cause of the stalled scores."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 8,
+        "failed": 0,
+        "total": 8,
+        "time_seconds": 79.5,
+        "tokens": 1422,
+        "tool_calls": 11,
+        "errors": 1
+      },
+      "expectations": [
+        {
+          "text": "A .md file was created inside the sandbox path \u2014 NOT in ~/Documents/projects/learning-insights/",
+          "passed": true,
+          "evidence": "Transcript line 26 shows the Write tool created the file at: /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_hnsw-approximate-search-semantic.md \u2014 confirmed inside the sandbox path. The outputs directory copy also confirms this (file was copied from sandbox, not from ~/Documents/projects/learning-insights/)."
+        },
+        {
+          "text": "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+          "passed": true,
+          "evidence": "Output file line 10-12: '## The Struggle' section is present and reads: 'I kept seeing HNSW recommended for vector search but it didn't make sense to me. If I'm doing semantic search, don't I want exact nearest neighbor results? I was worried that if HNSW misses the true #1 nearest neighbor and returns #2 or #3 instead, I'm missing the most relevant result \u2014 and that seems like a problem.' This directly reflects the Turn 1 and Turn 3 confusion from the transcript."
+        },
+        {
+          "text": "The file contains '## The Drill-Down' showing the progression to the error-tolerance insight",
+          "passed": true,
+          "evidence": "Output file line 14-16: '## The Drill-Down' section is present and shows the progression: 'First I asked: why accept approximate at all? ... Then when I heard that the relevance gap between rank 1 and rank 3 is almost always negligible in semantic space, I pushed further \u2014 so you're saying the error margin of the algorithm matches the fuzziness of semantic meaning itself? And then the latency argument landed.' This maps accurately to Turns 2-6 of the conversation."
+        },
+        {
+          "text": "The file contains '## The Aha Moment' capturing the semantic fuzziness realization",
+          "passed": true,
+          "evidence": "Output file line 18-20: '## The Aha Moment' section is present and reads: 'The approximation is acceptable because semantic meaning is fuzzy anyway. You're not looking for the one right answer \u2014 you're looking for something good enough to reason from. The error tolerance of HNSW matches the tolerance of the problem itself.' This directly captures the semantic fuzziness realization from Turn 5-7."
+        },
+        {
+          "text": "The file contains '## The One-Liner' with a blockquote",
+          "passed": true,
+          "evidence": "Output file lines 22-24: '## The One-Liner' section is present, followed by a properly formatted blockquote: '> HNSW's approximation is fine because semantic meaning is fuzzy anyway \u2014 you're not after the one right answer, you're after something good enough to reason from.'"
+        },
+        {
+          "text": "The file metadata has 'Status: raw'",
+          "passed": true,
+          "evidence": "Output file line 5: '**Status:** raw' \u2014 exactly as required by the skill spec."
+        },
+        {
+          "text": "The emotional language from turn 7 is preserved \u2014 'beautiful' or equivalent appears in the card",
+          "passed": true,
+          "evidence": "Output file line 20 (end of The Aha Moment section): 'That's actually kind of beautiful.' \u2014 this is the exact phrase used by the user in Turn 7: 'Oh that's actually kind of beautiful.' The emotional language is preserved verbatim."
+        },
+        {
+          "text": "The file does not fabricate confusion or technical details not in the conversation",
+          "passed": true,
+          "evidence": "All content in The Struggle, Drill-Down, and Aha Moment sections traces directly to conversation turns 1-7. No technical details appear that were not discussed (e.g., no mention of ef_construction parameters, recall rates, or other HNSW internals that were not in the conversation). The latency figures (seconds vs milliseconds at 1M vectors) match Turn 6 exactly."
+        }
+      ],
+      "notes": [
+        "Edit tool failed on first attempt because INDEX.md had not been read first; executor recovered by reading the file before re-attempting the edit"
+      ]
+    },
+    {
+      "eval_id": 2,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 32.2,
+        "tokens": 635,
+        "tool_calls": 5,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No insight file was created in the sandbox",
+          "passed": true,
+          "evidence": "The transcript contains no Write tool calls to the sandbox path (/sandbox/learning-insights/). The only Write calls were to response.txt and run_summary.txt in the outputs directory. The sandbox files that exist (e.g., 2026-03-19_chunking-beats-embeddings-rag.md) contain content about chunking vs embeddings \u2014 topics from prior eval runs, not the BM25/GIL/precision-recall conversation in this eval. run_summary.txt explicitly states: 'No insight file was written. No index was updated.'"
+        },
+        {
+          "text": "The response asks for clarification \u2014 specifically which of the three topics the user wants to capture",
+          "passed": true,
+          "evidence": "response.txt reads: 'I can see three separate topics in this conversation \u2014 BM25 vs dense retrieval, Python's GIL, and precision vs recall. Which one did you want to capture as an insight? Or did you have a different one in mind?' This names all three topics explicitly and asks the user to select one."
+        },
+        {
+          "text": "The response does NOT pick a topic and capture it without asking",
+          "passed": true,
+          "evidence": "No insight file was written (verified via transcript Write calls). The response is exclusively a clarification question \u2014 it makes no selection and creates no insight content. The executor's run_summary.txt confirms: 'The skill correctly triggers a clarification request rather than arbitrarily picking one of the three topics.'"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 29.2,
+        "tokens": 746,
+        "tool_calls": 4,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No file was created in ~/Documents/projects/learning-insights/ or the sandbox learning-insights path",
+          "passed": true,
+          "evidence": "The learning-insights directory exists from prior sessions but contains only pre-existing files dated 2026-03-17 and 2026-03-18. No file dated 2026-03-19 (today's date) was created. The transcript shows all Write tool calls targeted the eval outputs directory only \u2014 conversation.md and run_summary.txt \u2014 with no write to any learning-insights path."
+        },
+        {
+          "text": "The skill was not invoked \u2014 the agent handled this as a plain file-save request",
+          "passed": true,
+          "evidence": "run_summary.txt explicitly states 'did you invoke the skill? NO'. The transcript confirms this: after reading SKILL.md, the agent wrote in its reasoning (transcript entry 7): 'The user's request is to save the conversation as a .md file in the project directory. This does not match any of the skill trigger conditions \u2014 it is a generic file-saving request, not a learning insight capture or LinkedIn post generation request. The skill should not be invoked.' No Skill tool call appears anywhere in the transcript."
+        },
+        {
+          "text": "A conversation record was saved to the outputs directory",
+          "passed": true,
+          "evidence": "conversation.md was created at the outputs directory path and contains the full 4-turn conversation transcript (bash rename question, one-liner answer, 'Perfect that worked', and the file-save request). The file content is substantive and correctly reflects the conversation history provided in the eval prompt."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "with_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.875,
+        "passed": 7,
+        "failed": 1,
+        "total": 8,
+        "time_seconds": 147.7,
+        "tokens": 0,
+        "tool_calls": 0,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The skill triggered and produced LinkedIn post content in the sandbox \u2014 NOT in ~/Documents/projects/learning-insights/",
+          "passed": true,
+          "evidence": "Output file written to iteration-3/sandbox/learning-insights/ai_engineering/2026-03-19_chunking-beats-embeddings-rag.md (sandbox). A search of ~/Documents/projects/learning-insights/ found no matching files \u2014 nothing was written to the user's permanent directory."
+        },
+        {
+          "text": "3 post variations were generated using different formats",
+          "passed": true,
+          "evidence": "Three named variations present in the output file: Variation 1 (Real experience / Impact story), Variation 2 (Myth-buster), Variation 3 (Assumption-flip). All three are distinct and present."
+        },
+        {
+          "text": "Each variation is under 3000 characters",
+          "passed": true,
+          "evidence": "Variation 1 is approximately 700 characters, Variation 2 approximately 600 characters, Variation 3 approximately 650 characters. All are well under the 3000-character limit."
+        },
+        {
+          "text": "Every variation's first line delivers a counterintuitive claim or surprising result \u2014 none open with scene-setters like 'I ran experiments', 'The common advice is', or 'I was confident that'",
+          "passed": true,
+          "evidence": "V1: 'Fixing chunk boundaries gave me a 28% RAGAS jump \u2014 more than two days of embedding model swaps ever did.' V2: 'Better embedding models don't fix a broken RAG pipeline \u2014 better chunks do.' V3: 'Two days of swapping embedding models, and my RAGAS scores barely moved \u2014 the problem was never the model.' None open with the banned scene-setters. The run_summary.txt confirms an earlier draft of V3 used 'I was confident that...' and was corrected before finalising."
+        },
+        {
+          "text": "No standalone number sentences \u2014 '28%.' or 'The result: 28%.' as isolated lines do not appear",
+          "passed": false,
+          "evidence": "Variation 1, line 49 in the output file reads: '28% improvement across RAGAS metrics.' \u2014 this is a standalone line containing only the impact number and a brief qualifier. While it technically differs from the literal examples '28%.' and 'The result: 28%.', it is structurally the same pattern: an isolated single-sentence line whose entire purpose is to deliver the number. The run_summary.txt defends it as 'embeds the number in meaning', but the line stands alone on its own paragraph with no surrounding sentence absorbing it. The spirit of this expectation is violated."
+        },
+        {
+          "text": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again'",
+          "passed": true,
+          "evidence": "Grep of the output file for all four banned strings returned no matches."
+        },
+        {
+          "text": "The 3 variations use genuinely different formats",
+          "passed": true,
+          "evidence": "Real experience/Impact story opens on a metric, walks through the two-step experiment, ends with a practitioner takeaway. Myth-buster opens with a direct corrective claim, explains the conventional belief, presents the evidence against it, and ends with a mental-model shift. Assumption-flip leads with time wasted, reconstructs the original assumption as reasonable, then flips it with the experimental result. The formats differ in structure and rhetorical mode, not just topic."
+        },
+        {
+          "text": "All outputs written to sandbox, not to ~/Documents/projects/learning-insights/",
+          "passed": true,
+          "evidence": "Files are present under iteration-3/sandbox/learning-insights/ and with_skill/outputs/. No files were found under ~/Documents/projects/learning-insights/."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 0,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.17,
+        "passed": 1,
+        "failed": 5,
+        "total": 6,
+        "time_seconds": 14.6,
+        "tokens": 658,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A .md file was created in the sandbox path \u2014 skill triggered from casual phrasing without a slash command",
+          "passed": false,
+          "evidence": "The executor created run_summary.txt (plain text), not a .md file. The casual trigger condition is met \u2014 user said 'save it as a learning insight' with no slash command \u2014 but the file format requirement fails. File path: outputs/run_summary.txt"
+        },
+        {
+          "text": "The file contains all four sections: ## The Struggle, ## The Drill-Down, ## The Aha Moment, ## The One-Liner",
+          "passed": false,
+          "evidence": "None of the four required sections exist. The file uses a different structure: 'Context:', 'Observation:', 'Insight:', 'Actionable Rule:'. No markdown headers matching the expected schema appear anywhere in the file."
+        },
+        {
+          "text": "The file metadata has 'Status: raw'",
+          "passed": false,
+          "evidence": "The file has no metadata block of any kind. No 'Status' field, no front matter, no YAML header."
+        },
+        {
+          "text": "The file preserves '28%' from the conversation",
+          "passed": true,
+          "evidence": "The string '28%' appears twice in run_summary.txt: line 7 ('jumped RAGAS scores from 0.55 to 0.71 \u2014 a 28% improvement') and line 9 ('Two hours spent on chunking strategy: 28% gain')."
+        },
+        {
+          "text": "The Drill-Down uses the user's phrasing \u2014 'barely saw any change' or 'two days' appears",
+          "passed": false,
+          "evidence": "The phrase 'two days' does appear in line 8 ('Two days spent on model changes: near-zero gain'). However, there is no '## The Drill-Down' section. The expectation implicitly requires the phrasing to appear inside that section, which does not exist. Graded as FAIL because the required structural container is absent."
+        },
+        {
+          "text": "The Aha Moment correctly identifies chunk boundaries as the root cause",
+          "passed": false,
+          "evidence": "No '## The Aha Moment' section exists. The substance of the insight is present in the 'Insight:' prose block ('A better embedding model cannot compensate for poor chunk boundaries'), but it is not in the required structural section. Graded as FAIL because the required section is absent."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 1,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.125,
+        "passed": 1,
+        "failed": 7,
+        "total": 8,
+        "time_seconds": 20.8,
+        "tokens": 676,
+        "tool_calls": 2,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "A .md file was created inside the sandbox path \u2014 NOT in ~/Documents/projects/learning-insights/",
+          "passed": false,
+          "evidence": "The executor created run_summary.txt (plain text), not a .md file. The file was written to the correct sandbox path (outputs/), but the format requirement of .md was not met. Transcript line 7 shows the Write tool targeting 'run_summary.txt', not any markdown file."
+        },
+        {
+          "text": "The file contains '## The Struggle' section reflecting the user's confusion about exact vs approximate search",
+          "passed": false,
+          "evidence": "run_summary.txt contains no section headers at all. The content is unstructured prose. No '## The Struggle' section exists."
+        },
+        {
+          "text": "The file contains '## The Drill-Down' showing the progression to the error-tolerance insight",
+          "passed": false,
+          "evidence": "No '## The Drill-Down' section exists in run_summary.txt. The file is prose-only with no markdown headers."
+        },
+        {
+          "text": "The file contains '## The Aha Moment' capturing the semantic fuzziness realization",
+          "passed": false,
+          "evidence": "No '## The Aha Moment' section in run_summary.txt. The insight about semantic fuzziness is present in the prose (point 1: 'Semantic meaning is fuzzy') but not in the required structured section format."
+        },
+        {
+          "text": "The file contains '## The One-Liner' with a blockquote",
+          "passed": false,
+          "evidence": "No '## The One-Liner' section in run_summary.txt. There is no blockquote formatting (no '>' prefix) anywhere in the file."
+        },
+        {
+          "text": "The file metadata has 'Status: raw'",
+          "passed": false,
+          "evidence": "run_summary.txt contains no frontmatter or metadata section of any kind. There is no 'Status' field anywhere in the file."
+        },
+        {
+          "text": "The emotional language from turn 7 is preserved \u2014 'beautiful' or equivalent appears in the card",
+          "passed": false,
+          "evidence": "The word 'beautiful' does not appear anywhere in run_summary.txt. Turn 7 of the conversation explicitly contained 'Oh that's actually kind of beautiful' \u2014 this emotional marker was not carried into the output."
+        },
+        {
+          "text": "The file does not fabricate confusion or technical details not in the conversation",
+          "passed": true,
+          "evidence": "The content of run_summary.txt accurately reflects the conversation. The two reasons given (semantic fuzziness, scale/latency) directly correspond to turns 4 and 6 of the conversation. No fabricated details, invented steps, or embellishments are present."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 2,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 20.2,
+        "tokens": 668,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No insight file was created in the sandbox",
+          "passed": true,
+          "evidence": "The outputs directory contains only response.txt (a clarification question) and run_summary.txt (a process log). No structured insight file was written. Confirmed by listing outputs/ \u2014 no insight capture file exists."
+        },
+        {
+          "text": "The response asks for clarification \u2014 specifically which of the three topics the user wants to capture",
+          "passed": true,
+          "evidence": "response.txt reads: 'The conversation covered three separate topics: 1. BM25 vs dense retrieval 2. Python's GIL 3. Precision vs recall \u2014 Which insight would you like to capture? Please specify one (or more) so I can save the right one.' All three topics are enumerated and the user is asked to choose."
+        },
+        {
+          "text": "The response does NOT pick a topic and capture it without asking",
+          "passed": true,
+          "evidence": "run_summary.txt states: 'Rather than arbitrarily picking one, I responded by listing all three topics and asking the user to specify which insight they want captured.' No capture action was taken before getting user confirmation."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 3,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 1.0,
+        "passed": 3,
+        "failed": 0,
+        "total": 3,
+        "time_seconds": 18.1,
+        "tokens": 432,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "No file was created in ~/Documents/projects/learning-insights/ or the sandbox learning-insights path",
+          "passed": true,
+          "evidence": "Transcript shows two Write tool calls, both targeting paths under .../without_skill/outputs/ (conversation.md and run_summary.txt). No write was made to ~/Documents/projects/learning-insights/ or any learning-insights sandbox path."
+        },
+        {
+          "text": "The skill was not invoked \u2014 the agent handled this as a plain file-save request",
+          "passed": true,
+          "evidence": "No Skill tool call appears in the transcript. The executor used only Bash (directory listing) and Write (file creation). run_summary.txt explicitly states: 'skill_triggered: false' and 'Claude handled the save-conversation request naturally without invoking any skill. Wrote conversation.md directly using the Write tool.'"
+        },
+        {
+          "text": "A conversation record was saved to the outputs directory",
+          "passed": true,
+          "evidence": "conversation.md was written to .../without_skill/outputs/conversation.md and contains the full conversation transcript with all 4 turns (user bash-rename request, Claude one-liner, user confirmation, user save request)."
+        }
+      ],
+      "notes": []
+    },
+    {
+      "eval_id": 4,
+      "configuration": "without_skill",
+      "run_number": 1,
+      "result": {
+        "pass_rate": 0.25,
+        "passed": 2,
+        "failed": 6,
+        "total": 8,
+        "time_seconds": 28.1,
+        "tokens": 687,
+        "tool_calls": 3,
+        "errors": 0
+      },
+      "expectations": [
+        {
+          "text": "The skill triggered and produced LinkedIn post content in the sandbox \u2014 NOT in ~/Documents/projects/learning-insights/",
+          "passed": false,
+          "evidence": "run_summary.txt explicitly states: 'No skill invoked. Post written directly from conversation context without a structured template or skill scaffold.' This is the without_skill baseline run, so no skill was triggered. Content was written to the outputs dir, not ~/Documents/projects/learning-insights/, but the skill-trigger half of the assertion fails."
+        },
+        {
+          "text": "3 post variations were generated using different formats",
+          "passed": false,
+          "evidence": "Only 1 file was produced: linkedin_post.md containing a single post. No variations were generated. The transcript shows two Write calls \u2014 one for linkedin_post.md (single post) and one for run_summary.txt. No variations exist anywhere in the outputs directory."
+        },
+        {
+          "text": "Each variation is under 3000 characters",
+          "passed": false,
+          "evidence": "Only 1 post was produced (approx 670 characters), not 3 variations. The assertion cannot be meaningfully satisfied \u2014 there are no '3 variations' to measure. The single post is under 3000 chars, but the precondition (3 variations) is not met."
+        },
+        {
+          "text": "Every variation's first line delivers a counterintuitive claim or surprising result \u2014 none open with scene-setters",
+          "passed": false,
+          "evidence": "The single post opens with: 'I spent two days swapping embedding models in my RAG pipeline. MiniLM to a larger model. Almost no change in RAGAS scores.' This is a scene-setter (chronological narrative setup), not a counterintuitive claim or surprising result. Additionally, only 1 post exists, not 3 variations."
+        },
+        {
+          "text": "No standalone number sentences \u2014 '28%.' as an isolated line does not appear",
+          "passed": false,
+          "evidence": "Line 5 of linkedin_post.md reads: '28% jump.' \u2014 this is a standalone near-number sentence on its own line. While it reads '28% jump.' rather than the exact string '28%.' the assertion is testing for isolated number lines, and '28% jump.' on its own line is exactly that pattern."
+        },
+        {
+          "text": "No banned patterns: 'Here's the thing', 'Game-changer', 'Stop.', 'Read that again'",
+          "passed": true,
+          "evidence": "The full text of linkedin_post.md was reviewed. None of the banned phrases ('Here's the thing', 'Game-changer', 'Stop.', 'Read that again') appear anywhere in the post."
+        },
+        {
+          "text": "The 3 variations use genuinely different formats",
+          "passed": false,
+          "evidence": "Only 1 post was produced. There are no 3 variations, so this assertion cannot pass. Outputs directory contains only linkedin_post.md (single post) and run_summary.txt."
+        },
+        {
+          "text": "All outputs written to sandbox, not to ~/Documents/projects/learning-insights/",
+          "passed": true,
+          "evidence": "Both Write calls in the transcript target paths under .../without_skill/outputs/. Neither file was written to ~/Documents/projects/learning-insights/. Transcript confirms: 'File created successfully at: /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-3/eval-polish-request/without_skill/outputs/linkedin_post.md' and the same path prefix for run_summary.txt."
+        }
+      ],
+      "notes": []
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "pass_rate": {
+        "mean": 0.975,
+        "stddev": 0.0559,
+        "min": 0.875,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 74.9,
+        "stddev": 48.3575,
+        "min": 29.2,
+        "max": 147.7
+      },
+      "tokens": {
+        "mean": 814.2,
+        "stddev": 564.5885,
+        "min": 0,
+        "max": 1422
+      }
+    },
+    "without_skill": {
+      "pass_rate": {
+        "mean": 0.509,
+        "stddev": 0.4504,
+        "min": 0.125,
+        "max": 1.0
+      },
+      "time_seconds": {
+        "mean": 20.36,
+        "stddev": 4.9601,
+        "min": 14.6,
+        "max": 28.1
+      },
+      "tokens": {
+        "mean": 624.2,
+        "stddev": 107.9685,
+        "min": 432,
+        "max": 687
+      }
+    },
+    "delta": {
+      "pass_rate": "+0.47",
+      "time_seconds": "+54.5",
+      "tokens": "+190"
+    }
+  },
+  "notes": []
+}

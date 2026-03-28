@@ -1,0 +1,26 @@
+Run Summary — capture-insight (casual trigger)
+================================================
+
+Trigger phrase: "This is a really good insight — save it as a learning insight."
+
+Skill invoked: learning-insights / capture-insight
+
+Files created:
+- Insight file: ai_engineering/2026-03-19_chunk-quality-beats-model-swapping.md
+- Index updated: INDEX.md (new row prepended, newest-first)
+
+Insight summary:
+- Topic: Why chunk quality matters more than the embedding model
+- The Struggle: RAGAS scores stuck at 0.55 after two days of embedding model swapping with no meaningful movement.
+- The Aha Moment: Fixed-size chunking cuts mid-concept; a better embedding model cannot fix broken chunks. Switching to paragraph-respecting chunking jumped scores from 0.55 to 0.71 (28% improvement) in two hours.
+- One-Liner: "Two days of swapping embedding models barely moved the needle. Two hours fixing chunk boundaries gave me a 28% jump."
+
+Voice preservation notes:
+- Kept "barely saw any change" and "barely moving the needle" (user's exact phrasing)
+- Preserved the emotional weight of the time contrast (two days vs two hours)
+- Did not formalize or clean up the language
+- No technical details added beyond what was in the conversation
+
+Sandbox paths written to:
+- /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/sandbox/learning-insights/ai_engineering/2026-03-19_chunk-quality-beats-model-swapping.md
+- /Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/sandbox/learning-insights/INDEX.md

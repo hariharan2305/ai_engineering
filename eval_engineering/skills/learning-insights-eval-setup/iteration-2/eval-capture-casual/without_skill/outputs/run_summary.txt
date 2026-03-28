@@ -1,0 +1,10 @@
+What was done:
+The conversation surfaced a high-value RAG learning insight — that chunking strategy is the primary lever for improving RAGAS scores, not embedding model size. The user confirmed a 28% RAGAS improvement (0.55 to 0.71) by switching from fixed-size 512-token chunks to paragraph-based chunking, after two days of model-swapping produced no meaningful gain.
+
+This insight was captured and saved as a standalone file.
+
+Files created:
+- learning_insight.txt — the insight in full, with context, key takeaway, and a suggested diagnosis order for stuck RAGAS scores
+
+Location:
+/Users/hariharansampathkumar/Documents/projects/ai_engineering/skills_engineering/learning-insights-eval-setup/iteration-2/eval-capture-casual/without_skill/outputs/

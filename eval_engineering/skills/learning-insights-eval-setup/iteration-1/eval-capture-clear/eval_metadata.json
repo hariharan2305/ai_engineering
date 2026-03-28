@@ -1,0 +1,57 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-capture-clear",
+  "prompt": "/capture-insight why HNSW approximate search is acceptable for semantic retrieval (with full conversation context provided)",
+  "assertions": [
+    {
+      "id": "file_created",
+      "type": "deterministic",
+      "description": "A .md file was created inside ~/Documents/projects/learning-insights/ai_engineering/ with today's date (2026-03-19) in the filename"
+    },
+    {
+      "id": "has_struggle_section",
+      "type": "deterministic",
+      "description": "The created file contains a '## The Struggle' section with non-empty content"
+    },
+    {
+      "id": "has_drilldown_section",
+      "type": "deterministic",
+      "description": "The created file contains a '## The Drill-Down' section with non-empty content"
+    },
+    {
+      "id": "has_aha_section",
+      "type": "deterministic",
+      "description": "The created file contains a '## The Aha Moment' section with non-empty content"
+    },
+    {
+      "id": "has_oneliner_section",
+      "type": "deterministic",
+      "description": "The created file contains a '## The One-Liner' section with a blockquote (line starting with '>')"
+    },
+    {
+      "id": "status_raw",
+      "type": "deterministic",
+      "description": "The file metadata contains 'Status: raw'"
+    },
+    {
+      "id": "under_400_words",
+      "type": "deterministic",
+      "description": "The file body (excluding frontmatter/headers) is under 400 words"
+    },
+    {
+      "id": "index_updated",
+      "type": "deterministic",
+      "description": "~/Documents/projects/learning-insights/INDEX.md exists and contains a row referencing the new file"
+    },
+    {
+      "id": "voice_preserved",
+      "type": "llm_judge",
+      "description": "The One-Liner and Struggle sections preserve the user's casual phrasing. The user said 'that's actually kind of beautiful' and 'semantic meaning is fuzzy anyway' — the insight card should reflect that energy, not sanitize it into formal language"
+    },
+    {
+      "id": "no_fabrication",
+      "type": "llm_judge",
+      "description": "The Struggle section describes confusion that was actually expressed in the conversation (user asked about exact vs approximate search). It should NOT invent struggles or technical details not present in the provided conversation"
+    }
+  ]
+}

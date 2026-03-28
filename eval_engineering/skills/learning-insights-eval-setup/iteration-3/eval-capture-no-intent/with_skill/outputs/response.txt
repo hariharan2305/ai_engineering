@@ -1,0 +1,1 @@
+I can see three separate topics in this conversation — BM25 vs dense retrieval, Python's GIL, and precision vs recall. Which one did you want to capture as an insight? Or did you have a different one in mind?

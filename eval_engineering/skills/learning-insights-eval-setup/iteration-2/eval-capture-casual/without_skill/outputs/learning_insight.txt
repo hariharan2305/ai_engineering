@@ -1,0 +1,14 @@
+Insight: Chunk quality is the primary lever in RAG pipelines, not embedding model size.
+
+Context:
+- RAGAS scores were stuck at ~0.55 with fixed-size 512-token chunks, no overlap
+- Swapping all-MiniLM for a larger embedding model produced negligible improvement (two days of effort)
+- Switching to paragraph-based chunking moved RAGAS from 0.55 to 0.71 — a 28% improvement in two hours
+
+Key takeaway:
+A better embedding model cannot compensate for broken chunks. Chunk quality determines whether the right information is retrievable in the first place. For domain-specific corpora, chunking strategy is almost always a higher-leverage intervention than model size.
+
+Diagnosis order for stuck RAGAS scores:
+1. Chunking strategy — is the right information even in a single retrievable unit?
+2. Retrieval — is that unit being surfaced for the relevant query?
+3. Embedding model — only a meaningful lever once chunks are coherent
