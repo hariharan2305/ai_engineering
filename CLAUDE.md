@@ -8,10 +8,13 @@ A structured learning repository for a Senior ML Engineer building **production 
 
 ## Repository Structure
 
-Two independent learning tracks:
+Independent learning tracks:
 
 - **FastAPI/** — Primary track: FastAPI for GenAI backends (6-week fast-track roadmap)
 - **Prompting/** — Secondary track: DSPy framework and meta-prompting
+- **RAG/** — RAG component mastery lab (see RAG track section below)
+- **eval_engineering/** — Eval engineering learning journal; has its own `eval_engineering/CLAUDE.md`
+- **anthropic_courses/** — Anthropic SDK / API course notebooks; has its own `anthropic_courses/CLAUDE.md`
 
 ### FastAPI Track Layout
 
@@ -113,12 +116,13 @@ Understand every RAG component deeply by building a lab bench where components a
 ### Curriculum Order (component-by-component)
 
 1. **Chunking** — `exp_02_*` (complete): recursive, semantic, markdown, HTML (LangChain); SentenceSplitter, SemanticSplitter, TokenTextSplitter, CodeSplitter (LlamaIndex); contextual enrichment; late chunking concept file
-2. **Embeddings** — MiniLM → larger/domain-specific models (`exp_03_*`)
-3. **Retrieval** — dense-only → hybrid BM25+dense (`exp_04_*`)
+2. **Embeddings** — MiniLM → larger/domain-specific models (`exp_03_*`, complete): MPNet, E5, BGE, pplx-embed-context-v1, NV-Embed, BGE-M3
+3. **VectorDB backends + Retrieval strategies** — `exp_04_*` (in progress):
+   - Backend alternatives: `exp_04_1_qdrant.py` (dense + BM25 sparse stored, dense-only retrieval), `exp_04_2_weaviate.py`, `exp_04_3_pgvector.py`
+   - Retrieval strategies: `exp_04_sparse_bm25.py` (rank_bm25 only), `exp_04_hybrid.py` (BM25 + Dense fused via RRF), `exp_04_multi_query.py` (multi-query expansion), `exp_04_hyde.py` (HyDE — hypothetical document embedding)
 4. **Reranking** — identity → cross-encoder reranker (`exp_05_*`)
 5. **Generation** — prompt engineering, context window management (`exp_06_*`)
-6. **Advanced retrieval** — HyDE, multi-query, query expansion (`exp_07_*`)
-7. **FastAPI capstone** — wrap the best pipeline as a production API
+6. **FastAPI capstone** — wrap the best pipeline as a production API
 
 ### Evaluation Stack
 
@@ -158,7 +162,8 @@ Preferred libraries per component:
 | Chunking (LI token) | `llama_index.core.node_parser.TokenTextSplitter` |
 | Chunking (LI code/AST) | `llama_index.core.node_parser.CodeSplitter` (needs `tree-sitter-language-pack`) |
 | Embeddings | `sentence-transformers` |
-| Vector DB | `chromadb` directly |
+| Vector DB (baseline) | `chromadb` directly |
+| Vector DB (alternatives) | `qdrant-client`, `weaviate-client`, `pgvector` + `psycopg2` |
 | BM25 (hybrid retrieval) | `rank_bm25` |
 | Cross-encoder reranking | `sentence-transformers` CrossEncoder |
 | Generation | `openai` SDK directly |
