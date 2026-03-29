@@ -631,3 +631,229 @@ Question: {query}"""
 
         fused = self._rrf_fuse(all_results)
         return fused[:top_k]
+
+
+# ── Parent Document Retriever — Qdrant native ─────────────────────────────────
+
+class QdrantParentRetriever:
+    """
+    Parent document retrieval using Qdrant as the single store.
+
+    Architecture:
+      Index time:
+        - Split corpus into parent chunks (large, e.g. 512 tokens)
+        - Split each parent into child chunks (small, e.g. 128 tokens)
+        - Embed child chunks → upsert into Qdrant with parent_text + parent_id in payload
+        - No separate doc store needed — Qdrant payload carries the parent text
+
+      Query time:
+        - Embed query → search Qdrant for top-k child matches
+        - Extract parent_text directly from each hit's payload
+        - Deduplicate by parent_id (multiple children may share a parent)
+        - Return parent texts as RetrievedChunk objects
+
+    Why Qdrant for this:
+      Qdrant's payload field stores arbitrary JSON alongside each vector.
+      Storing parent text in payload means retrieval is a single network call —
+      no secondary doc store lookup needed. Practical for corpora where
+      parent chunks are small enough to fit comfortably in payload (~1-2KB).
+
+    Requires: Qdrant running on localhost:6333
+      docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant
+    """
+
+    def __init__(
+        self,
+        collection_name: str,
+        embedder: SentenceTransformerEmbedder,
+        embedding_dim: int = 384,
+        qdrant_url: str = "http://localhost:6333",
+    ):
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import VectorParams, Distance
+
+        self._embedder = embedder
+        self._collection = collection_name
+        self._client = QdrantClient(url=qdrant_url)
+
+        existing = [c.name for c in self._client.get_collections().collections]
+        if collection_name in existing:
+            self._client.delete_collection(collection_name)
+        self._client.create_collection(
+            collection_name=collection_name,
+            vectors_config=VectorParams(size=embedding_dim, distance=Distance.COSINE),
+        )
+
+    def index(self, parent_chunks: list, child_chunks_by_parent: dict) -> int:
+        """
+        Upsert child embeddings into Qdrant with parent text in payload.
+
+        Args:
+            parent_chunks: list[Chunk] — large chunks; text sent to generator
+            child_chunks_by_parent: dict[parent_id → list[Chunk]] — small chunks for retrieval
+        Returns:
+            total child chunks indexed
+        """
+        from qdrant_client.models import PointStruct
+
+        parent_text_by_id = {p.id: p.text for p in parent_chunks}
+        points = []
+        point_id = 0
+
+        for parent_id, children in child_chunks_by_parent.items():
+            parent_text = parent_text_by_id[parent_id]
+            for child in children:
+                embedding = embed_query(child.text, self._embedder)
+                points.append(PointStruct(
+                    id=point_id,
+                    vector=embedding,
+                    payload={
+                        "parent_id":   parent_id,
+                        "parent_text": parent_text,
+                        "child_text":  child.text,
+                        "doc_id":      child.doc_id,
+                        "chunk_index": child.chunk_index,
+                    },
+                ))
+                point_id += 1
+
+        batch_size = 100
+        for i in range(0, len(points), batch_size):
+            self._client.upsert(
+                collection_name=self._collection,
+                wait=True,
+                points=points[i: i + batch_size],
+            )
+        return len(points)
+
+    def retrieve(self, query: str, top_k: int = 5) -> list[RetrievedChunk]:
+        query_embedding = embed_query(query, self._embedder)
+        hits = self._client.query_points(
+            collection_name=self._collection,
+            query=query_embedding,
+            with_payload=True,
+            limit=top_k * 4,
+        ).points
+
+        # Deduplicate by parent_id — keep highest-scoring child per parent
+        seen_parents: set[str] = set()
+        results: list[RetrievedChunk] = []
+        for hit in hits:
+            parent_id = hit.payload["parent_id"]
+            if parent_id not in seen_parents:
+                seen_parents.add(parent_id)
+                results.append(RetrievedChunk(
+                    id=parent_id,
+                    text=hit.payload["parent_text"],
+                    doc_id=hit.payload["doc_id"],
+                    chunk_index=hit.payload["chunk_index"],
+                    score=hit.score,
+                    metadata={},
+                ))
+            if len(results) == top_k:
+                break
+        return results
+
+
+# ── Parent Document Retriever — ChromaDB + Redis ──────────────────────────────
+
+class RedisParentRetriever:
+    """
+    Parent document retrieval using ChromaDB for children + Redis for parent doc store.
+
+    Architecture:
+      Index time:
+        - Split corpus into parent chunks (large) → store in Redis keyed by parent_id
+        - Split each parent into child chunks (small) → embed → store in ChromaDB
+          with parent_id in metadata
+        - Two stores, two responsibilities: ChromaDB for vector search, Redis for text
+
+      Query time:
+        - Embed query → search ChromaDB for top-k child matches
+        - Extract parent_ids from ChromaDB metadata
+        - Batch fetch parent texts from Redis via pipeline (O(1) per key)
+        - Deduplicate by parent_id → return parent texts as RetrievedChunk objects
+
+    Why this architecture matters in production:
+      ChromaDB handles high-dimensional similarity search.
+      Redis handles fast key-value lookup at scale — sub-millisecond reads,
+      horizontal scalability, persistence options. The two stores scale
+      independently: grow the Redis cluster for larger corpora without
+      rebuilding the vector index, and vice versa.
+
+    Requires: Redis running on localhost:6379
+      docker run -p 6379:6379 redis
+    """
+
+    def __init__(
+        self,
+        vectordb: ChromaVectorDB,
+        embedder: SentenceTransformerEmbedder,
+        redis_host: str = "localhost",
+        redis_port: int = 6379,
+        redis_db: int = 0,
+    ):
+        import redis as redis_lib
+        self._vectordb = vectordb
+        self._embedder = embedder
+        self._redis = redis_lib.Redis(
+            host=redis_host,
+            port=redis_port,
+            db=redis_db,
+            decode_responses=True,
+        )
+
+    def index(self, parent_chunks: list, child_embedded_chunks: list) -> int:
+        """
+        Store parent texts in Redis and child embeddings in ChromaDB.
+
+        Args:
+            parent_chunks: list[Chunk] — large chunks stored in Redis
+            child_embedded_chunks: list[EmbeddedChunk] — small chunks with parent_id in metadata
+        Returns:
+            total child chunks indexed
+        """
+        pipe = self._redis.pipeline()
+        for parent in parent_chunks:
+            pipe.set(f"parent:{parent.id}", parent.text)
+        pipe.execute()
+
+        self._vectordb.add_chunks(child_embedded_chunks)
+        return len(child_embedded_chunks)
+
+    def retrieve(self, query: str, top_k: int = 5) -> list[RetrievedChunk]:
+        query_embedding = embed_query(query, self._embedder)
+        child_hits = self._vectordb.search(query_embedding, top_k=top_k * 4)
+
+        # Deduplicate by parent_id — keep highest-scoring child per parent
+        seen_parents: set[str] = set()
+        parent_ids_ordered: list[str] = []
+        scores_by_parent: dict[str, float] = {}
+
+        for hit in child_hits:
+            parent_id = hit.metadata.get("parent_id", hit.doc_id)
+            if parent_id not in seen_parents:
+                seen_parents.add(parent_id)
+                parent_ids_ordered.append(parent_id)
+                scores_by_parent[parent_id] = hit.score
+            if len(parent_ids_ordered) == top_k:
+                break
+
+        # Batch fetch parent texts from Redis in one pipeline round-trip
+        pipe = self._redis.pipeline()
+        for pid in parent_ids_ordered:
+            pipe.get(f"parent:{pid}")
+        parent_texts = pipe.execute()
+
+        results = []
+        for pid, text in zip(parent_ids_ordered, parent_texts):
+            if text:
+                results.append(RetrievedChunk(
+                    id=pid,
+                    text=text,
+                    doc_id=pid,
+                    chunk_index=0,
+                    score=scores_by_parent[pid],
+                    metadata={},
+                ))
+        return results

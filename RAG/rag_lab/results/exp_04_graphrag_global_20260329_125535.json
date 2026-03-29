@@ -1,0 +1,71 @@
+{
+  "experiment": "exp_04_graphrag_global",
+  "timestamp": "20260329_125535",
+  "retrieval_strategy": "GraphRAG global search (microsoft/graphrag v3.x)",
+  "search_mode": "global",
+  "baseline_scores": {
+    "faithfulness": 0.641,
+    "answer_relevancy": 0.583,
+    "answer_similarity": 0.538
+  },
+  "scores": {
+    "faithfulness": 0.0,
+    "answer_relevancy": 0.8591483483323111,
+    "answer_similarity": 0.6313884662060095
+  },
+  "delta": {
+    "faithfulness": -0.641,
+    "answer_relevancy": 0.2761,
+    "answer_similarity": 0.0934
+  },
+  "samples": [
+    {
+      "question": "What is Retrieval Augmented Generation and why does it exist?",
+      "answer": "## Understanding Retrieval Augmented Generation (RAG)\n\nRetrieval Augmented Generation (RAG) refers to a significant framework that enhances the capabilities of large language models by integrating retrieval techniques with generative abilities. The core purpose of RAG is to allow systems to incorporate external knowledge retrieval during the content production process. This integration enables these language models to provide contextually relevant and accurate responses, mitigating the limitations faced by models that rely solely on pre-existing training data. The primary reason RAG systems exist is to address the limitations of traditional language models, which may produce answers based on outdated or insufficient training information, leading to inaccuracies. By incorporating retrieval mechanisms, RAG systems can deliver responses that are grounded in current and factual contexts. The synergy between retrieval and generation thus leads to enhanced response quality and establishes a robust framework that is particularly vital for applications requiring high levels of accuracy and reliability [Data: Reports (12, 4, 3)].\n\n### Techniques and Methodologies\n\nThe RAG methodology emphasizes various techniques such as indexing, chunking, and hybrid retrieval methods. These recommendations improve the overall ability of systems to effectively manage user queries, ensuring that they can access a broad spectrum of information sources to generate meaningful answers. The advancements brought by RAG reflect a significant leap in the fields of natural language processing and artificial intelligence, thereby enhancing user engagement and the relevance of content produced [Data: Reports (3, 12)]. \n\nIn summary, RAG exists to significantly improve the accuracy and relevance of generated content by merging enhanced retrieval techniques with generative models, ultimately transforming how information is accessed and delivered in AI-driven applications.",
+      "num_contexts": 5,
+      "ground_truth": "RAG is an AI technique that grounds LLM responses in externally retrieved knowledge. It exists to address two limitations of LLMs: knowledge cutoff (not knowing about post-training events) and hallucination (generating plausible but incorrect information)."
+    },
+    {
+      "question": "What are the two phases of a RAG system and what happens in each?",
+      "answer": "The Retrieval-Augmented Generation (RAG) system comprises two integral phases: **Retrieval** and **Generation**. \n\n### Retrieval Phase\nIn the Retrieval phase, relevant documents or information are fetched based on user queries. Various algorithms, including querying techniques and Top-K retrieval methods, are employed to identify and retrieve data that is contextually appropriate. Effective querying plays a crucial role in ensuring that the most pertinent content is selected, facilitating the next phase of the system [Data: Reports (3, 1, 12)].\n\n### Generation Phase\nFollowing retrieval, the Generation phase utilizes the acquired information to craft responses to user queries. Large language models (LLMs) process the relevant data obtained during the Retrieval phase to produce coherent and contextually grounded answers. This phase highlights the importance of RAG systems in enhancing the quality of responses by integrating external knowledge gleaned from the retrieval process [Data: Reports (3, 12, 1)].\n\nIn summary, the RAG system operates by first retrieving contextually relevant data and then using that information to generate informed, high-quality responses.",
+      "num_contexts": 5,
+      "ground_truth": "The two phases are indexing and querying. During indexing, documents are parsed, chunked, embedded, and stored in a vector database. During querying, the user's question is embedded, similar chunks are retrieved, and the LLM generates an answer grounded in those chunks."
+    },
+    {
+      "question": "How does chunk size affect RAG system quality?",
+      "answer": "## Impact of Chunk Size on RAG System Quality\n\nChunk size plays a crucial role in the effectiveness of retrieval-augmented generation (RAG) systems, as it directly influences both retrieval precision and contextual understanding. Smaller chunks tend to encapsulate more specific and relevant information that aligns closely with user queries. This characteristic enhances the chances of matching user inquiries to applicable data, resulting in more accurate and contextually enriched responses from AI systems. When chunks are excessively large, they may dilute the context, leading to less precise and less reliable outcomes. Furthermore, the practice of chunking is essential for optimizing the segmentation of documents, enabling them to be broken down into manageable pieces. This methodological adjustment allows for improved retrieval performance as it ensures that queries are paired with highly relevant information. Overall, the relationship between chunk size and RAG systems underscores the importance of strategic decisions regarding chunking to enhance the reliability and relevance of AI-generated information [Data: Reports (4, 1, 12, 8)].",
+      "num_contexts": 5,
+      "ground_truth": "Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. Larger chunks (512-1024 tokens) provide more context but can introduce noise. The optimal chunk size depends on the use case."
+    },
+    {
+      "question": "What is HNSW and why is it used in vector databases?",
+      "answer": "## Understanding HNSW and Its Importance in Vector Databases\n\nHNSW, or Hierarchical Navigable Small World, is an algorithm utilized in vector databases specifically for efficient nearest neighbor search. This algorithm constructs a multi-layered graph structure, wherein each layer encompasses a subset of nodes. This hierarchical formation is paramount for enabling rapid navigation through the search space, optimizing search performance while retaining a commendable level of accuracy, which is critical for tasks such as similarity search and recommendation systems [Data: Reports (5, 6, 12)]. \n\nThe efficacy of HNSW in performing similarity searches stems from its design, which balances search accuracy with computational efficiency. By leveraging graph connections, HNSW is able to skip over substantial segments of data, thus reducing the number of distance calculations required. This characteristic is particularly significant in contexts where performance is essential, such as real-time querying and scenarios involving frequently changing data [Data: Reports (5, 7, 16)]. Consequently, HNSW has become a favored choice in vector databases, especially for applications involving high-dimensional and large datasets inherent to machine learning environments. \n\nIn summary, HNSW offers a robust solution for vector databases, combining rapid query capabilities with strong performance, making it an indispensable tool in many data-driven applications.",
+      "num_contexts": 5,
+      "ground_truth": "HNSW (Hierarchical Navigable Small World) is an Approximate Nearest Neighbor algorithm used in vector databases. It builds a multi-layered graph structure that allows logarithmic search complexity, making similarity search across millions of vectors fast."
+    },
+    {
+      "question": "What is hybrid search and when should it be used?",
+      "answer": "## Understanding Hybrid Search\n\nHybrid search integrates both keyword-based and vector-based search methodologies, thereby enhancing information retrieval by leveraging the strengths of each approach. This dual-layer strategy enables a broader range of search queries to be processed more effectively, particularly those involving proper nouns or specific terminologies. The combination of traditional search methods with modern vectorized alternatives improves performance and accommodates various data types [Data: Reports (16, +more)].\n\n### Optimal Scenarios for Use\n\nHybrid search should be employed in scenarios where search queries may require a combination of semantic understanding and traditional keyword matching. This is particularly beneficial when dealing with complex queries that encompass nuanced user intent or domain-specific terminology, as it significantly boosts the overall effectiveness of information retrieval systems [Data: Reports (16)]. \n\nIn summary, hybrid search may be the preferred option for applications necessitating advanced information retrieval capabilities, especially in contexts where precision and user intent are crucial.",
+      "num_contexts": 5,
+      "ground_truth": "Hybrid search combines dense vector similarity search with sparse BM25 keyword search. It should be used when queries include rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Scores are fused using Reciprocal Rank Fusion."
+    },
+    {
+      "question": "What does the RAGAS faithfulness metric measure?",
+      "answer": "The RAGAS faithfulness metric evaluates the alignment of answers generated by Retrieval-Augmented Generation (RAG) systems with the factual context provided. It assesses the integrity and reliability of the system's outputs by identifying discrepancies between the retrieved information and the generated responses. This evaluation is critical for detecting issues such as hallucinations, where the generated content may not accurately reflect the underlying data. By measuring faithfulness, the metric ensures that the outputs are accurate and trustworthy, which enhances the overall user experience and the effectiveness of the system [Data: Reports (1, 46, 54)].",
+      "num_contexts": 5,
+      "ground_truth": "Faithfulness measures whether the generated answer is factually consistent with the retrieved context. A faithful answer only states claims supported by the context. It is computed by asking a judge LLM to verify each factual claim in the answer against the provided context."
+    },
+    {
+      "question": "What is the lost-in-the-middle problem in RAG?",
+      "answer": "### Understanding the Lost-in-the-Middle Problem in Retrieval-Augmented Generation (RAG)\n\nThe \"lost-in-the-middle\" problem in Retrieval-Augmented Generation (RAG) refers to the challenges faced when excessive or overly complex information is integrated into the context provided to language models. This phenomenon, also described as \"context stuffing,\" occurs when too much data is included, potentially overwhelming the model. As a result, the relevant information\u2014critical for ensuring accurate and coherent responses\u2014may become obscured. This issue is pivotal as it directly impacts the quality of the generated outputs, leading to a dilution of meaning and effectiveness in the system's responses. Addressing the lost-in-the-middle problem is essential for maintaining high standards of output quality in language model applications [Data: Reports (3, 12, 1)].",
+      "num_contexts": 5,
+      "ground_truth": "The lost-in-the-middle problem occurs when relevant information is positioned in the middle of a long context window. Research shows LLMs perform better when relevant information appears at the beginning or end of the context, and may ignore information in the middle."
+    },
+    {
+      "question": "What is the difference between context precision and context recall in RAGAS?",
+      "answer": "### Understanding Context Precision and Context Recall in RAGAS\n\nIn the context of RAGAS (Retrieve and Generate Answer Systems), **context precision** and **context recall** are critical metrics used to evaluate the effectiveness of the information retrieval and generation process.\n\n**Context Precision** refers to the relevance of the information retrieved concerning the user's question. It assesses whether the data provided addresses the specific needs of the query, filtering out any irrelevant information that may detract from the helpfulness of the answer. A high precision score indicates that most of the retrieved information is pertinent, which enhances the overall accuracy of the responses generated [Data: Reports (1, 46, 48)].\n\nOn the other hand, **Context Recall** measures the completeness of the information necessary to fully address the user's question. It focuses on how effectively the system can extract relevant context from the available data. High recall implies that the system successfully retrieves a comprehensive set of relevant information, crucial for formulating complete and accurate responses. Conversely, poor recall suggests potential gaps in information retrieval, which could lead to inadequate or incomplete answers [Data: Reports (1, 49)].\n\nIn conclusion, while context precision ensures that the information provided is relevant and useful, context recall emphasizes the importance of capturing all necessary information comprehensively, thus both metrics are vital for delivering high-quality outputs in RAGAS systems.",
+      "num_contexts": 5,
+      "ground_truth": "Context precision measures whether retrieved chunks are relevant to the question (are the retrieved chunks useful). Context recall measures whether all information needed to answer the question was present in the retrieved context (was nothing missed). Recall requires ground truth answers to compute."
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "experiment": "exp_04_parent_qdrant",
+  "timestamp": "20260328_122617",
+  "config": {
+    "chunking": {
+      "chunk_size": 512,
+      "overlap": 50
+    },
+    "embedding": {
+      "model_name": "all-MiniLM-L6-v2"
+    },
+    "vectordb": {
+      "collection_name": "rag_lab",
+      "persist_dir": "./chroma_db"
+    },
+    "retrieval": {
+      "top_k": 5
+    },
+    "generation": {
+      "model": "gpt-4o-mini",
+      "max_tokens": 512
+    },
+    "evaluation": {
+      "judge_model": "gpt-4o-mini"
+    }
+  },
+  "retrieval_strategy": "ParentDoc/Qdrant \u2014 child=128 indexed, parent=512 returned",
+  "baseline_scores": {
+    "faithfulness": 0.641,
+    "answer_relevancy": 0.583,
+    "answer_similarity": 0.538
+  },
+  "scores": {
+    "faithfulness": 0.6180555555555556,
+    "answer_relevancy": 0.6671512579271999,
+    "answer_similarity": 0.5620803818749003
+  },
+  "delta": {
+    "faithfulness": -0.0229,
+    "answer_relevancy": 0.0842,
+    "answer_similarity": 0.0241
+  },
+  "samples": [
+    {
+      "question": "What is Retrieval Augmented Generation and why does it exist?",
+      "answer": "Retrieval Augmented Generation (RAG) is an AI technique that enhances the accuracy and reliability of large language models by grounding their responses in external, retrieved knowledge. Instead of relying solely on information embedded in the model during training, RAG systems dynamically fetch relevant documents at the time of the query and use them as context for the language model.\n\nRAG exists to address two fundamental limitations of large language models: the need for more accurate and reliable information and the ability to incorporate external knowledge dynamically.",
+      "num_contexts": 5,
+      "ground_truth": "RAG is an AI technique that grounds LLM responses in externally retrieved knowledge. It exists to address two limitations of LLMs: knowledge cutoff (not knowing about post-training events) and hallucination (generating plausible but incorrect information)."
+    },
+    {
+      "question": "What are the two phases of a RAG system and what happens in each?",
+      "answer": "A RAG system operates in two phases: indexing and querying. \n\nDuring indexing, source documents are prepared and organized for retrieval. In the querying phase, the system retrieves relevant information based on user input to generate answers.",
+      "num_contexts": 5,
+      "ground_truth": "The two phases are indexing and querying. During indexing, documents are parsed, chunked, embedded, and stored in a vector database. During querying, the user's question is embedded, similar chunks are retrieved, and the LLM generates an answer grounded in those chunks."
+    },
+    {
+      "question": "How does chunk size affect RAG system quality?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 5,
+      "ground_truth": "Smaller chunks (128-256 tokens) improve retrieval precision but may lack sufficient context for generation. Larger chunks (512-1024 tokens) provide more context but can introduce noise. The optimal chunk size depends on the use case."
+    },
+    {
+      "question": "What is HNSW and why is it used in vector databases?",
+      "answer": "I don't have enough information in the provided context to answer this.",
+      "num_contexts": 5,
+      "ground_truth": "HNSW (Hierarchical Navigable Small World) is an Approximate Nearest Neighbor algorithm used in vector databases. It builds a multi-layered graph structure that allows logarithmic search complexity, making similarity search across millions of vectors fast."
+    },
+    {
+      "question": "What is hybrid search and when should it be used?",
+      "answer": "Hybrid search combines a dense vector score with a sparse BM25 keyword score to improve performance on queries that may not be well represented by embedding models, such as those involving rare proper nouns, product codes, or specific terminology. It is particularly effective for handling both semantic queries (like \"what is the capital of France\") and lexical queries (such as \"error code NX-4012\"). Hybrid search should be used in situations where it is important to address both types of queries effectively. Most production RAG systems utilize hybrid search for this reason.",
+      "num_contexts": 5,
+      "ground_truth": "Hybrid search combines dense vector similarity search with sparse BM25 keyword search. It should be used when queries include rare proper nouns, product codes, or specific terminology that embedding models may not represent well. Scores are fused using Reciprocal Rank Fusion."
+    },
+    {
+      "question": "What does the RAGAS faithfulness metric measure?",
+      "answer": "The RAGAS faithfulness metric measures whether the generated answer is factually consistent with the retrieved context.",
+      "num_contexts": 5,
+      "ground_truth": "Faithfulness measures whether the generated answer is factually consistent with the retrieved context. A faithful answer only states claims supported by the context. It is computed by asking a judge LLM to verify each factual claim in the answer against the provided context."
+    },
+    {
+      "question": "What is the lost-in-the-middle problem in RAG?",
+      "answer": "The lost-in-the-middle problem in RAG refers to the issue where LLMs (language models) ignore information that is positioned in the middle of a long context.",
+      "num_contexts": 5,
+      "ground_truth": "The lost-in-the-middle problem occurs when relevant information is positioned in the middle of a long context window. Research shows LLMs perform better when relevant information appears at the beginning or end of the context, and may ignore information in the middle."
+    },
+    {
+      "question": "What is the difference between context precision and context recall in RAGAS?",
+      "answer": "Context precision refers to context relevance, which is the measure of how well the retrieved context matches the question being asked. Context recall, on the other hand, measures whether all the information needed to answer the question is present in the retrieved context. High recall checks if each piece of ground truth is derivable from the retrieved context.",
+      "num_contexts": 5,
+      "ground_truth": "Context precision measures whether retrieved chunks are relevant to the question (are the retrieved chunks useful). Context recall measures whether all information needed to answer the question was present in the retrieved context (was nothing missed). Recall requires ground truth answers to compute."
+    }
+  ]
+}

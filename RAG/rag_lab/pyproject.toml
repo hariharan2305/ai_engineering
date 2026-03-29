@@ -32,4 +32,6 @@ dependencies = [
     "sqlalchemy>=2.0.0",
     "rank-bm25>=0.2.2",
     "llama-index-llms-langchain>=0.8.0",
+    "redis>=7.4.0",
+    "graphrag>=3.0.8",
 ]

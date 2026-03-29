@@ -1,0 +1,17 @@
+# Generated index data — re-created by running --phase index
+output/
+
+# LLM call cache — re-created automatically on next index run
+cache/
+
+# Runtime logs
+logs/
+
+# Input files — copies of corpus/ files, already tracked there
+input/
+
+# API keys — never commit
+.env
+
+# Allow the template (no real keys in it)
+!.env.template
